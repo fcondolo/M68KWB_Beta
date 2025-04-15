@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>68K Workbench</title>
+  <link rel="icon" type="image/x-icon" href="images/icon.ico?">
+  <link rel="shortcut icon" href="images/icon.ico?"/>
+
+  <link rel="stylesheet" href="src/other/HTML-KickStart-master/css/kickstart.css" media="all" /> <!-- KICKSTART -->
+  <link rel="stylesheet" href="soundy.css" media="all" />
+
+  <script src='src/other/jquery-3.6.3.min.js'></script>
+  <script src="src/other/HTML-KickStart-master/js/kickstart.js"></script> <!-- KICKSTART -->
+
+  <!-- BASE -->
+  <script src='config.js'></script>
+  <script src='src/core/StringUtils.js'></script>
+  <script src='src/core/debugger.js'></script>
+  <script src='src/core/machine.js'></script>
+  <script src='src/core/debugPrimitives.js'></script>
+  <script src='src/core/m68k.js'></script>
+  <script src='src/core/TimeMachine.js'></script>
+  <script src='src/core/LineParser.js'></script>
+  <script src='src/core/StringParser.js'></script>
+  <script src='src/core/CodeParser.js'></script>
+  <script src='src/core/audio.js'></script>
+  <script src='src/core/main.js'></script>
+  <script src='src/misc/Int8ToWAV.js'></script>
+  <script src='src/misc/JS_ASM_Tools.js'></script>
+
+
+  <!-- ASSEMBLER / DISASSEMBLER -->
+  <script src='src/assembler/CodeStream.js'></script>
+  <script src='src/assembler/disassembler.js'></script>
+  <script src='src/assembler/disToString.js'></script>
+  <script src='src/assembler/assemble_common.js'></script>
+  <script src='src/assembler/assemble_group0000.js'></script>
+  <script src='src/assembler/assemble_group1101.js'></script>
+  <script src='src/assembler/assemble_group1100.js'></script>
+  <script src='src/assembler/assemble_group1110.js'></script>
+  <script src='src/assembler/assemble_group0110.js'></script>
+  <script src='src/assembler/assemble_group0101.js'></script>
+  <script src='src/assembler/test_opcodes.js'></script>
+
+
+  <!-- AMIGA SPECIFIC
+ -->
+ <script src='src/amiga/Amiga_Constants.js'></script>
+  <script src='src/amiga/amiga.js'></script>
+  <script src='src/amiga/customReg.js'></script>
+  <script src='src/amiga/bitplanes.js'></script>
+  <script src='src/amiga/copper.js'></script>
+  <script src='src/amiga/blitter.js'></script>
+ 
+  <!-- ATARI ST SPECIFIC -->
+  <script src='src/atari/atariST_Constants.js'></script>
+  <script src='src/atari/atariST.js'></script>
+  <script src='src/atari/atariST_Bitplanes.js'></script>
+  <script src='src/atari/atariST_Sound.js'></script>
+  <script src='src/atari/atariSTE_blitter.js'></script>
+
+  <!-- TESTS
+ -->
+ <script src='fx/tests/testParser.js'></script>
+ <script src='fx/tests/playground.js'></script>
+ <script src='fx/tests/testLabels.js'></script>
+
+  <!-- 
+    *****************************************************************
+    ***                      START FX BLOCK                       ***
+    *****************************************************************
+  -->
+
+  <!-- START ATARI FX -->
+  <!-- ... put your next Atari FX here...  -->
+  <!-- END ATARI FX -->
+
+
+  <!-- START Tutorials
+   -->
+   <script src='fx/tutorials/tut1_emptyFX.js'></script>
+  <script src='fx/tutorials/tut2_invokeAsm.js'></script>
+  <script src='fx/tutorials/tut3_debugger.js'></script>
+  <script src='fx/tutorials/tut4_automodified.js'></script>
+  <script src='fx/tutorials/tut5_AmigaImage.js'></script>
+  <script src='fx/tutorials/tut6_STEImage.js'></script>
+  <script src='fx/tutorials/tut_Atari1.js'></script>
+  <script src='fx/tutorials/tut_Atari_HBL.js'></script>
+  <script src='fx/tutorials/testSTEBlitter.js'></script>
+
+  <!-- ... put your next tutorial here...  -->
+  <!-- END Tutorials  -->
+
+  <!-- START AMIGA FX
+ -->
+  <script src='fx/amiga/heroes.js'></script>
+  <script src='fx/amiga/mem_64k.js'></script>
+  <script src='fx/amiga/Draw2Buffer/Draw2Buffer.js'></script>
+  <script src='fx/amiga/Sphere/v1/sphv1.js'></script>
+  <script src='fx/amiga/Sphere/v2/sphv2.js'></script>
+  <script src='fx/amiga/Sphere/v3/sphv3.js'></script>
+  <script src='fx/amiga/Sphere/v4/sphv4.js'></script>
+  <script src='fx/amiga/StarField/v1/strfldv1.js'></script>
+  <script src='fx/amiga/StarField/v2/strfldv2.js'></script>
+ 
+  <!-- ... put your next Amiga FX here...  -->
+  <!-- END AMIGA FX -->
+
+  <!-- 
+    *****************************************************************
+    ***                       END FX BLOCK                        ***
+    *****************************************************************
+  -->
+
+</head>
+
+<body onload="main_onload();" onblur="onLoseFocus()">
+  <div id='oneLiner' style="position: fixed; color:black;  background-color:#dddddd; left: 0%; top: 0%; display: none;">
+    <p id = "liner"></p>
+  </div>
+  <div id='tracingLog' style="position: fixed; color:black;  background-color:#dddddd; right: 0%; bottom: 0%; display: none;">
+    <p id = "tracing"></p>
+  </div>
+  <div id="content">
+    <!--   <img src="city_ref.png"> -->
+    <canvas id="mycvs" width="390" height="312" style="background-color:black"></canvas>
+    <br>
+    <canvas id="chunkyShow" width="390" height="312" style="display:none; position:fixed; z-index:10; background-color:black"></canvas>
+    <canvas id="chunkyDraw" width="390" height="312" style="display:none; position:fixed; z-index:10; background-color:black"></canvas>
+    <br>
+    <!-- <button onclick="if (play) play=false; else play = true;">></button> -->
+    Zoom: <input type="range" min="100" max="400" value="100" class="slider" id="outpuResolution"
+      onChange="onNewOutputResolution();" onInput="onNewOutputResolution();">
+    Speed: <input type="range" min="0" max="100" value="100" class="slider" id="runningSpeed"
+      onChange="onNewRunningSpeed();" onInput="onNewRunningSpeed();">
+    <label for="layout">Layout</label>
+    <select id="layout" name="layout" onchange="onLayout();">
+      <option value="8">Large code window</option>
+      <option value="6">Half code window</option>
+      <option value="4">Small code window</option>
+    </select>
+    <br>
+    <div style="color: #ff00ff;" id="errors" class="col_12"></div>
+    <div class="col_12">
+      <br>Jump to label: <input class="autocomplete" type="text" id="filterLabel" name="filterLabel" size="30"><br>
+      <br><select name="labels" id="labels" onchange="focusOnLabel(getComboValue(this))"></select>
+    </div>
+    <div id="debugger-left" class="col_8" style="overflow:auto; max-height:768px;"></div>
+    <div id="rightPane" class="col_4" style="overflow:auto; max-height:768px;">
+      <div id="registersDump"></div>
+      <canvas id="backBuffer" width="390" height="312"></canvas>
+      <div id="debugger-right"></div>
+    </div>
+    <div id="log" class="col_12"></div>
+  </div style="display:none">
+  <img id="atariMonitorImage" width=390 height=312 src="images/STMonitor.png" style="display:none">
+  <img id="OCSMonitorImage" width=390 height=312 src="images/OCSMonitor.png" style="display:none">
+  <div>
+
+  </div>
+
+  <!-- MODAL BOX -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <p id="modalContent"></p>
+      <center><button id="modalclose">OK</button></center>
+    </div>
+  </div>
+
+  <!-- MOUSE COORD -->
+  <div id = "mouseFollow" style = "display:none; position:fixed; z-index:10; background-color: #6B6B6B; color: white;">
+    <span id="mouseCoordLabel">DANS TON CUL</span>
+  </div>
+
+  <!-- PAUSED -->
+  <div id = "paused" style = "display:none; position:fixed; z-index:10; background-color: #FF0000; color: white;">
+    <span><h2>PAUSED - Press P</h2></span>
+  </div>
+
+</body>
+
+</html>
