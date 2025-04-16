@@ -277,6 +277,9 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
   if (DEBUGGER_CTRL_PRESSED)
     return;
 
+  if (!CODERPARSER_SINGLETON || !MYFX)
+    return; // in case keys are pressed beore the fx is loaded
+
   if ((!DEBUGGER_insideInvoke) && (!DEBUGGER_tracing)) {
     if (MYFX && MYFX.FX_OnKey) {
       let stopEvent = false;
@@ -1439,6 +1442,9 @@ function onRegDataClicked(_index) {
 
 var DEBUGGER_lastUpdLine = -1;
 function DEBUGGER_update(_force) {
+  if (!CODERPARSER_SINGLETON || !MYFX)
+    return; // in case keys are pressed beore the fx is loaded
+
   if (!_force) {
     if (DEBUGGER_lastUpdLine == M68K_IP)
       return; // otherwise constantly refreshes the right pane and cant select an address to watch

@@ -234,15 +234,25 @@ function showMouseCoord(event) {
   setTooltipPos(event,elm);	
 }
 
-function main_startChosenFx(_index) {
+function main_startChosenFx(_className) {
+  let _index = -1;
+  for (let i = 0; i < REGISTERED_FX.length; i++) {
+    if (REGISTERED_FX[i].classname == _className) {
+      _index = i;
+      break;
+    }
+  }
+  if (_index < 0) {
+    return false;
+  }
 
   FX_INFO = REGISTERED_FX[_index];
   if (!FX_INFO) {
     alert("FATAL: could not find FX in REGISTERED_FX table");
-    return;
+    return false;
   }
 
-  const FXName = REGISTERED_FX[_index].classname;
+  const FXName = FX_INFO.classname;
   MAIN_ALERTS_LIST = [];
   MAIN_ALERTS_ALLLOWED = true;
 
@@ -250,10 +260,10 @@ function main_startChosenFx(_index) {
     eval("MYFX = new " + FXName + "();");
   } catch (e) {
     alert("could not create FX: " + FXName + ". Error: " + e);
-    return;
+    return false;
   }
 
-  console.log("launching FX: " + FXName + ", platform:" + REGISTERED_FX[_index].platform);
+  console.log("launching FX: " + FXName + ", platform:" + FX_INFO.platform);
 
   const prevFx = localStorage.getItem(LOCALSTORAGE_FX_NAME);
   if (prevFx != FXName) {
@@ -273,7 +283,8 @@ function main_startChosenFx(_index) {
     cvs.style.cursor = "default";
     var elm = document.getElementById('mouseFollow').style;
     elm.display = "none";
-});
+
+  });
 
 
 
@@ -330,11 +341,12 @@ function main_startChosenFx(_index) {
   if (FX_INFO.clickToStart || FX_INFO.hasAudio)
     showModalBox("close (or click outside) to start", main_startAll);
   else main_startAll();
+  return true;
 }
 
 function onFxChosen() {
-  let sel = document.getElementById("fxList");
-  main_startChosenFx(sel.selectedIndex);
+  let sel = document.getElementById("fxListSelect");
+  main_startChosenFx(sel.options[sel.selectedIndex].value);
 }
 
 function findFxIndexFromName(_name) {
@@ -348,32 +360,55 @@ function findFxIndexFromName(_name) {
   return -1;
 }
 
+
+function updateFxList() {
+  let fxList = document.getElementById("fxListSelect");
+  while (fxList.length > 0) {
+    fxList.remove(0);
+  }  
+  let search = document.getElementById("searchfx").value.toUpperCase();
+  let firstDone = false;
+  for (let i = 0; i < REGISTERED_FX.length; i++) {
+    const name = REGISTERED_FX[i].classname.toUpperCase();
+    if (name.includes(search)) {
+      let objOption = document.createElement("option");
+      objOption.text = REGISTERED_FX[i].classname;
+      objOption.value = REGISTERED_FX[i].classname;
+      if (!firstDone) {
+        objOption.selected="selected";
+        firstDone = true;
+      }
+      fxList.options.add(objOption);
+    }
+  }
+}
+
 function main_onload() {
-  // parse URL to determine current FX and create it
+  let fxList = "";
+
+  // First try to start the FX in URL params
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   let FXName = urlParams.get('fx');
   if (!FXName)
     FXName = urlParams.get('FX');
-  let prevFx = localStorage.getItem(LOCALSTORAGE_FX_NAME);
-  let fxList = "";
-  let fxIndex = findFxIndexFromName(FXName);
-  if (fxIndex >= 0) {
-    return main_startChosenFx(fxIndex);
-  } else {
-    fxIndex = findFxIndexFromName(prevFx);
-    if (fxIndex >= 0) {
-      return main_startChosenFx(fxIndex);
-    }
+  if (FXName) {
+    if (main_startChosenFx(FXName))
+      return;
+    fxList += "FX " + FXName + " from URL could not be started<br>";
   }
-  if (FXName)
-    fxList += "Could not find classname '" + FXName + "'. Did you call REGISTER_FX with the right params?<br><br>"; 
-  else if (prevFx)
-    fxList += "Could not find classname '" + prevFx + "' anymore. Choose another FX<br><br>"; 
 
+  // If failed, try to run previous session's FX stored in localStorage
+  FXName = localStorage.getItem(LOCALSTORAGE_FX_NAME);
+  if (FXName) {
+    if (main_startChosenFx(FXName))
+      return;  
+    fxList += "FX " + FXName + " from last session could not be started<br>";
+  }
+  
   // could not instanciate FX: show a modal box to choose from a list
-  fxList += '<center>Please select a FX from the below list:</center><br>';
-  fxList += '<select name="fxList" id="fxList">';
+  fxList += '<center>Please select a FX from the below list:<br><br>';
+  fxList += '<select name="fxListSelect" id="fxListSelect">';
   let prevName = localStorage.getItem(LOCALSTORAGE_FX_PREV);
   for (let i = 0; i < REGISTERED_FX.length; i++) {
     const name = REGISTERED_FX[i].classname;
@@ -384,7 +419,8 @@ function main_onload() {
       fxList += '<option value="' + name + '">' + fullName + '</option>';
   }
   fxList += '</select>';
-  fxList += "<br><br>You can also use '?FX=classname' in the address bar";
+  fxList += '<br><hr><br>Filter by name:<br><br><input type="text" id="searchfx" name="searchfx" oninput="updateFxList()"><br><br>';
+  fxList += "<br><br>You can also use '?FX=classname' in the address bar</center>";
   showModalBox(fxList, onFxChosen);
 }
 
