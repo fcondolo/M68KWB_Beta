@@ -168,7 +168,13 @@ class M68K_Machine {
 
     getchkMemDebugString(_v,_s,_f) {
         let t = this;
-        let s = M68K_CURLINE.getFailString();
+        let s;
+        if (DEBUGGER_insideInvoke)
+            s = M68K_CURLINE.getFailString();
+        else {
+            const err = new Error();
+            s = filterStack(err.stack);
+        }
         if (_f == ALLOW_READ) s += "<br>reading ";
         else if (_f == ALLOW_WRITE) s += "<br>writing ";
         s += "$" + _s.toString(16) + " bytes at address $" + _v.toString(16);
@@ -188,7 +194,13 @@ class M68K_Machine {
             if (!_o) {
                 let mess = "ODD address error<br>";
                 mess += t.getchkMemDebugString(_v,_s,_f);
-                debug(mess);
+                if (DEBUGGER_insideInvoke) {
+                    debug(mess);
+                }
+                else {
+                    mess = mess.replaceAll("<br>","\n");
+                    alert("Javascript memory access error:\n" + mess);
+                }
                 return;    
             }
         }
@@ -200,7 +212,7 @@ class M68K_Machine {
                     msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_WRITE_FORBID_START, CPU_DBG_WRITE_FORBID_END);                    
                 }
                 if (_v < ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES && _v >= M68K_VECTORS_ZONE_SIZE) {
-                    msg = "writing underflow, overwriting code section at $" + _v.toString(16) + M68K_CURLINE.getFailString("<br>");
+                    msg = "writing underflow, overwriting code section at $" + _v.toString(16) + "<br>" + t.getOutsideBoundaryDebugString(_v, _s, _f, t.startSuperStack, t.endSuperStack);
                 }
                 if (t.super) {
                     if (_v >= t.endSuperStack) {
@@ -235,7 +247,13 @@ class M68K_Machine {
                 }
                 if (msg != null) {
                     if (t.errorContext) msg = "\nError Context: " + t.errorContext + "\n" + msg;
-                    debug(msg);    
+                    if (DEBUGGER_insideInvoke) {
+                        debug(msg);    
+                    }
+                    else {
+                        msg = msg.replaceAll("<br>","\n");
+                        alert(msg);
+                    }
                 }
             }
 
@@ -272,7 +290,13 @@ class M68K_Machine {
                     } else if (_v != regs.a[7]) { // movem to stack
                         let msg = "reading  outside of CPU_DBG_READ_ALLOW_START and CPU_DBG_READ_ALLOW_END ";
                         msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_READ_ALLOW_START, CPU_DBG_READ_ALLOW_END);
-                        debug(msg);    
+                        if (DEBUGGER_insideInvoke) {
+                            debug(msg);    
+                        }
+                        else {
+                            msg = msg.replaceAll("<br>","\n");
+                            alert(msg);
+                        }
                     }
                 }    
             }

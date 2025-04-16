@@ -96,6 +96,15 @@
     return (_v & 0x80000000) ? (_v - 0x100000000) : _v;
   }
 
+  function JSInt16ToAsm(_value) {
+    if (_value >= 0) return _value & 0xffff;
+    let complement = Math.abs(_value);
+    complement = ~complement;
+    complement++;
+    complement &= 0xffff;
+    return complement;
+  }
+
   //////////////////////////////////////////////////////
   // A FEW FUNCTIONS TO DEAL WITH DATA REGISTERS FROM JS
   //////////////////////////////////////////////////////

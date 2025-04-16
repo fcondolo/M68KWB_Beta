@@ -226,6 +226,29 @@ function onLoseFocus() {
   PREV_KEYDOWN = 0;
 }
 
+function filterStack(_s) {
+  let ofs = 0;
+  let ret = "";
+  const l = _s.length;
+  while (ofs < l) {
+    let cur = "";
+    while (_s[ofs] != '\n' && ofs < l) {
+      cur += _s[ofs++];
+    }
+    while (_s[ofs] == '\n') ofs++;
+    if (cur.includes(FX_INFO.classname)) {
+      let i1 = cur.indexOf("http");
+      let i2 = cur.indexOf(".js");
+      if (i1 >= 0 && i2 >= 0) {
+        while (i2 > i1 && cur[i2] != '/') i2--;
+        cur = cur.substring(0,i1) + cur.substring(i2);
+      }
+      ret += cur + '\n';    
+    }
+  }
+  return ret;
+}
+
 function checkKeyUP(e) { // https://css-tricks.com/snippets/javascript/javascript-keycodes/
   var event = window.event ? window.event : e;
   if (event.keyCode == 16) { // shift
