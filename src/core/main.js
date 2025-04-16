@@ -335,7 +335,7 @@ function main_startChosenFx(_className) {
   }
   onNewOutputResolution();  
   onNewRunningSpeed();
-  if (CODERPARSER_SINGLETON)
+  if (CODERPARSER_SINGLETON)  // some FX have no asm
     invoke68K("M68KWB_TargetPlatformInit");
 
   if (FX_INFO.clickToStart || FX_INFO.hasAudio)
