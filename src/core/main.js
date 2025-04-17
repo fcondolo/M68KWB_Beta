@@ -235,9 +235,10 @@ function showMouseCoord(event) {
 }
 
 function main_startChosenFx(_className) {
+  _className = _className.toUpperCase();
   let _index = -1;
   for (let i = 0; i < REGISTERED_FX.length; i++) {
-    if (REGISTERED_FX[i].classname == _className) {
+    if (REGISTERED_FX[i].classname.toUpperCase() == _className) {
       _index = i;
       break;
     }
@@ -393,17 +394,22 @@ function main_onload() {
   if (!FXName)
     FXName = urlParams.get('FX');
   if (FXName) {
-    if (main_startChosenFx(FXName))
-      return;
-    fxList += "FX " + FXName + " from URL could not be started<br>";
+    if (FXName != "reset") {
+      if (main_startChosenFx(FXName))
+        return;
+      fxList += "FX " + FXName + " from URL could not be started<br>";  
+    }
   }
 
   // If failed, try to run previous session's FX stored in localStorage
-  FXName = localStorage.getItem(LOCALSTORAGE_FX_NAME);
-  if (FXName) {
-    if (main_startChosenFx(FXName))
-      return;  
-    fxList += "FX " + FXName + " from last session could not be started<br>";
+  if (FXName != "reset")
+  {
+    FXName = localStorage.getItem(LOCALSTORAGE_FX_NAME);
+    if (FXName) {
+      if (main_startChosenFx(FXName))
+        return;  
+      fxList += "FX " + FXName + " from last session could not be started<br>";
+    }
   }
   
   // could not instanciate FX: show a modal box to choose from a list

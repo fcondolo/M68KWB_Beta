@@ -271,6 +271,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     DEBUGGER_CTRL_PRESSED = false;
     DEBUGGER_ALT_PRESSED = false;
     PREV_KEYDOWN = 0;
+    document.getElementById("myModal").style.display = "none";
   }
 
   if (event.keyCode == 16) // shift
@@ -507,21 +508,13 @@ function DEBUGGER_setParanoid(_s) {
 
 function DEBUGGER_memoryStats() {
   let msg = "<center><b style='color:white'>Memory Stats</b></center><br>";
-  msg += "<table><tr><th>adrs</th><th>size</th><th>remaining</th><th>label</th></tr>";
+  msg += "<table><tr><th>adrs</th><th>size</th><th>label</th></tr>";
   let dcSize = 0;
   let dsSize = 0;
   let unknownSize = 0;
-  let totalRAM = 0;
-  let reaminingRAM = 0;
   for (let i = 0; i < DEBUGGER_AllocsList.length; i++) {
     let showMsg = true;
     const d = DEBUGGER_AllocsList[i];
-    if (i == 0) { 
-      totalRAM = d.size;
-      reaminingRAM = d.size;
-    } else {
-      reaminingRAM -= d.size;
-    }
     if (d.size < 4096) {
       if (d.label) {
         if (d.label.startsWith("@DC.@")) { dcSize += d.size; showMsg = false; }
@@ -538,12 +531,14 @@ function DEBUGGER_memoryStats() {
       } else {
         lab = "no label";
       }
-      msg += "<tr><td>$" + d.adrs.toString(16) + "</td><td>$" + d.size.toString(16) + "</td><td>$" + reaminingRAM.toString(16) + "</td><td>" + lab + "</td></tr>";
+      if (lab != "Total RAM size") {
+        msg += "<tr><td>$" + d.adrs.toString(16) + "</td><td>$" + d.size.toString(16) + "</td><td>" + lab + "</td></tr>";
+      }
     }
   }
-  if (dcSize > 0) msg += "<tr><td>misc</td><td>$" + dcSize.toString(16) + "</td><td>N/A</td><td>less than 4096 bytes dc.b/w/l</td></tr>";
-  if (dsSize > 0) msg += "<tr><td>misc</td><td>$" + dsSize.toString(16) + "</td><td>N/A</td><td>less than 4096 bytes ds.b/w/l</td></tr>";
-  if (unknownSize > 0) msg += "<tr><td>misc</td><td>$" + unknownSize.toString(16) + "</td><td>N/A</td><td>less than 4096 bytes other allocs</td></tr>";
+  if (dcSize > 0) msg += "<tr><td>misc</td><td>$" + dcSize.toString(16) + "</td><td>less than 4096 bytes dc.b/w/l</td></tr>";
+  if (dsSize > 0) msg += "<tr><td>misc</td><td>$" + dsSize.toString(16) + "</td><td>less than 4096 bytes ds.b/w/l</td></tr>";
+  if (unknownSize > 0) msg += "<tr><td>misc</td><td>$" + unknownSize.toString(16) + "</td><td>less than 4096 bytes other allocs</td></tr>";
   msg += "</table>";
 
   showModalBox(msg, null);
