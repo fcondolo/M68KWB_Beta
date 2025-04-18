@@ -252,7 +252,8 @@ function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null) {
     const sx = Math.sign(_x1 - _x0);
     const sy = Math.sign(_y1 - _y0);
     let err = dx - dy;
-  
+    if (Math.abs(dx) > OCS_CONFIG.AMIGA_line_maxLen) return main_Alert("AMIGA_line: dx > OCS_CONFIG.AMIGA_line_maxLen: " + dx);
+    if (Math.abs(dy) > OCS_CONFIG.AMIGA_line_maxLen) return main_Alert("AMIGA_line: dy > OCS_CONFIG.AMIGA_line_maxLen: " + dy);
     while (true) {
         AMIGA_pix2Bitplane(_x0,_y0,_bpl);
         /*

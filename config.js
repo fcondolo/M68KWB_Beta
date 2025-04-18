@@ -106,7 +106,9 @@ const OCS_CONFIG = {
     // ticks per second is used to trigger VBL interrupts
     M68K_TICKS_PER_SECOND   : 7140000,
     // Copper X coordinate of the first visible bitplane pixel (leftmost pixel) for low resolution, without overscan.
-    COPPER_SCREEN_LEFT_X    : 0x2d
+    COPPER_SCREEN_LEFT_X    : 0x2d,
+    // Avoid drawing insanely long lines and freeze your browser 8below value is max dx or dy in pixels)
+    AMIGA_line_maxLen       : 1000
 }
 
 // -----------------------------------------------------------------------
