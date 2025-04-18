@@ -235,21 +235,15 @@ function showMouseCoord(event) {
 }
 
 function main_startChosenFx(_className) {
+  FX_INFO = null;
   _className = _className.toUpperCase();
-  let _index = -1;
   for (let i = 0; i < REGISTERED_FX.length; i++) {
     if (REGISTERED_FX[i].classname.toUpperCase() == _className) {
-      _index = i;
+      FX_INFO = REGISTERED_FX[i];
       break;
     }
   }
-  if (_index < 0) {
-    return false;
-  }
-
-  FX_INFO = REGISTERED_FX[_index];
   if (!FX_INFO) {
-    alert("FATAL: could not find FX in REGISTERED_FX table");
     return false;
   }
 
@@ -347,7 +341,10 @@ function main_startChosenFx(_className) {
 
 function onFxChosen() {
   let sel = document.getElementById("fxListSelect");
-  main_startChosenFx(sel.options[sel.selectedIndex].value);
+  const name = sel.options[sel.selectedIndex].value;
+  if (!main_startChosenFx(name)) {
+    alert("ERROR: Can't start FX " + name);
+  }
 }
 
 function findFxIndexFromName(_name) {
