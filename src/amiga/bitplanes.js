@@ -52,8 +52,9 @@ function bitplanes_updateAllValues() {
 
 	let DIWSTOP_val = AMIGA_getCustom(DIWSTOP);
 	if (DIWSTOP_val != 0) {
-		DisplayWindowStop_x = (DIWSTOP_val & 0xff);
-		DisplayWindowStop_y = ((DIWSTOP_val >> 8) & 0xff);
+		DisplayWindowStop_x = 256 + (DIWSTOP_val & 0xff);
+		DisplayWindowStop_y = ((DIWSTOP_val >>> 8) & 0xff);
+		if ((DisplayWindowStop_y & (1<<7)) == 0) DisplayWindowStop_y += 256;
 	}
 
 	let DDFSTRT_val = AMIGA_getCustom(DDFSTRT);
@@ -133,9 +134,9 @@ function bitplanes_update() {
 				continue;
 			}
 			// update only color0 if outside of bitplanes visible area
-			if (rasterX < DisplayDataFetchFirstPix || rasterX >= DisplayDataFetchLastPix) {
+			if (rasterX < DisplayDataFetchFirstPix || rasterX >= DisplayDataFetchLastPix || rasterY >= DisplayWindowStop_y) {
 				if (data[d] + data[d + 1] + data[d + 2] < 10) { // do not overwrite javascript graphics
-					useColorIndex(0);
+					useColorIndex(0);	// write color00 outside of display window
 					data[d++] = BPL_R;
 					data[d++] = BPL_G;
 					data[d++] = BPL_B;
