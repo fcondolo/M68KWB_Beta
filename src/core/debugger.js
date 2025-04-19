@@ -339,6 +339,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
       $("tr[tabindex=" + idx + "]").focus();
     break;
     case 66: // b
+    /*
       if (DEBUGGER_SHIFT_PRESSED) {
         if (DEBUGGER_Base == 2)
           DEBUGGER_Base = 16;
@@ -347,9 +348,11 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         DEBUGGER_update(true);
         DEBUGGER_dumpRegistersValues();
       }
-      else if (DEBUGGER_ALT_PRESSED) {
+      else */if (DEBUGGER_ALT_PRESSED) {
           SET_PAUSEUPDATE(!DEBUGGER_PAUSEUPDATE);
           if (!DEBUGGER_PAUSEUPDATE) setTraceMode(false);
+        } else {
+          DEBUGGER_BitplanesVisibility();
         }
     break;
     case 67: // c
@@ -506,7 +509,37 @@ function DEBUGGER_setParanoid(_s) {
   DEBUGGER_paranoid = _s;
 }
 
+function changeBitplaneVisibility() {
+  let bplCount = bitpane_bplCount;
+  if (FX_INFO.platform == "ST" || FX_INFO.platform == "STE")
+    bplCount = 4;
+  for (let i = 0; i < bplCount; i++) {
+    let v = document.getElementById("bplvis"+i);
+    if (v.checked) bitplaneWeight[i] = 1; 
+    else bitplaneWeight[i] = 0;  
+  }
+}
+
+function DEBUGGER_BitplanesVisibility() {
+  hideModalBox();
+  let msg = "<center><b style='color:white'>Bitplanes Visibility</b></center><br>";
+  msg += "<table><tr><th>index</th><th>visible</th></tr>";
+  let bplCount = bitpane_bplCount;
+  if (FX_INFO.platform == "ST" || FX_INFO.platform == "STE")
+    bplCount = 4;
+  for (let i = 0; i < bplCount; i++) {
+    msg += "<tr><td>"+i+"</td><td><input type='checkbox' id=bplvis"+i;
+    msg += " onClick=changeBitplaneVisibility()";
+    if (bitplaneWeight[i] == 1)  msg += " checked/>";
+    msg += "</td></tr>";
+  }
+  msg += "</table>";
+
+  showModalBox(msg, changeBitplaneVisibility);  
+}
+
 function DEBUGGER_memoryStats() {
+  hideModalBox();
   let msg = "<center><b style='color:white'>Memory Stats</b></center><br>";
   msg += "<table><tr><th>adrs</th><th>size</th><th>label</th></tr>";
   let dcSize = 0;
@@ -548,7 +581,7 @@ function DEBUGGER_help() {
   let msg = "<center><b style='color:white'>M68KWorkbench Help</b></center><br>";
   msg += "<table><tr><th>KEY(s)</th><th>COMMAND</th><th>DESCRIPTION</th></tr>";
   
-  msg += "<tr><td>shift + b</td><td>binary</td><td>dump registers values in binary (on/off)</td></tr>";
+  msg += "<tr><td>b</td><td>Bitplanes visibility</td><td>Switch bitplanes on/off</td></tr>";
   msg += "<tr><td>alt + b</td><td>break update</td><td>trigger breakpoint at the beginning of update (on/off)</td></tr>";
   msg += "<tr><td>c</td><td>cycles</td><td>toggle show CPU cycles per frame on/off</td></tr>";
   if (FX_INFO.platform == 'OCS')

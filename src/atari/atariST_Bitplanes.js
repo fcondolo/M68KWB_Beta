@@ -216,12 +216,15 @@ function ST_bitplanes_update() {
 				p4 |= p4n >> sft;
 			}
 			for (let bit = 15; bit >= 0; bit--) {
-				const msk = 1<<bit;
+				const msk1 = bitplaneWeight[0]<<bit;
+				const msk2 = bitplaneWeight[1]<<bit;
+				const msk3 = bitplaneWeight[2]<<bit;
+				const msk4 = bitplaneWeight[3]<<bit;
 				let v = 0;
-				if ((p4 & msk)!==0) v |= 1<<3;
-				if ((p3 & msk)!==0) v |= 1<<2;
-				if ((p2 & msk)!==0) v |= 1<<1;
-				if ((p1 & msk)!==0) v |= 1;
+				if ((p4 & msk4)!==0) v |= 1<<3;
+				if ((p3 & msk3)!==0) v |= 1<<2;
+				if ((p2 & msk2)!==0) v |= 1<<1;
+				if ((p1 & msk1)!==0) v |= 1;
 				v *= 4;
 			//	if (data[d]<16) {
 				data[d++] = pal[v];
