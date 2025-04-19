@@ -4,6 +4,8 @@ PI     EQU    16384
 
 init:
        bsr           setPalette
+       lea           sintable,a2
+       ;>JS lock(a2,0xffffffff,"sintable")
        rts
 
 
@@ -14,8 +16,9 @@ init:
 ; out d0 : y
 rot:
        move.w        d0,d2
-       lea           sintable,a0
-       move.l        a0,a1
+     ;  move.l        #12,a2
+       move.l        a2,a0
+       move.l        a2,a1
        and.l         #$ffff,d0
        add.l         d0,a0
        move.w        (a0),d0              ; sin

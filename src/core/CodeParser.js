@@ -1137,6 +1137,11 @@ class CodeParser {
         }
 
         for (let rr = 0; rr <= 7; rr++) {
+          ln.jsString = ln.jsString.replaceAll("lock(d"+rr,"lock('d"+rr+"'");
+          ln.jsString = ln.jsString.replaceAll("lock(D"+rr,"lock('d"+rr+"'");
+          ln.jsString = ln.jsString.replaceAll("lock(a"+rr,"lock('a"+rr+"'");
+          ln.jsString = ln.jsString.replaceAll("lock(A"+rr,"lock('a"+rr+"'");
+
           ln.jsString = ln.jsString.replaceAll("d"+rr+".ub","(regs.d["+rr+"]&0xff)");
           ln.jsString = ln.jsString.replaceAll("d"+rr+".uw","(regs.d["+rr+"]&0xffff)");
           ln.jsString = ln.jsString.replaceAll("d"+rr+".ul","regs.d["+rr+"]");

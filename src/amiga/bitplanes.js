@@ -1,17 +1,3 @@
-/*
-VERY VERY BASIC IMPLEMENTATION
-This is not supposed to be an Amiga emulator. Just provides basic support for bitplanes
-and some copper (changing bitplane pointers per line, bitplane modulo, etc.)
-- The only value taken from BPLCON0 is the number of bitplanes
-- BPLxPTH, BPLxPTL, BPLxMOD & BPLCON1 are taken into account (You can use bitplanes pointers, modulos and scroll values)
-- Changes made to BPLxPTH, BPLxPTL, BPLxMOD & BPLCON1 by the COPPER during the frame are taken into account
-- 6 bitplanes modes (HAM, EHB) are not supported. The 7 bitplanes OCS trick is not yet supported either
-- No dual playfield
-- No high-resolution, 320x256 et 320x180 resolutions tested only
-*/
-
-// TODO: Implement proper start/stop using: https://amigafonteditor.ozzyboshi.com/diwstartstop.html
-
 let DisplayDataFetchFirstPix = 0;
 let DisplayDataFetchLastPix = 0;
 let bitpane_bplCount = 0;
@@ -24,30 +10,31 @@ let BPL_R, BPL_G, BPL_B;
 // DMA enable through DMACON
 let DMA_Bitplane = false;
 let DMA_Copper = false;
+let isHAMMode = false;
 
 function useColorIndex(_index) {
 	const color = AMIGA_customregs[COLOR0 / 2 + _index]; // tap directly into table to avoid calling AMIGA_getCustom() once per pixel...
 	BPL_B = (color & 15) * 16;
-	BPL_G = ((color >> 4) & 15) * 16;
-	BPL_R = ((color >> 8) & 15) * 16;
+	BPL_G = ((color >>> 4) & 15) * 16;
+	BPL_R = ((color >>> 8) & 15) * 16;
 }
 
 
 function bitplanes_updateAllValues() {
 	const DMACONVal = AMIGA_getCustom(DMACONR);
-	if (((DMACONVal >> 7) & 1) != 0)
+	if (((DMACONVal >>> 7) & 1) != 0)
 		DMA_Copper = true;
 	else
 		DMA_Copper = false;
-	if (((DMACONVal >> 8) & 1) != 0)
+	if (((DMACONVal >>> 8) & 1) != 0)
 		DMA_Bitplane = true;
 	else
 		DMA_Bitplane = false;
 
 	let DIWSTRT_val = AMIGA_getCustom(DIWSTRT);
 	if (DIWSTRT_val != 0) {
-		DisplayWindowStart_x = (DIWSTRT_val & 0xff);
-		DisplayWindowStart_y = ((DIWSTRT_val >> 8) & 0xff);
+		DisplayWindowStart_x = (DIWSTRT_val & 0xff)*SIMU_DEFAULT_WIDTH/640;
+		DisplayWindowStart_y = ((DIWSTRT_val >>> 8) & 0xff);
 	}
 
 	let DIWSTOP_val = AMIGA_getCustom(DIWSTOP);
@@ -86,14 +73,17 @@ function bitplanes_updateAllValues() {
 	bitplaneMod[5] = AMIGA_getCustom(BPL2MOD);
 
 	bitplaneHScroll[0] = AMIGA_getCustom(BPLCON1) & 0x0f;
-	bitplaneHScroll[1] = (AMIGA_getCustom(BPLCON1) & 0xf0) >> 4;
+	bitplaneHScroll[1] = (AMIGA_getCustom(BPLCON1) & 0xf0) >>> 4;
 	bitplaneHScroll[2] = bitplaneHScroll[0];
 	bitplaneHScroll[3] = bitplaneHScroll[1];
 	bitplaneHScroll[4] = bitplaneHScroll[0];
 	bitplaneHScroll[5] = bitplaneHScroll[1];
 
 	let BPLCON0_Val = AMIGA_getCustom(BPLCON0);
-	bitpane_bplCount = (BPLCON0_Val >> 12) & 7;	
+	bitpane_bplCount = (BPLCON0_Val >>> 12) & 7;
+	if ((BPLCON0_Val & 1<<11) != 0) {
+		isHAMMode = true;
+	}
 }
 
 function bitplanes_update() {
@@ -145,19 +135,22 @@ function bitplanes_update() {
 			}
 			else { // update bitplanes
 				let colorIndex = 0;
-				for (let curBpl = 0; curBpl < bitpane_bplCount; curBpl++) {
-					let readx = bplReadX - bitplaneHScroll[curBpl];
-					if (readx >= 0) {
-						let pixindex = (readx >> 3) + bplReadY[curBpl];
-						let bitplane = bitplaneAdrs[curBpl];
-						let mask = 1 << (7 - (readx & 7));
-						//if (pixindex >= 0 && pixindex < bplHorizByteCount*PLAYFIELD_LINES_COUNT) {
-						let data = MACHINE.ram[bitplane + pixindex] & mask;
-						if (data != 0) data = 1;
-						colorIndex |= bitplaneWeight[curBpl] * (data << curBpl);
-						//} else 
-						//	debugger;
-					}
+				if (isHAMMode) {
+				} else { // NOT HAM
+					for (let curBpl = 0; curBpl < bitpane_bplCount; curBpl++) {
+						let readx = bplReadX - bitplaneHScroll[curBpl];
+						if (readx >= 0) {
+							let pixindex = (readx >>> 3) + bplReadY[curBpl];
+							let bitplane = bitplaneAdrs[curBpl];
+							let mask = 1 << (7 - (readx & 7));
+							//if (pixindex >= 0 && pixindex < bplHorizByteCount*PLAYFIELD_LINES_COUNT) {
+							let data = MACHINE.ram[bitplane + pixindex] & mask;
+							if (data != 0) data = 1;
+							colorIndex |= bitplaneWeight[curBpl] * (data << curBpl);
+							//} else 
+							//	debugger;
+						}
+					}	
 				}
 				bplReadX++;
 				if (data[d] + data[d + 1] + data[d + 2] < 10) { // do not overwrite javascript graphics

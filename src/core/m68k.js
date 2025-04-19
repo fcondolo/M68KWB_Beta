@@ -210,7 +210,7 @@ function runtimeError68k(_e) {
   debugger;
 }
 
-function lock(_reg, _mask) {
+function lock(_reg, _mask, _reason) {
   if (!_mask)
     _mask = 0xffffffff;
   _reg = _reg.toUpperCase();
@@ -230,20 +230,26 @@ function lock(_reg, _mask) {
     runtimeError68k(_reg + ' already locked');
   }
 
-  data[reg.ind] = { val: reg.tab[reg.ind] & _mask, mask: _mask};
+  data[reg.ind] = { val: reg.tab[reg.ind] & _mask, mask: _mask, reason: _reason};
 }
 
 
 function checklocks() {
   for (let i = 0; i < 8; i++) {
     if (lockDataA[i]) {
-      if (regs.a[i] & lockDataA[i].mask != lockDataA[i].val) {
-        debug('locked register A' + i + ' was modified');
+      if ((regs.a[i] & lockDataA[i].mask) != lockDataA[i].val) {
+        if (lockDataA[i].reason)
+          debug('sorry, register A' + i + ' is locked for: ' + lockDataA[i].reason);
+        else
+          debug('sorry, register A' + i + ' is locked');
       }
     }
     if (lockDataD[i]) {
       if (regs.d[i] & lockDataD[i].mask != lockDataD[i].val) {
-        debug('locked register D' + i + ' was modified');
+        if (lockDataD[i].reason)
+          debug('sorry, register D' + i + ' is locked for: ' + lockDataD[i].reason);
+        else
+          debug('sorry, register D' + i + ' is locked');
       }
     }
   }
