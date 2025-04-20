@@ -1195,7 +1195,7 @@ function I_ADD_8(_src, _dst) {
   var d = _dst & 0xff;
   var r = s + d; if (r > 0xffff) r -= 0x10000;
   _dst = (_dst & 0xffff0000) | r;
-  flgAdd(s, d, r, 0x8000, false);
+  flgAdd(s, d, r, 0x80, false);
   return _dst;
 }
 
