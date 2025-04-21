@@ -600,15 +600,16 @@ class CodeParser {
       if (ln.isLabel && (!_preprocess_only)) {
         ln.skipSpaces();
         let name = ln.filtered.substring(ln.ofs, index);
+        if (name[name.length-1] == ':')
+          name = name.substring(0, name.length - 1);
+        console.log("adding label: " + name);
         if (name[0] != '.') {
           for (let k = 0; k < t.labels.length; k++) {
             if (t.labels[k].label == name) {
-              ln.Failed("sorry, label " + name + " already exists in file " + t.labels[k].fromFile + " at line " + (t.labels[k].fromLine + 1).toString());
+              return ln.Failed("sorry, label " + name + " already exists in file " + t.labels[k].fromFile + " at line " + (t.labels[k].fromLine + 1).toString());
             }
           }
         }
-        if (name[name.length-1] == ':')
-          name = name.substring(0, name.length - 1);
         t.labels.push({ label: name, index: lnIt, fromFile: ln.path, fromLine: ln.line, dcData: null });
       }
     }
