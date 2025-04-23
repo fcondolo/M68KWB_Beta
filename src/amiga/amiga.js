@@ -5,7 +5,7 @@
 var AMIGA_STARTSTACK;
 
 var AMIGA_customregs = null;
-
+var AMIGA_CURHELPER = null;
 
 let AMIGA_data_index = 0;
 let AMIGA_started = false;
@@ -34,6 +34,7 @@ function AMIGA_drawChunky8(_chunkyBuffer, _srcW, _srcH, _dstW, _dstH) {
 
 
 function AMIGA_updateScreenHelper(_params) {
+    AMIGA_CURHELPER = _params;
     let ptr = _params.bitplanes;
     if (_params.double) {
         _params.swapCounter ^= 1;
@@ -86,6 +87,7 @@ function AMIGA_GetScreenHelper(_params) {
     if (!_params.cplistSize) _params.cplistSize = 1024;
     if ((_params.width % 8) != 0) main_Alert("ERROR: AMIGA_GetScreenHelper called with a screen width that is not a multiple of 8");
     _params.lineBytes = Math.floor(_params.width / 8);
+    AMIGA_CURHELPER = _params;
 
     AMIGA_start();
     _params.bplSize = _params.lineBytes * _params.height;
@@ -232,7 +234,10 @@ writes a pixel in a bitplane. note: assumes line width is 40 bytes
 */
 function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null, _clr = false) {
     if (!_clip) {
-        _clip = {minx:0,miny:0,maxx:320,maxy:256};
+        if (AMIGA_CURHELPER)
+            _clip = {minx:0,miny:0,maxx:AMIGA_CURHELPER.width,maxy:AMIGA_CURHELPER.height};
+        else
+            _clip = {minx:0,miny:0,maxx:320,maxy:256};
     }
     _x = Math.floor(_x);
     _y = Math.floor(_y);
@@ -260,8 +265,13 @@ function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null, _clr = false) {
     let err = dx - dy;
     if (Math.abs(dx) > OCS_CONFIG.AMIGA_line_maxLen) return main_Alert("AMIGA_line: dx > OCS_CONFIG.AMIGA_line_maxLen: " + dx);
     if (Math.abs(dy) > OCS_CONFIG.AMIGA_line_maxLen) return main_Alert("AMIGA_line: dy > OCS_CONFIG.AMIGA_line_maxLen: " + dy);
+
+    let clip = {minx:0,miny:0,maxx:320,maxy:256};
+    if (AMIGA_CURHELPER)
+        clip = {minx:0,miny:0,maxx:AMIGA_CURHELPER.width,maxy:AMIGA_CURHELPER.height};
+
     while (true) {
-        AMIGA_pix2Bitplane(_x0,_y0,_bpl, null, _clr);
+        AMIGA_pix2Bitplane(_x0,_y0,_bpl, clip, _clr);
       if (_x0 === _x1 && _y0 === _y1) break;
   
       const e2 = 2 * err;
