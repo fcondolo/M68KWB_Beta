@@ -1,3 +1,8 @@
-23/04/2025	as asked by Depeche, the new protocol for AMIGA_line is: 
-		AMIGA_line(_x0,_y0,_x1,_y1,_bpl, _clr = false) to be
-		able t clear lines.
+23/04/2025	
+==========
+
+- as asked by Depeche, the new protocol for AMIGA_line is: 
+	AMIGA_line(_x0,_y0,_x1,_y1,_bpl, _clr = false) to be able to clear lines.
+
+- better cycle counting (WIP, still missing instructions)
+

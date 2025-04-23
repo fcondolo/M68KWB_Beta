@@ -602,7 +602,7 @@ class CodeParser {
         let name = ln.filtered.substring(ln.ofs, index);
         if (name[name.length-1] == ':')
           name = name.substring(0, name.length - 1);
-        console.log("adding label: " + name);
+        //console.log("adding label: " + name);
         if (name[0] != '.') {
           for (let k = 0; k < t.labels.length; k++) {
             if (t.labels[k].label == name) {
@@ -2040,6 +2040,7 @@ class CodeParser {
         return;
         case 'AND':
         case 'ANDI':
+          if (line.arg2.type == 'reg' && line.arg2.tab == regs.a) return line.Failed("can't AND an address register");
           if (line.arg2.tab == regs.d) t.pickCycle(line,4,6);
           else t.pickCycle(line,8,12);
           line.call = AND; 
@@ -2181,6 +2182,7 @@ class CodeParser {
         break;
         case 'OR': 
         case 'ORI': 
+          if (line.arg2.type == 'reg' && line.arg2.tab == regs.a) return line.Failed("can't OR an address register");
           if (line.arg2.tab == regs.d) t.pickCycle(line,4,6);
           else t.pickCycle(line,8,12);
           line.call = OR; 
@@ -2329,6 +2331,7 @@ class CodeParser {
         case 'TRAP': line.call = TRAP; break;
         case 'TRAPV': line.call = NOT_IMPLEMENTED; break;
         case 'TST':
+          if (line.arg1.type == 'reg' && line.arg1.tab == regs.a) return line.Failed("can't TST an address register");
           line.cycles = 4;
           line.call = TST; 
         return;
@@ -2336,9 +2339,10 @@ class CodeParser {
         default: line.Failed('instruction not recognized: ' + line.instr); break;
       }
       if (line.cycles == 0)
-        line.cycles = 8;  // some default average shit for not yet covered instrucitons, useful for interrupts
+        line.cycles = 8;  // some default average shit for not yet covered instructions, useful for interrupts
       if (line.arg1) line.cycles += line.arg1.cycles;
       if (line.arg2) line.cycles += line.arg2.cycles;
+      line.SetInstrCycles(); // more precise wip
     }
   }
 

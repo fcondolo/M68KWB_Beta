@@ -818,5 +818,409 @@ class LineParser {
     }
 
   }
+
+
+  warn(_msg) {
+    showHTMLError(this.getWarningString(_msg));
+  }
+
+  getArgDispSize(_d) {
+    if (_d >= -128 && _d <= 127) return 8;
+    if (_d >= -32768 && _d <= 32767) return 16;
+    return 32;
+  }
+
+  getArgAdrsSize(_a) {
+    if (!_a ||  _a == 0) {
+        this.warn("getArgAdrsSize: null adrress");
+        return 0;
+    }
+    if (_a < 0) {
+        this.warn("getArgAdrsSize: adrress is negative");
+        return 0;
+    }
+    if (_a < 65536) return 16;
+    return 32;
+  }
+
+  checkCycleValue(_v) {
+    if (_v < 0) {
+        this.warn("unsupported case, bug in cycles tables");
+        return 0;
+    }
+    return _v;
+  }
+
+  getArgCycles(
+    _a, 
+    reg_data,               // Dn
+    reg_adrs,               // An
+    indirect,               // (A)
+    indirect_postIncr,      // (A)+
+    indirect_predecr,       // -(A)
+    indirect_disp1,         // $(A)
+    indirect_disp2,         // I(A)
+    adrs_w,                 // .W
+    adrs_l,                 // .L
+    pcrel_1,                // $(P)
+    pcrel_2,                // I(P)
+    immediate               // #
+    ) {
+    let t = this;
+    switch(_a.type) {
+        case 'reg':
+            if (_a.tab == regs.d) return t.checkCycleValue(reg_data);
+            if (_a.tab == regs.a) return t.checkCycleValue(reg_adrs);
+            t.warn("can't compute cycles: wrong register type");
+        break;
+        case 'ind':
+            if (_a.predecrement) return t.checkCycleValue(indirect_predecr);
+            if (_a.postincrement) return t.checkCycleValue(indirect_postIncr);
+            if (_a.disp) {
+                if (_a.indReg) return t.checkCycleValue(indirect_disp2);
+                return t.checkCycleValue(indirect_disp1);
+            }
+            return t.checkCycleValue(indirect);
+        case 'labl': {
+            if (!isNaN(_a.isLabelIndex)) { // label (memory address)
+                const l = CODERPARSER_SINGLETON.labels[_a.isLabelIndex];
+                let adrs = l.dcData;
+                if (adrs == null) { // no data: it's a code label
+                    adrs = l.codeSectionOfs;
+                }
+                if (t.getArgAdrsSize(_a.value) < 32) return t.checkCycleValue(adrs_w);
+                return t.checkCycleValue(adrs_l);
+            }
+            t.warn("can't compute cycles: label has no address");
+        }            
+        case 'adrs':
+            if (t.getArgAdrsSize(_a.value) < 32) return t.checkCycleValue(adrs_w);
+            return t.checkCycleValue(adrs_l);
+        case 'imm': return t.checkCycleValue(immediate);
+        default:
+          t.warn("can't compute cycles: unhandled addressing type");
+        return 0;
+    }
+    return 0;
+  }
+
+  isDReg(_a) {
+    return ((_a.type == 'reg') && (_a.tab == regs.d));
+  }
+
+  isAReg(_a) {
+    return ((_a.type == 'reg') && (_a.tab == regs.a));
+  }
+
+  SetInstrCycles() {
+    let t = this;
+    let cycles = 0;
+    switch (t.instr) {
+        case 'ADD':
+        case 'ADDI':
+        case 'ADDA': {
+            if (t.instrSize < 4) {
+              if (t.isDReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  4,  4,  8,  8, 12, 12, 16, 12, 16, 12, 16,  8); break; }
+              if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  4,  8, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+              if (t.isAReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  8,  8, 12, 12, 16, 16, 20, 16, 20, 16, 20, 12); break; }
+              if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2,  8,  8, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+              // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+              // add.w *,d0             4    4    8    8   12   12   16   12   16   12   16    8
+              // add.w d0,*             4    8   12   12   16   16   20   16   20
+              // adda.w *,a1            8    8   12   12   16   16   20   16   20   16   20   12
+              // add.w #1,*             8    8   16   16   20   20   24   20   24
+            } else {
+              if (t.isDReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  8,  8, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+              if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  8,  8, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+              if (t.isAReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  8,  8, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+              if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2, 16, 16, 28, 28, 32, 32, 36, 32, 36, -1, -1, -1); break; }
+              // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+              // add.l *,d0             8    8   16   16   20   20   24   20   24   20   24   16
+              // add.l d0,*             8    8   20   20   24   24   28   24   28
+              // adda.l *,a1            8    8   16   16   20   20   24   20   24   20   24   16
+              // add.l #1,*            16    16  28   28   32   32   36   32   36
+            }
+        }
+        break;
+        case 'ADDQ':
+          if (t.instrSize < 4)      { cycles = t.getArgCycles(t.arg2,  4,  8, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+          else                      { cycles = t.getArgCycles(t.arg2,  8,  8, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // addq.w #1,*            4    8   12   12   16   16   20   16   20
+          // addq.l #1,*            8    8   20   20   24   24   28   24   28
+        case 'ADDX':
+          if (t.instrSize < 4)      { cycles = t.getArgCycles(t.arg1,  4, -1, -1, -1, 20, -1, -1, -1, -1, -1, -1, -1); break; }
+          else                      { cycles = t.getArgCycles(t.arg1,  8, -1, -1, -1, 32, -1, -1, -1, -1, -1, -1, -1); break; }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // addx.w *,*             4                  20
+          // addx.l *,*             8                  32
+        case 'AND':
+        case 'ANDI':
+          if (t.instrSize < 4) {
+            if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  4, -1,  8,  8, 12, 12, 16, 12, 16, 12, 16,  8); break; }
+            if (t.isDReg(t.arg1))     { cycles = t.getArgCycles(t.arg2,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  8, -1, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // and.w *,d0             4   -1   8    8   12   12   16   12   16   12   16    8
+            // and.w d0,*             4   -1  12   12   16   16   20   16   20
+            // and.w #1,*             8   -1  16   16   20   20   24   20   24
+          } else { 
+            if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  8, -1, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+            if (t.isDReg(t.arg1))     { cycles = t.getArgCycles(t.arg2,  8, -1, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  16,-1, 28, 28, 32, 32, 36, 32, 36, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // and.l *,d0             8   -1   16   16   20   20   24   20   24   20   24   16
+            // and.l d0,*             8   -1   20   20   24   24   28   24   28
+            // and.l #1,*            16   -1   28   28   32   32   36   32   36
+          }
+        break;
+        case 'CLR':
+          if (t.instrSize < 4)      { cycles = t.getArgCycles(t.arg1,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+          else                      { cycles = t.getArgCycles(t.arg1,  8, -1, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // clr.w *                4   -1   12   12   16   16   20   16   20
+          // clr.l *                8   -1   20   20   24   24   28   24   28
+          case 'CMP':
+          case 'CMPA':
+          case 'CMPI': {
+          if (t.instrSize < 4) {
+            if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  4,  4,   8,  8, 12, 12, 16, 12, 16, 12, 16,  8); break; }
+            if (t.isAReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  8,  8,  12, 12, 16, 16, 20, 16, 20, 16, 20, 12); break; }
+            if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  8,  12, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // cmp.w *,d0             4    4    8    8   12   12   16   12   16   12   16    8
+            // cmpa.w *,a1            8    8   12   12   16   16   20   16   20   16   20   12
+            // cmp.w #1,*             8    12  12   12   16   16   20   16   20
+          } else { 
+            if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  8,  8, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+            if (t.isAReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  8,  8, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+            if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  16, 16,20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // cmp.l *,d0             8    8   16   16   20   20   24   20   24   20   24   16
+            // cmpa.l *,a1            8    8   16   16   20   20   24   20   24   20   24   16
+            // cmp.l #1,*            16    16  20   20   24   24   28   24   28
+          }
+        }
+        break;
+        case 'EOR':
+        case 'EORI':
+        if (t.instrSize < 4) {
+          if (t.isDReg(t.arg1))     { cycles = t.getArgCycles(t.arg2,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+          if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  8, -1, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // eor.w d0,*             4   -1   12   12   16   16   20   16   20
+          // eor.w #1,*             8   -1   16   16   20   20   24   20   24
+        } else { 
+          if (t.isDReg(t.arg1))     { cycles = t.getArgCycles(t.arg2,  8, -1, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+          if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  16,-1, 28, 28, 32, 32, 36, 32, 36, -1, -1, -1); break; }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // eor.l d0,*             8   -1   20   20   24   24   28   24   28
+          // eor.l #1,*            16   -1   28   28   32   32   36   32   36
+        }
+      break;
+      case 'MOVE':
+      case 'MOVEA': {
+        if (t.instrSize < 4) {
+          if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  4,  4,  8,  8, 12, 12, 16, 12, 16, 12, 16,  8); break; }
+          if (t.isAReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  4,  4,  8,  8, 12, 12, 16, 12, 16, 12, 16,  8); break; }
+          if (t.arg2.type == 'ind') {
+            if (!t.arg2.disp)       { cycles = t.getArgCycles(t.arg1,  8,  8, 12, 12, 16, 16, 20, 16, 20, 16, 20, 12); break; }
+            else {
+              if (t.arg2.indReg)    { cycles = t.getArgCycles(t.arg1,  16,16, 20, 20, 24, 24, 28, 24, 28, 24, 28, 20); break; }
+              else                  { cycles = t.getArgCycles(t.arg1,  12,12, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+            }
+          }
+          if (t.arg2.type == 'adrs') {
+            if (t.getArgAdrsSize(t.arg2.value) < 32)
+                                    { cycles = t.getArgCycles(t.arg1,  12,12, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+            else
+                                    { cycles = t.getArgCycles(t.arg1,  16,16, 20, 20, 24, 24, 28, 24, 28, 24, 28, 20); break; }
+          }
+          if (t.arg2.type == 'labl') {
+            if (!isNaN(t.arg2.isLabelIndex)) { // label (memory address)
+              const l = CODERPARSER_SINGLETON.labels[t.arg2.isLabelIndex];
+              let adrs = l.dcData;
+              if (adrs == null) { // no data: it's a code label
+                  adrs = l.codeSectionOfs;
+              }
+              if (t.getArgAdrsSize(adrs) < 32)
+                { cycles = t.getArgCycles(t.arg1,  12,12, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+              else
+                { cycles = t.getArgCycles(t.arg1,  16,16, 20, 20, 24, 24, 28, 24, 28, 24, 28, 20); break; }
+            }
+          }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // move.w *,d0            4    4    8    8   12   12   16   12   16   12   16    8
+          // move.w *,a1            4    4    8    8   12   12   16   12   16   12   16    8
+          // move.w *,-(a1)+        8    8   12   12   16   16   20   16   20   16   20   12
+          // move.w *,24(a1)       12   12   16   16   20   20   24   20   24   20   24   16
+          // move.w *,20(a1,d0.w)  16   16   20   20   24   24   28   24   28   24   28   20
+          // move.w *,$200.w       12   12   16   16   20   20   24   20   24   20   24   16
+          // move.w *,scratchpad   16   16   20   20   24   24   28   24   28   24   28   20
+        } else { 
+          if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  4,  4, 12, 12, 16, 16, 20, 16, 20, 16, 20, 12); break; }
+          if (t.isAReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  4,  4, 12, 12, 16, 16, 20, 16, 20, 16, 20, 12); break; }
+          if (t.arg2.type == 'ind') {
+            if (!t.arg2.disp)       { cycles = t.getArgCycles(t.arg1,  12, 12, 20, 20, 24, 24, 28, 24, 28, 24, 28, 20); break; }
+            else {
+              if (t.arg2.indReg)    { cycles = t.getArgCycles(t.arg1,  20,20, 28, 28, 32, 32, 36, 32, 36, 32, 36, 28); break; }
+              else                  { cycles = t.getArgCycles(t.arg1,  16,16, 24, 24, 28, 28, 32, 28, 32, 28, 32, 24); break; }
+            }
+          }
+          if (t.arg2.type == 'adrs') {
+            if (t.getArgAdrsSize(t.arg2.value) < 32)
+                                    { cycles = t.getArgCycles(t.arg1,  20,20, 28, 28, 32, 32, 36, 32, 36, 32, 36, 28); break; }
+            else
+                                    { cycles = t.getArgCycles(t.arg1,  20,20, 28, 28, 32, 32, 36, 32, 36, 32, 36, 28); break; }
+          }
+          if (t.arg2.type == 'labl') {
+            if (!isNaN(t.arg2.isLabelIndex)) { // label (memory address)
+              const l = CODERPARSER_SINGLETON.labels[t.arg2.isLabelIndex];
+              let adrs = l.dcData;
+              if (adrs == null) { // no data: it's a code label
+                  adrs = l.codeSectionOfs;
+              }
+              if (t.getArgAdrsSize(adrs) < 32)
+                { cycles = t.getArgCycles(t.arg1,  20,20, 28, 28, 32, 32, 36, 32, 36, 32, 36, 28); break; }
+              else
+                { cycles = t.getArgCycles(t.arg1,  20,20, 28, 28, 32, 32, 36, 32, 36, 32, 36, 28); break; }
+            }
+          }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // move.l *,d0            4    4   12   12   16   16   20   16   20   16   20   12
+          // move.l *,a1            4    4   12   12   16   16   20   16   20   16   20   12
+          // move.l *,-(a1)+       12   12   20   20   24   24   28   24   28   24   28   20
+          // move.l *,24(a1)       16   16   24   24   28   28   32   28   32   28   32   24
+          // move.l *,20(a1,d0.l)  20   20   28   28   32   32   36   32   36   32   36   28
+          // move.l *,$200.l       20   20   28   28   32   32   36   32   36   32   36   28
+          // move.l *,scratchpad   20   20   28   28   32   32   36   32   36   32   36   28
+        }
+      }
+      break;
+
+      case "MOVEM": {
+        if (l.arg1.movem && l.arg1.movem.length > 0) { // regs to mem
+          let n = l.arg1.movem.length;
+          if (t.instrSize < 4) {
+          cycles = t.getArgCycles(t.arg2,  -1,  -1, 8+4*n, -1, 8+4*n, 12+4*n, 14+4*n, 12+4*n, 16+4*n, -1, -1, -1);
+            break;
+          } else {
+            cycles = t.getArgCycles(t.arg2,  -1,-1, 8+8*n, -1, 8+8*n, 12+8*n, 14+8*n, 12+8*n, 16+8*n, -1, -1, -1);
+            break;
+          }
+        } else { // mem to regs
+          let n = l.arg2.movem.length;
+          if (t.instrSize < 4) {
+            cycles = t.getArgCycles(t.arg1,  -1,-1, 12+4*n, -1, 12+4*n, 16+4*n, 18+4*n, 16+4*n, 20+4*n, -1, -1, -1);
+            break;
+          } else {
+            cycles = t.getArgCycles(t.arg1,  -1,-1, 12+8*n, -1, 12+8*n, 16+8*n, 18+8*n, 16+8*n, 20+8*n, -1, -1, -1);
+            break;            
+          }
+        }
+      }
+      break;
+      case 'MOVEP':
+        if (t.instrSize < 4) cycles = 16;
+        else cycles = 24;
+      break;
+
+      case 'NEG':
+      case 'NEGX':
+        if (t.instrSize < 4) {
+          cycles = t.getArgCycles(t.arg1,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1);
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // neg.w *                4   -1   12   12   16   16   20   16   20
+          // negx.w *               4   -1   12   12   16   16   20   16   20
+        } else { 
+          cycles = t.getArgCycles(t.arg1,  8, -1, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1);
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // neg.l *                8   -1   20   20   24   24   28   24   28
+          // negx.l *               8   -1   20   20   24   24   28   24   28
+                  }
+      break;
+      
+      case 'NOT':
+        if (t.instrSize < 4) {
+          cycles = t.getArgCycles(t.arg1,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1);
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // not.w *                4   -1   12   12   16   16   20   16   20
+        } else { 
+          cycles = t.getArgCycles(t.arg1,  8, -1, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1);
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // not.l *                8   -1   20   20   24   24   28   24   28
+        }
+      break;
+
+      case 'OR':
+      case 'ORI':
+          if (t.instrSize < 4) {
+            if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  4, -1,  8,  8, 12, 12, 16, 12, 16, 12, 16,  8); break; }
+            if (t.isDReg(t.arg1))     { cycles = t.getArgCycles(t.arg2,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  8, -1, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // or.w *,d0              4   -1   8    8   12   12   16   12   16   12   16    8
+            // or.w d0,*              4   -1   12   12   16   16   20   16   20
+            // or.w #1,*              8   -1   16   16   20   20   24   20   24
+          } else { 
+            if (t.isDReg(t.arg2))     { cycles = t.getArgCycles(t.arg1,  8, -1, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+            if (t.isDReg(t.arg1))     { cycles = t.getArgCycles(t.arg2,  8, -1, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm') { cycles = t.getArgCycles(t.arg2,  16,-1, 28, 28, 32, 32, 36, 32, 36, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // or.l *,d0              8   -1   16   16   20   20   24   20   24   20   24   16
+            // or.l d0,*              8   -1   20   20   24   24   28   24   28
+            // or.l #1,*             16   -1   28   28   32   32   36   32   36
+          }        
+        break;
+
+        case 'SUB':
+        case 'SUBI':
+        case 'SUBA':
+            if (t.instrSize < 4) {
+              if (t.isDReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  4,  4,  8,  8, 12, 12, 16, 12, 16, 12, 16,  8); break; }
+              if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  4,  8, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+              if (t.isAReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  8,  8, 12, 12, 16, 16, 20, 16, 20, 16, 20, 12); break; }
+              if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2,  8,  8, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+              // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+              // sub.w *,d0             4    4    8    8   12   12   16   12   16   12   16    8
+              // sub.w d0,*             4    8   12   12   16   16   20   16   20
+              // suba.w *,a1            8    8   12   12   16   16   20   16   20   16   20   12
+              // sub.w #1,*             8    8   16   16   20   20   24   20   24
+              
+            } else {
+              if (t.isDReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  8,  8, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+              if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  8,  8, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+              if (t.isAReg(t.arg2))       { cycles = t.getArgCycles(t.arg1,  8,  8, 16, 16, 20, 20, 24, 20, 24, 20, 24, 16); break; }
+              if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2, 16, 16, 28, 28, 32, 32, 36, 32, 36, -1, -1, -1); break; }
+              // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+              // sub.l *,d0             8    8   16   16   20   20   24   20   24   20   24   16
+              // sub.l d0,*             8    8   20   20   24   24   28   24   28
+              // suba.l *,a1            8    8   16   16   20   20   24   20   24   20   24   16
+              // sub.l #1,*            16    16  28   28   32   32   36   32   36                          }
+            }
+        break;
+        case 'SUBQ':
+          if (t.instrSize < 4)      { cycles = t.getArgCycles(t.arg2,  4,  8, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+          else                      { cycles = t.getArgCycles(t.arg2,  8,  8, 20, 20, 24, 24, 28, 24, 28, -1, -1, -1); break; }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // subq.w #1,*            4    8   12   12   16   16   20   16   20
+          // subq.l #1,*            8    8   20   20   24   24   28   24   28
+        case 'SUBX':
+          if (t.instrSize < 4)      { cycles = t.getArgCycles(t.arg1,  4, -1, -1, -1, 20, -1, -1, -1, -1, -1, -1, -1); break; }
+          else                      { cycles = t.getArgCycles(t.arg1,  8, -1, -1, -1, 32, -1, -1, -1, -1, -1, -1, -1); break; }
+          // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+          // subx.w *,*             4                  20
+          // subx.l *,*             8                  32
+        
+          case 'TST':
+            if (t.instrSize < 4)      { cycles = t.getArgCycles(t.arg1,  4, -1,  8,  8, 12, 12, 16, 12, 16, -1, -1, -1); break; }
+            else                      { cycles = t.getArgCycles(t.arg1,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // tst.w *                4   -1    8    8   12   12   16   12   16
+            // tst.l *                4   -1   12   12   16   16   20   16   20
+          } // end of switch
+
+    if (cycles > 0) t.cycles = cycles;
+}  
   
 }
