@@ -1,5 +1,4 @@
-// also check https://github.com/grahambates/68kcounter/blob/master/src/timings/index.ts
-// and https://github.com/grahambates/68kcounter/blob/master/src/timings/tables.ts
+// ==> IMPLEMENTED IN FUNCTION SetInstrCycle() in file LineParser.js
 
 // Cycles table stolen from Dio https://www.atari-forum.com/viewtopic.php?t=16240
 

@@ -912,6 +912,20 @@ class LineParser {
     return ((_a.type == 'reg') && (_a.tab == regs.a));
   }
 
+  updateShiftCycles(c) {
+    let t = this;
+    if (c < 0) {
+      c = 1;
+      if (t.arg1.type == 'imm') c = t.arg1.value;  
+    }
+    c--;
+    c *= 2;            
+    if (t.instrSize == 4) c += 4;
+    t.cycles = t.getArgCycles(t.arg2,  8+c,-1, 12+c, 12+c, 16+c, 16+c, 20+c, 16+c, 20+c, -1, -1,-1);
+    // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+    // asl.w #1,*             8   -1   12   12   16   16   20   16   20
+  }
+
   SetInstrCycles() {
     let t = this;
     let cycles = 0;
@@ -1097,7 +1111,7 @@ class LineParser {
         }
       }
       break;
-
+      
       case "MOVEM": {
         if (l.arg1.movem && l.arg1.movem.length > 0) { // regs to mem
           let n = l.arg1.movem.length;
@@ -1139,7 +1153,7 @@ class LineParser {
           // negx.l *               8   -1   20   20   24   24   28   24   28
                   }
       break;
-      
+
       case 'NOT':
         if (t.instrSize < 4) {
           cycles = t.getArgCycles(t.arg1,  4, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1);
@@ -1218,7 +1232,123 @@ class LineParser {
             // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
             // tst.w *                4   -1    8    8   12   12   16   12   16
             // tst.l *                4   -1   12   12   16   16   20   16   20
-          } // end of switch
+
+          case 'BCHG':
+            if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  8, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2,  12,-1, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // bchg d0,*              8    -1  12   12   16   16   20   16   20
+            // bchg #1,*             12    -1  16   16   20   20   24   20   24
+          break;
+          
+          case 'BSET':
+            if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  8, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2,  12,-1, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // bset d0,*              8   -1   12   12   16   16   20   16   20
+            // bset #1,*             12   -1   16   16   20   20   24   20   24
+          break;
+
+          case 'BCLR':
+            if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  8, -1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2,  12,-1, 16, 16, 20, 20, 24, 20, 24, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // bclr d0,*              8   -1   12   12   16   16   20   16   20
+            // bclr #1,*             12   -1   16   16   20   20   24   20   24
+          break;
+
+          case 'BTST':
+            if (t.isDReg(t.arg1))       { cycles = t.getArgCycles(t.arg2,  8, -1,  8,  8, 12, 12, 16, 12, 16, -1, -1, -1); break; }
+            if (t.arg1.type == 'imm')   { cycles = t.getArgCycles(t.arg2,  12,-1, 12, 12, 16, 16, 20, 16, 20, -1, -1, -1); break; }
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // btst d0,*              8   -1    8    8   12   12   16   12   16
+            // btst #1,*             12   -1   12   12   16   16   20   16   20
+          break;
+
+          case 'LEA':
+            cycles = t.getArgCycles(t.arg1,  -1,-1,  4, -1, -1,  8, 16,  8, 12,  8, 16, -1);
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // lea *,a1              -1   -1   4    -1   -1    8   16    8   12    8   16
+          break;
+
+          case 'PEA':
+            cycles = t.getArgCycles(t.arg1,  -1,-1, 12, -1, -1, 16, 24, 16, 20, 16, 24, -1);
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // pea *                 -1   -1  12    -1   -1   16   24   16   20   16   24
+          break;
+
+          case 'JMP':
+            cycles = t.getArgCycles(t.arg1,  -1,-1,  8, -1, -1, 12, 16, 12, 12, 12, -1,-1);
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // jmp                   -1   -1    8   -1   -1   12   16   12   12   12   -1  -1
+          break;
+
+          case 'JSR':
+            cycles = t.getArgCycles(t.arg1,  -1,-1,  16, -1, -1, 20, 24, 20, 20, 20, -1,-1);
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // jsr                             16             20   24   20   20   20
+          break;
+
+          case 'ST':
+            cycles = t.getArgCycles(t.arg1,  8,-1, 12, 12, 16, 16, 20, 16, 20, -1, -1,-1);
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // st *                   8   -1   12   12   16   16   20   16   20
+          break;
+
+          case 'TAS':
+            cycles = t.getArgCycles(t.arg1,  4,-1, 16, 16, 20, 20, 24, 20, 24, -1, -1,-1);
+            // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
+            // tas *                  4   -1   16   16   20   20   24   20   24
+          break;
+
+          case 'ASL':
+          case 'ASR':
+          case 'LSL':
+          case 'LSR':
+          case 'ROL':
+          case 'ROR':
+          case 'ROXL':
+          case 'ROXR':
+            t.updateShiftCycles(-1);
+            cycles = t.cycles;
+          break;
+
+          case 'SWAP':
+          case 'EXT':
+          case 'NOP':
+          case 'MOVEQ':
+              cycles = 4;
+          break;
+      
+          case 'EXG': cycles = 8; break;
+          case 'BRA': 
+          case 'BHI':
+          case 'BLS':
+          case 'BCS':
+          case 'BCC':
+          case 'BNE':
+          case 'BEQ':
+          case 'BVC':
+          case 'BVS':
+          case 'BPL':
+          case 'BMI':
+          case 'BGE':
+          case 'BLT':
+          case 'BGT':
+          case 'BLE':
+              cycles = 12;
+          break;
+          case 'RTS': cycles = 16; break;    
+          case 'BSR':
+          case 'RTE':
+              cycles = 20;
+          break;    
+          case 'TRAP': cycles = 36; break;
+          case 'ILLEGAL':
+            if (t.jsString) t.cycles = 0;
+            cycles = 36;
+          break;
+        } // end of switch
 
     if (cycles > 0) t.cycles = cycles;
 }  

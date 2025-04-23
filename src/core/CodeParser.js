@@ -2067,11 +2067,23 @@ class CodeParser {
         case 'BLT': line.cycles = 10; line.call = BLT; return;
         case 'BGT': line.cycles = 10; line.call = BGT; return;
         case 'BLE': line.cycles = 10; line.call = BLE; return;
-        case 'BCHG': line.call = BCHG; break;
-        case 'BCLR': line.call = BCLR; break;
-        case 'BSET': line.call = BSET; break;
+        case 'BCHG':
+          if (line.arg1.type == 'reg' && line.arg1.tab == regs.a) return line.Failed("can't BCHG an address register");
+          line.call = BCHG; 
+        break;
+        case 'BCLR':
+          if (line.arg1.type == 'reg' && line.arg1.tab == regs.a) return line.Failed("can't BCLR an address register");
+          line.call = BCLR; 
+        break;
+        case 'BSET': 
+          if (line.arg1.type == 'reg' && line.arg1.tab == regs.a) return line.Failed("can't BSET an address register");
+          line.call = BSET; 
+        break;
         case 'BSR': line.call = BSR; break;
-        case 'BTST': line.call = BTST; break;
+        case 'BTST':
+          if (line.arg1.type == 'reg' && line.arg1.tab == regs.a) return line.Failed("can't BTST an address register");
+          line.call = BTST;
+        break;
         case 'BRA': 
           line.cycles = 10; 
           line.call = BRA; 
@@ -2091,22 +2103,22 @@ class CodeParser {
           line.call = CMP; 
         break;
         case 'CMPM': line.call = NOT_IMPLEMENTED; break;
-        case 'DBF': line.cycles = 10; line.call = DBF; return; // DBCC default cycles is 10 as we expect a loop to be taken at least once
-        case 'DBRA': line.cycles = 10; line.call = DBF; return;
-        case 'DBHI': line.cycles = 10; line.call = DBHI; return;
-        case 'DBLS': line.cycles = 10; line.call = DBLS; return;
-        case 'DBCS': line.cycles = 10; line.call = DBCS; return;
-        case 'DBCC': line.cycles = 10; line.call = DBCC; return;
-        case 'DBNE': line.cycles = 10; line.call = DBNE; return;
-        case 'DBEQ': line.cycles = 10; line.call = DBEQ; return;
-        case 'DBVC': line.cycles = 10; line.call = DBVC; return;
-        case 'DBVS': line.cycles = 10; line.call = DBVS; return;
-        case 'DBPL': line.cycles = 10; line.call = DBPL; return;
-        case 'DBMI': line.cycles = 10; line.call = DBMI; return;
-        case 'DBGE': line.cycles = 10; line.call = DBGE; return;
-        case 'DBLT': line.cycles = 10; line.call = DBLT; return;
-        case 'DBGT': line.cycles = 10; line.call = DBGT; return;
-        case 'DBLE': line.cycles = 10; line.call = DBLE; return;
+        case 'DBF': line.cycles = 12; line.call = DBF; return; // DBCC default cycles is 10 as we expect a loop to be taken at least once
+        case 'DBRA': line.cycles = 12; line.call = DBF; return;
+        case 'DBHI': line.cycles = 12; line.call = DBHI; return;
+        case 'DBLS': line.cycles = 12; line.call = DBLS; return;
+        case 'DBCS': line.cycles = 12; line.call = DBCS; return;
+        case 'DBCC': line.cycles = 12; line.call = DBCC; return;
+        case 'DBNE': line.cycles = 12; line.call = DBNE; return;
+        case 'DBEQ': line.cycles = 12; line.call = DBEQ; return;
+        case 'DBVC': line.cycles = 12; line.call = DBVC; return;
+        case 'DBVS': line.cycles = 12; line.call = DBVS; return;
+        case 'DBPL': line.cycles = 12; line.call = DBPL; return;
+        case 'DBMI': line.cycles = 12; line.call = DBMI; return;
+        case 'DBGE': line.cycles = 12; line.call = DBGE; return;
+        case 'DBLT': line.cycles = 12; line.call = DBLT; return;
+        case 'DBGT': line.cycles = 12; line.call = DBGT; return;
+        case 'DBLE': line.cycles = 12; line.call = DBLE; return;
         case 'DIVS': line.cycles = 158; line.call = DIVS; return;
         case 'DIVU': line.cycles = 140; line.call = DIVU; return;
         case 'EOR': 

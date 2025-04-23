@@ -514,7 +514,7 @@ function I_ROXL_32(_instr) {
 
   var _d = d;
   var n = s;
-  _instr.cycles = 8+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (32-n))) != 0;
     d = (((d << n) | (d >>> (32-n))) & 0xffffffff) >>> 0;
@@ -534,7 +534,7 @@ function I_ROXL_16(_instr) {
 
   var _d = d;
   var n = s;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (16-n))) != 0;
     d = ((d << n) | (d >> (16-n))) & 0xffff;
@@ -554,7 +554,7 @@ function I_ROXL_8(_instr) {
 
   var _d = d;
   var n = s;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (8-n))) != 0;
     d = ((d << n) | (d >> (8-n))) & 0xff;
@@ -574,7 +574,7 @@ function I_ROXR_32(_instr) {
 
   var _d = d;
   var n = s;
-  _instr.cycles = 8+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n-1))) != 0;
     d = (((d << (32-n)) | (d >>> n)) & 0xffffffff) >>> 0;
@@ -594,7 +594,7 @@ function I_ROXR_16(_instr) {
 
   var _d = d;
   var n = s;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n-1))) != 0;
     d = ((d << (16-n)) | (d >>> n)) & 0xffff;
@@ -614,7 +614,7 @@ function I_ROXR_8(_instr) {
 
   var _d = d;
   var n = s;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n-1))) != 0;
     d = ((d << (8-n)) | (d >>> n)) & 0xff;
@@ -693,6 +693,8 @@ function I_ASL_32(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
+  _instr.updateShiftCycles(n);
+
   _instr.cycles = 8+2*n;
   var d = dst.tab[dst.ind];
   if (n) {
@@ -718,7 +720,7 @@ function I_ASL_16(_instr) {
 
   let dst = _dest;
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
 
   var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
@@ -746,7 +748,7 @@ function I_ASL_8(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind] & 0xff;
   if (n) {
     var sign = (d & 0x80) != 0;
@@ -772,7 +774,7 @@ function I_ASR_32(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 8+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind];
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
@@ -796,7 +798,7 @@ function I_ASR_16(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
@@ -820,7 +822,7 @@ function I_ASR_8(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind] & 0xff;
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
@@ -845,7 +847,7 @@ function I_LSL_32(_instr) {
 
 
   var n = src.value & 63;
-  _instr.cycles = 8+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind];
 
   if (n) {
@@ -870,7 +872,7 @@ function I_LSL_16(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
     regs.x = regs.c = (d & (1 << (16 - n))) != 0;
@@ -894,7 +896,7 @@ function I_LSL_8(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind] & 0xff;
   if (n) {
     regs.x = regs.c = (d & (1 << (8 - n))) != 0;
@@ -918,7 +920,7 @@ function I_LSR_32(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 8+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind];
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
@@ -942,7 +944,7 @@ function I_LSR_16(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
@@ -966,7 +968,7 @@ function I_LSR_8(_instr) {
   let dst = _dest;
 
   var n = src.value & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   var d = dst.tab[dst.ind] & 0xff;
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
@@ -1103,7 +1105,7 @@ function I_DIVU(_source, _dest) {
 function I_ROL_32(_amount, _dest) {
   var d = _dest;
   var n = _amount & 63;
-  _instr.cycles = 8+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (32 - n))) != 0;
     d = (((d << n) | (d >>> (32 - n))) & 0xffffffff) >>> 0;
@@ -1118,7 +1120,7 @@ function I_ROL_32(_amount, _dest) {
 function I_ROL_16(_amount, _dest) {
   var d = _dest & 0xffff;
   var n = _amount & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (16 - n))) != 0;
     d = (((d << n) | (d >> (16 - n))) & 0xffff) >>> 0;
@@ -1133,7 +1135,7 @@ function I_ROL_16(_amount, _dest) {
 function I_ROL_8(_amount, _dest) {
   var d = _dest & 0xff;
   var n = _amount & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (8 - n))) != 0;
     d = (((d << n) | (d >> (8 - n))) & 0xff) >>> 0;
@@ -1148,7 +1150,7 @@ function I_ROL_8(_amount, _dest) {
 function I_ROR_32(_amount, _dest) {
   var d = _dest;
   var n = _amount & 63;
-  _instr.cycles = 8+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n - 1))) != 0;
     d = (((d << (32 - n)) | (d >>> n)) & 0xffffffff) >>> 0;
@@ -1163,7 +1165,7 @@ function I_ROR_32(_amount, _dest) {
 function I_ROR_16(_amount, _dest) {
   var d = _dest & 0xffff;
   var n = _amount & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n - 1))) != 0;
     d = (((d << (16 - n)) | (d >>> n)) & 0xffff) >>> 0;
@@ -1178,7 +1180,7 @@ function I_ROR_16(_amount, _dest) {
 function I_ROR_8(_amount, _dest) {
   var d = _dest & 0xff;
   var n = _amount & 63;
-  _instr.cycles = 6+2*n;
+  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n - 1))) != 0;
     d = (((d << (8 - n)) | (d >>> n)) & 0xff) >>> 0;
@@ -2436,14 +2438,8 @@ function STACK_POP(_size) {
 
 function BCCExec(_l, _cond) {
   if (_cond) {
-    _l.cycles = 10; // branch taken
     M68K_NEXTIP = _l.branchIP; 
     reportBranch(M68K_IP);
-  } else {
-    if (_l.instrSize == 2)
-      _l.cycles = 12; // branch not taken, .W
-    else
-      _l.cycles = 8; // branch not taken, .B
   }
 }
 
