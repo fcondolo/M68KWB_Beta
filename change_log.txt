@@ -4,5 +4,6 @@
 - as asked by Depeche, the new protocol for AMIGA_line is: 
 	AMIGA_line(_x0,_y0,_x1,_y1,_bpl, _clr = false) to be able to clear lines.
 
-- better cycle counting (WIP, still missing instructions)
+- Implemented cycles count given in: https://www.atari-forum.com/viewtopic.php?t=16240
+
 
