@@ -222,13 +222,15 @@ function getLabelFromName(_l) {
 
 
 /**
-AMIGA_pix2Bitplane(_x,_y,_bpl)
+AMIGA_pix2Bitplane(_x,_y,_bpl,_clr = false)
 writes a pixel in a bitplane. note: assumes line width is 40 bytes
 @param _x: x coordinate (in pixels)
 @param _y: y coordinate (in pixels)
 @param _bpl: address of the bitplane to write
+@param _clip: clippingrectangle
+@param _clr: clear pixel instead of writing it
 */
-function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null) {
+function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null, _clr = false) {
     if (!_clip) {
         _clip = {minx:0,miny:0,maxx:320,maxy:256};
     }
@@ -241,12 +243,16 @@ function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null) {
     const ofs = bplHorizByteCount * _y + Math.floor(_x / 8);
     const adrs = _bpl + ofs;
     let d = MACHINE.getRAMValue(adrs, 1, false);
-    d |= 1<<(7-(_x&7));
-    MACHINE.setRAMValue(d, adrs, 1);
-  }
+    const msk = 1<<(7-(_x&7));
+    if (_clr) 
+        d &= ~msk;
+    else
+        d |= msk;
+    MACHINE.setRAMValue(d, adrs, 1);    
+}
 
 
-  function AMIGA_line(_x0,_y0,_x1,_y1,_bpl) {
+  function AMIGA_line(_x0,_y0,_x1,_y1,_bpl, _clr = false) {
     const dx = Math.abs(_x1 - _x0);
     const dy = Math.abs(_y1 - _y0);
     const sx = Math.sign(_x1 - _x0);
@@ -255,16 +261,7 @@ function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null) {
     if (Math.abs(dx) > OCS_CONFIG.AMIGA_line_maxLen) return main_Alert("AMIGA_line: dx > OCS_CONFIG.AMIGA_line_maxLen: " + dx);
     if (Math.abs(dy) > OCS_CONFIG.AMIGA_line_maxLen) return main_Alert("AMIGA_line: dy > OCS_CONFIG.AMIGA_line_maxLen: " + dy);
     while (true) {
-        AMIGA_pix2Bitplane(_x0,_y0,_bpl);
-        /*
-        const _x = Math.floor(_x0);
-        const _y = Math.floor(_y0);
-        const ofs = bplHorizByteCount * _y + Math.floor(_x / 8);
-        const adrs = _bpl + ofs;
-        let d = MACHINE.getRAMValue(adrs, 1, false);
-        d |= 1<<(7-(_x&7));
-        MACHINE.setRAMValue(d, adrs, 1);
-      */
+        AMIGA_pix2Bitplane(_x0,_y0,_bpl, null, _clr);
       if (_x0 === _x1 && _y0 === _y1) break;
   
       const e2 = 2 * err;
@@ -272,5 +269,4 @@ function AMIGA_pix2Bitplane(_x,_y,_bpl, _clip = null) {
       if (e2 <  dx) { err += dx; _y0 += sy; }
     }
   }  
-
 
