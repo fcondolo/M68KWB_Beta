@@ -1,12 +1,7 @@
 
 var CODERPARSER_SINGLETON = null;
-var PARSER_WAIT_FILE = null;
-var STOP_GLOBAL_COMPILATION = false;
-var MACRO_COUNTER = 0;
-var COMPIL_MSG = "starting build process...";
-var COMPLIL_INTERVAL_ID = null;
-var COMPLIL_MSG_ELM;
-  
+
+/* unused so far
 function _asm(_str) {
   let l = new LineParser("_asm instr", 0, _str, 0);
   l.codeSectionOfs = M68K_VECTORS_ZONE_SIZE;
@@ -20,7 +15,7 @@ function _asm(_str) {
     debuggger;
   }
 }
-
+*/
 
 
 function checkNumberSize(_n, _size) {
@@ -39,9 +34,6 @@ function checkNumberSize(_n, _size) {
   return res;
 }
 
-function showCompilMsg() {
-    COMPLIL_MSG_ELM.innerHTML = "Building: " + COMPIL_MSG;
-}  
 
 
 class CodeParser {
@@ -67,8 +59,20 @@ class CodeParser {
     t.labelToAddress = [];
     t.lateArgs = [];
     t.lateAsmbl = [];
+    t.stopGlobalCompilation = false;
+    t.macroCounter = 0;
+    t.showCompilMsg( "starting build process...");
   }
   
+  showCompilMsg(_msg) {
+    let t = this;
+    let e = document.getElementById('liner')
+    t.compilMsg = _msg;
+    if (_msg)
+      e.innerHTML = "Building: " + t.compilMsg;
+    else
+      e.innerHTML = null;
+  }  
 
   ascii68k_loadfile(_path, _fromStringArray = null) {
     let t = this;
@@ -77,9 +81,6 @@ class CodeParser {
 
     let elm = document.getElementById('oneLiner');
     elm.style.display = 'inline-block';
-    COMPLIL_MSG_ELM = document.getElementById('liner')
-    COMPLIL_MSG_ELM.innerHTML = COMPIL_MSG;
-    if (COMPLIL_INTERVAL_ID == null) COMPLIL_INTERVAL_ID = setInterval(showCompilMsg, 10);
   
     if (_path) {
       t.errorContext.push("root file: " + _path);
@@ -103,8 +104,8 @@ class CodeParser {
     // includes are done first
     watchdog = 0;
     do {
-      while (PARSER_WAIT_FILE != null) {
-        COMPIL_MSG = "loafing file: " + PARSER_WAIT_FILE;
+      while (t.strings.waitingOnFile != null) {
+        t.showCompilMsg("loading file: " + t.strings.waitingOnFile);
       }
       watchdog++;
       if (!t.startPass()) return false;
@@ -120,7 +121,7 @@ class CodeParser {
     }
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing labels...";
+    t.showCompilMsg("processing labels...");
     t.process_labels(true); // preprocess labels to avoid having label + instruction on the same line
 
 
@@ -132,19 +133,19 @@ class CodeParser {
         t.lastPass = true;
 
       if (!t.startPass()) return false;
-      COMPIL_MSG = "processing EQU...";
+      t.showCompilMsg("processing EQU...");
       t.process_EQU();
     }
 
 
     // process conditional compilation directives
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing conditional compilation...";
+    t.showCompilMsg("processing conditional compilation...");
     t.process_conditionalComp();
 
     // process RS.x
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing rs.x...";
+    t.showCompilMsg("processing rs.x...");
     t.process_rs();
 
     // try to fix all REPT - multiple passes needed
@@ -156,7 +157,7 @@ class CodeParser {
         t.lastPass = true;
 
       watchdog = 0;
-      COMPIL_MSG = "processing rept...";
+      t.showCompilMsg("processing rept...");
       do {
         if (!t.startPass()) return false;
         watchdog++;
@@ -165,7 +166,7 @@ class CodeParser {
 
     // try to fix all macros - single pass
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing macros...";
+    t.showCompilMsg("processing macros...");
     t.collect_macro();
 
     if (!t.startPass()) return false;
@@ -173,7 +174,7 @@ class CodeParser {
 
     // try to fix all SET : all lines must have been generated before
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing sets...";
+    t.showCompilMsg("processing sets...");
     t.process_SET();
 
     // try to fix all labels. Single pass : labels won't infer other labels
@@ -186,15 +187,15 @@ class CodeParser {
     // ==> ds.x
     // ==> incbin
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing labels (pass2)...";
+    t.showCompilMsg("processing labels (pass2)...");
     t.process_labels(false);
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing incbin...";
+    t.showCompilMsg("processing incbin...");
     t.process_incbin();
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing dc.x...";
+    t.showCompilMsg("processing dc.x...");
     t.collectDC();
 /*
     t.firstPass = true;
@@ -208,7 +209,7 @@ class CodeParser {
     }
 */
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing js instructions...";
+    t.showCompilMsg("processing js instructions...");
     t.process_JS();
 
 
@@ -216,26 +217,26 @@ class CodeParser {
 
     // Instructions
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing instructions...";
+    t.showCompilMsg("processing instructions...");
     t.process_instr();
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "solving branch labels...";
+    t.showCompilMsg("solving branch labels...");
     t.process_banchLabels();
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "solving code labels...";
+    t.showCompilMsg("solving code labels...");
     t.process_codeLabels();
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing branch labels (pass 2)...";
+    t.showCompilMsg("processing branch labels (pass 2)...");
     t.process_banchLabels();
 
-    COMPIL_MSG = "processing branch labels (pass 3)...";
+    t.showCompilMsg("processing branch labels (pass 3)...");
     t.process_lateArgs();
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "assembling instructions...";
+    t.showCompilMsg("assembling instructions...");
     const compiledCodeBytes = t.process_assemble();
     if (compiledCodeBytes == -1) {
       main_Alert(t.showParsingErrors());
@@ -245,25 +246,25 @@ class CodeParser {
     t.process_lateAsmbl();
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "processing branch labels (pass 4)...";
+    t.showCompilMsg("processing branch labels (pass 4)...");
     t.process_banchLabels(true);
 
     MACHINE.maxCodeAdrs = compiledCodeBytes;
     
     console.info("assembled " + (compiledCodeBytes-M68K_VECTORS_ZONE_SIZE) + " bytes (" + t.strings.lines.length + " lines)");
 
-    COMPIL_MSG = "fill RAM with DC.x values...";
+    t.showCompilMsg("fill RAM with DC.x values...");
     t.fillDC();
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "bind asm instructions with their js implementation...";
+    t.showCompilMsg("bind asm instructions with their js implementation...");
     t.process_executionCallbacks();
 
 
     if (!t.startPass()) return false;
-    COMPIL_MSG = "loading breakpoints...";
+    t.showCompilMsg("loading breakpoints...");
     t.process_loadBreakpoints();
-    COMPIL_MSG = "initializing debugger (generating HTML)...";
+    t.showCompilMsg("initializing debugger (generating HTML)...");
     DEBUGGER_initFile();
 
     t.fastConst = new Array(t.constants.length);
@@ -285,8 +286,7 @@ class CodeParser {
 
     t.showParsingErrors();
 
-    clearInterval(COMPLIL_INTERVAL_ID);
-    COMPIL_MSG = null;
+    t.showCompilMsg(null);
     HideDebugLog();
 
     //document.getElementById("log").innerHTML = log;
@@ -321,7 +321,7 @@ class CodeParser {
 
   startPass() {
     let t = this;
-    if (STOP_GLOBAL_COMPILATION) {
+    if (t.stopGlobalCompilation) {
       let elm = document.getElementById("errors");
       elm.innerHTML = "";
       let str = "";
@@ -346,7 +346,7 @@ class CodeParser {
     if (t.lastPass) {
       t.push_error(_str);
       console.error(_str);
-      STOP_GLOBAL_COMPILATION = true;
+      t.stopGlobalCompilation = true;
     } else {
       console.log("temporary error, will try to fix in another pass: " + _str);
     }
@@ -500,7 +500,7 @@ class CodeParser {
             let ln2 = t.strings.lines[j];
             if (ln2.path != ln.path) {
               ln.Failed("could not find ENDR associated to REPT. Make sure REPT and ENDR are in the same file");
-              STOP_GLOBAL_COMPILATION = true;
+              t.stopGlobalCompilation = true;
               return false;
             }
             const wrd2 = ln2.readNextWord();
@@ -524,7 +524,7 @@ class CodeParser {
             }
           }
           ln.Failed("could not find ENDR associated to REPT");
-          STOP_GLOBAL_COMPILATION = true;
+          t.stopGlobalCompilation = true;
           return false;
       }
       }
@@ -684,7 +684,7 @@ class CodeParser {
         if (a == 'MACRO')
           continue;
         // insert macro
-        MACRO_COUNTER++;
+        t.macroCounter++;
         for (let i = 0; i < m.lines.length; i++) {
           let l = m.lines[i];
           if (l.isLabel) {
@@ -692,7 +692,7 @@ class CodeParser {
               const filt = t.removeSemiColumn(l.filtered);
               if (m.labels[j].from == filt) {
                 const lnI = lnIt + i + 1;
-                m.labels[j].to = m.labels[j].from.replaceAll('\\@', '_' + lnI + '_' + MACRO_COUNTER);
+                m.labels[j].to = m.labels[j].from.replaceAll('\\@', '_' + lnI + '_' + t.macroCounter);
               }
             }
           }
@@ -788,7 +788,7 @@ class CodeParser {
           return false;
         }
         let finalPath  = pth.final;
-        COMPIL_MSG = "load binary file: " + finalPath;
+        t.showCompilMsg("load binary file: " + finalPath);
         const err = load_binary_resource(finalPath, ln.attachedLabel);
         if (err) {
           let errMsg = "'incbin' failed for file: " + path; 
@@ -1577,7 +1577,7 @@ class CodeParser {
       let ofsBeforeArg = ln.ofs;
       let arg1 = ln.readArg();
       if (arg1 == "READARG-ERROR") {
-        STOP_GLOBAL_COMPILATION = true;
+        t.stopGlobalCompilation = true;
         return;
       }
       let ofsAfterArg = ln.ofs;
@@ -1592,7 +1592,7 @@ class CodeParser {
       ofsBeforeArg = ln.ofs;
       let arg2 = ln.readArg();
       if (arg2 == "READARG-ERROR") {
-        STOP_GLOBAL_COMPILATION = true;
+        t.stopGlobalCompilation = true;
         return;
       }
       ofsAfterArg = ln.ofs;
@@ -1633,7 +1633,7 @@ class CodeParser {
         if (index2 <0 || index2 > index) {
           ln.isInstr = false;
           ln.Failed(ln.text);
-          STOP_GLOBAL_COMPILATION = true;
+          t.stopGlobalCompilation = true;
           return false;  
         }
       }

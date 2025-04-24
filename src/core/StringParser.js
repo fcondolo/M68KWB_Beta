@@ -4,6 +4,7 @@ class StringParser {
     let t = this;
     t.lines = [];
     t.original = [];
+    t.waitingOnFile = null;
   }
   
   insertTextFile(_path, _index) {
@@ -13,7 +14,7 @@ class StringParser {
     const file = _path + "?v="+ms;
     let rawFile = new XMLHttpRequest();
     rawFile.open("GET", file, false);
-    PARSER_WAIT_FILE = _path;
+    t.waitingOnFile = _path;
     rawFile.onreadystatechange = function () {
       if (rawFile.readyState === 4) {
         if (rawFile.status === 200 || rawFile.status == 0) {
@@ -37,18 +38,18 @@ class StringParser {
               t.original.push(lines[i]);
             }
           }
-          PARSER_WAIT_FILE = null;
+          t.waitingOnFile = null;
           return true;
         } else switch (rawFile.status) {
-          case 403: main_Alert("can't load file: " + _path + " : error 403 (forbidden)"); STOP_GLOBAL_COMPILATION = true; PARSER_WAIT_FILE = null; return false;
+          case 403: main_Alert("can't load file: " + _path + " : error 403 (forbidden)"); CODERPARSER_SINGLETON.stopGlobalCompilation = true; t.waitingOnFile = null; return false;
           case 404:
             main_Alert("can't load file: " + _path + " : error 404 (not found)");
-            STOP_GLOBAL_COMPILATION = true;
-            PARSER_WAIT_FILE = null;
+            CODERPARSER_SINGLETON.stopGlobalCompilation = true;
+            t.waitingOnFile = null;
           return false;
           default:
             if (rawFile.status >= 400) main_Alert("can't load " + _path + " : error #" + rawFile.status);
-            PARSER_WAIT_FILE = null;
+            t.waitingOnFile = null;
             break;
         }
       }
@@ -57,8 +58,8 @@ class StringParser {
       rawFile.send(null);
     } catch (e) {
       main_Alert(e);
-      PARSER_WAIT_FILE = null;
+      t.waitingOnFile = null;
     }
-    return !STOP_GLOBAL_COMPILATION;
+    return !CODERPARSER_SINGLETON.stopGlobalCompilation;
   }
 }

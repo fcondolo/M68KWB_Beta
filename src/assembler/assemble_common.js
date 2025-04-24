@@ -31,7 +31,7 @@ function asmbl_error(_e) {
     he += "<br>" + ASSEMBLER_CONTEXT[i];
     ce += "\n" + ASSEMBLER_CONTEXT[i];
     CODERPARSER_SINGLETON.push_error(ASSEMBLER_CONTEXT[i]);
-    STOP_GLOBAL_COMPILATION = true;
+    CODERPARSER_SINGLETON.stopGlobalCompilation = true;
   }
   CODERPARSER_SINGLETON.push_error(_e);
   console.error(ce);

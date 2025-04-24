@@ -163,7 +163,7 @@ class LineParser {
 
   getFailString(_err) {
     let t = this;
-    STOP_GLOBAL_COMPILATION = true;
+    CODERPARSER_SINGLETON.stopGlobalCompilation = true;
     t.parsingOK = false;
     let ret = t.getFileLineStr();
     if (_err)
@@ -227,11 +227,12 @@ class LineParser {
     ret += " (" + t.filtered + " )";
     return ret;
   }
+  
 
   Failed(_err) {
     let t = this;
     t.parsingOK = false;
-    STOP_GLOBAL_COMPILATION = true;
+    CODERPARSER_SINGLETON.stopGlobalCompilation = true;
     if (CODERPARSER_SINGLETON.errors.length == 0)
       CODERPARSER_SINGLETON.push_error(t.getFileLineStr() + " :<br>" + _err + "<br>" + t.filtered + "<br>");
     CODERPARSER_SINGLETON.Error(t.getFileLineStr() + " :<br>" + _err + "<br>" + t.filtered + "<br>");
