@@ -1570,10 +1570,16 @@ function setArg(_arg, _value, _size, _signed, _ofs) {
   ret.val = _value;
   switch (_arg.type) {
     case 'reg': {
-      _arg.tab[_arg.ind] &= ~mask;
-      _arg.tab[_arg.ind] |= _value;
+      // if destination is an address register and the size is word, sign extend
+      if (_arg.tab == regs.a && _size == 2) {
+        const r = (_value & 0x8000) ? ((0xffff0000 | _value) >>> 0) : _value;
+        _arg.tab[_arg.ind] = r;
+      } else { // default case
+        _arg.tab[_arg.ind] &= ~mask;
+        _arg.tab[_arg.ind] |= _value;  
+      }
     }
-      break;
+    break;
     case 'imm':
     case 'adrs': {
       let mem = _arg.value;
@@ -1820,7 +1826,7 @@ function MOVEM(_instr) {
         let res = setArg(_dest, valueToSet, _instr.instrSize, false, destOfs);
         if (res.err) return res.err;
         // When a group of registers is transferred to or from memory (using an addressing mode other than pre-decrementing or postincrementing), the registers are transferred starting at the specified address and up through higher addresses.
-        if (!_dest.postincrement)
+        if ((!_dest.postincrement) && (!_dest.predecrement))
           destOfs += _instr.instrSize;
       }
     }
@@ -1829,13 +1835,24 @@ function MOVEM(_instr) {
   if (_instr.arg2.movem) { // memory ==> registers
     let _source = _instr.arg1;
     let readOfs = 0;
+    let restoreSource = null;
+    if (_source.type == 'ind') {
+      if ((_source.tab == regs.a) && (!_source.postincrement) && (!_source.predecrement))
+      {
+        restoreSource = _source.tab[_source.ind];
+      }
+    }
     for (let i = 0; i < _instr.arg2.movem.length; i++) {
       // let _dest = _instr.arg2;
       // _dest.reg = _instr.arg2.movem[i].reg;
       // _dest.tab = _instr.arg2.movem[i].tab;
       // _dest.ind = _instr.arg2.movem[i].ind;
       let val = getArg(_source, _instr.instrSize, false, false, readOfs).value;
-      // MOVEM.W sign-extends words when they are moved to data registers.      
+      // When a group of registers is transferred to or from memory (using an addressing mode other than pre-decrementing or postincrementing), the registers are transferred starting at the specified address and up through higher addresses.
+      if (restoreSource)
+        _source.tab[_source.ind] += _instr.instrSize;
+
+      // MOVEM.W sign-extends words when writing to data or address registers
       if (_instr.instrSize == 2) {
         const r = (val & 0x8000) ? ((0xffff0000 | val) >>> 0) : val;
         val = r;  
@@ -1845,6 +1862,8 @@ function MOVEM(_instr) {
       //if (res.err) return res.err;
       readOfs += _instr.instrSize;
     }
+    if (restoreSource)
+      _source.tab[_source.ind] = restoreSource;
     return null;
   }
   main_Alert("fucked up movem");
