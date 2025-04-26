@@ -39,6 +39,7 @@ var DEBUGGER_lastJSExecLog = null;
 var DEBUGGER_timeM_prevRow = null;
 var DEBUGGER_hitBP_prevRow = null;
 var DEBUGGER_ForceFocus = null;
+var DEBUGGER_QueryDisplayRefresh = false;
 
 DEBUGGER_DumpCopperList = null;
 DEBUGGER_copperListDump = "";
@@ -49,6 +50,7 @@ var DEBUGGER_PAUSEUPDATE = false;
 var DEBUGGER_PAUSEVBL = false;
 var DEBUGGER_AdditionalDbgMsg = "";
 var DEBUGGER_NeedReload = false;
+var DEBUGGER_justHitRun = false;
 var PARSER_lines = [];
 
 function DebugCtx_reset(_defaultMsg = null) {
@@ -441,18 +443,8 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         console.log("RELOADING PAGE...");
         window.location.reload();
       }
-      if (DEBUGGER_lastBreakPointProcessed == M68K_IP)
-        DEBUGGER_skipNextBP = M68K_IP;
-      DEBUGGER_lastBreakPointProcessed = -1;
-      DEBUGGER_traceTillRTS = false;
-      DEBUGGER_runTillIP = null;      
-      setTraceMode(false);
-      DEBUGGER_update(true);
-      if (DEBUGGER_PrevFocus)
-        DEBUGGER_PrevFocus.classList.remove('highlight_row');
-      DEBUGGER_PrevFocus = null;
-      document.getElementById('mycvs').focus();
-      onNewOutputResolution();
+      DEBUGGER_justHitRun = true;
+      DEBUGGER_traceOneInstr();
     break;
     case 83: // s
     break;
@@ -734,6 +726,23 @@ function DEBUGGER_makeInstrString(_line) {
 }
 
 function DEBUGGER_BeforeInstr() {
+  if (DEBUGGER_justHitRun) {
+    DEBUGGER_justHitRun = false;
+    DEBUGGER_lastBreakPointProcessed = -1;
+    DEBUGGER_traceTillRTS = false;
+    DEBUGGER_runTillIP = null;      
+    setTraceMode(false);
+    DEBUGGER_update(true);
+    if (DEBUGGER_PrevFocus)
+      DEBUGGER_PrevFocus.classList.remove('highlight_row');
+    DEBUGGER_PrevFocus = null;
+    document.getElementById('mycvs').focus();
+    onNewOutputResolution();
+    DEBUGGER_QueryDisplayRefresh = true;
+    MACHINE.customUpdate();
+    return;
+  }
+
   if (M68K_IP == DEBUGGER_lastBeforeInstr)
     return;
   DEBUGGER_lastBeforeInstr = M68K_IP;

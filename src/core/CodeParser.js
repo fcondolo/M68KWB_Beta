@@ -103,13 +103,18 @@ class CodeParser {
 
     // includes are done first
     watchdog = 0;
+    const max_include_files = 100;
     do {
       while (t.strings.waitingOnFile != null) {
         t.showCompilMsg("loading file: " + t.strings.waitingOnFile);
       }
       watchdog++;
       if (!t.startPass()) return false;
-    } while (t.process_include() && watchdog < 100)
+    } while (t.process_include() && watchdog < max_include_files)
+    if (watchdog >= max_include_files) {
+      showHTMLError("Warning: exceeded max includes. Maybe infinite include loop? See max_include_files in CodeParser.js");
+    } 
+    // include default platform code to allow basic simulation of system functions
     switch (FX_INFO.platform) {
       case "OCS": 
         t.process_oneInclude("./src/amiga/Amiga_Default.asm", null, t.strings.lines.length);
@@ -125,20 +130,20 @@ class CodeParser {
     t.process_labels(true); // preprocess labels to avoid having label + instruction on the same line
 
 
-    // try to fix all constants - multiple passes needed
+    // try to fix all constants - multiple passes needed as one EQU may depend on the value of another EQU
     t.firstPass = true;
     t.lastPass = false;
+    if (!t.startPass()) return false;
+    t.showCompilMsg("processing EQU...");
+    let processLst = t.list_EQU();
     for (let passIt = 0; passIt < max_pass; passIt++) {
       if (passIt == max_pass - 1)
         t.lastPass = true;
-
-      if (!t.startPass()) return false;
-      t.showCompilMsg("processing EQU...");
-      t.process_EQU();
+      if (t.process_EQU(processLst)) break;
     }
 
 
-    // process conditional compilation directives
+    // process conditional compilation directives, right after EQU as it may rely on it
     if (!t.startPass()) return false;
     t.showCompilMsg("processing conditional compilation...");
     t.process_conditionalComp();
@@ -161,7 +166,7 @@ class CodeParser {
       do {
         if (!t.startPass()) return false;
         watchdog++;
-      } while (t.process_rept() && (watchdog < 50));
+      } while (t.process_REPT() && (watchdog < 50));
     }
 
     // try to fix all macros - single pass
@@ -223,10 +228,6 @@ class CodeParser {
     if (!t.startPass()) return false;
     t.showCompilMsg("solving branch labels...");
     t.process_banchLabels();
-
-    if (!t.startPass()) return false;
-    t.showCompilMsg("solving code labels...");
-    t.process_codeLabels();
 
     if (!t.startPass()) return false;
     t.showCompilMsg("processing branch labels (pass 2)...");
@@ -321,6 +322,7 @@ class CodeParser {
 
   startPass() {
     let t = this;
+    // stop if previous step generated an error
     if (t.stopGlobalCompilation) {
       let elm = document.getElementById("errors");
       elm.innerHTML = "";
@@ -332,6 +334,7 @@ class CodeParser {
       main_Alert("Errors while assembling:" + str);
       return false;
     }
+    // rewind line interpretation values
     t.rsOffset = 0;
     const lnCount = t.strings.lines.length;
     for (let i = 0; i < lnCount; i++) {
@@ -479,7 +482,7 @@ class CodeParser {
     return false;
   }
 
-  process_rept() {
+  process_REPT() {
     let t = this;
     t.errorContext.push("process 'REPT' directives");
     const lnCount = t.strings.lines.length;
@@ -626,9 +629,6 @@ class CodeParser {
     const lnCount = t.strings.lines.length;
     for (let lnIt = 0; lnIt < lnCount; lnIt++) {
       let ln = t.strings.lines[lnIt];
-      //if (ln.filtered.indexOf("interrupt collect_macro") >= 0)
-      //  debugger;
-      let index = indexOfSingleWord('MACRO', ln.filtered);
       let name = t.removeSemiColumn(ln.readNextWord());
       const wrd = ln.readNextWord();
       if (wrd == "MACRO") {
@@ -1036,15 +1036,15 @@ class CodeParser {
     c.splice(i, 0, { name: _name, value: Math.floor(_value), path: _ln.path, line: _ln.line });
   }
 
-  process_EQU() {
+  list_EQU() {
     let t = this;
+    let lst = [];
     const lnCount = t.strings.lines.length;
     for (let i = 0; i < lnCount; i++) {
       let ln = t.strings.lines[i];
-      if (!t.firstPass && ln.parsingOK) continue;
       const wrd1 = ln.readNextWord();
       const wrd2 = ln.readNextWord();
-      if (wrd2 == "EQU") {
+      if (wrd2 == "EQU" || wrd2 == "=") {
         if (ASSEMBLER_CONFIG.no_space_before_EQU) {
           if (ln.isSpace(ln.text[0])) { // ln.text, not ln.filtered because filtered already removed heading spaces
             ln.Failed("found space at the beginning of the line, but 'no_space_before_EQU' option is set in config.js.");
@@ -1052,24 +1052,26 @@ class CodeParser {
           }
         }
         ln.isInstr = false;
-        const value = ln.readNextNumber(PARSE_FAIL_ERROR);
-        if (!isNaN(value)) {
-          t.addConstant(ln, wrd1, value);
-        }
-      } else if (wrd2 == "=") {
-        if (ASSEMBLER_CONFIG.no_space_before_EQU) { // ln.text, not ln.filtered because filtered already removed heading spaces
-          if (ln.isSpace(ln.text[0])) {
-            ln.Failed("found space at the beginning of the line, but 'no_space_before_EQU' option is set in config.js.");
-            return;
-          }
-        }
-        ln.isInstr = false;
-        const value = ln.readNextNumber(PARSE_FAIL_ERROR);
-        if (!isNaN(value)) {
-          t.addConstant(ln, wrd1, value);
-        }
+        lst.push({w:wrd1, v:i});
       }
     }
+    return lst;
+  }
+
+  process_EQU(_equlst) {
+    let t = this;
+    let allDone = true;
+    const lnCount = _equlst.length;
+    for (let i = 0; i < lnCount; i++) {
+      let ln = t.strings.lines[_equlst[i].v];
+      let errBhv = PARSE_FAIL_OK;
+      if (t.lastPass) errBhv = PARSE_FAIL_ERROR;
+      const value = ln.readNextNumber(errBhv);
+      if (!isNaN(value)) {
+        t.addConstant(ln, _equlst[i].w, value);
+      } else allDone = false;
+    }
+    return allDone;
   }
 
   process_rs() {
@@ -1789,23 +1791,7 @@ class CodeParser {
     }
   }
 
-  process_codeLabels() {
-    let t = this;
-    let IP = 0;
-    const lnCount = t.strings.lines.length;
-    for (let lnIt = 0; lnIt < lnCount; lnIt++) {
-      let line = t.strings.lines[lnIt];
-      if (!line.isInstr)
-        continue;
-      if (line.isLabel) {
-        line.Failed("please do not put a label and an instruction on the same line");
-        return;
-      }
-      line.IP = IP++;
-    }
-  }
-
-
+  
   getLabelCodeSectionOffset(_name) {
     let t = this;
     _name = _name.toUpperCase();

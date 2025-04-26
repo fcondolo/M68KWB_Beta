@@ -120,6 +120,10 @@ function main_mainLoop() {
     console.log("inside invoke: " + DEBUGGER_insideInvoke);
     try {
       main_updateAsmOnly(); // tracing code
+      if (DEBUGGER_QueryDisplayRefresh) {
+        DEBUGGER_QueryDisplayRefresh = false;
+        MACHINE.customUpdate();
+      }
     } catch (err) {
       if (err.message == "WAITING_USERINPUT")  {
         console.log("main_updateAsmOnly - waiting for the user to trace. don't execute further");
@@ -235,6 +239,8 @@ function showMouseCoord(event) {
 }
 
 function main_startChosenFx(_className) {
+  hideModalBox();
+
   FX_INFO = null;
   _className = _className.toUpperCase();
   for (let i = 0; i < REGISTERED_FX.length; i++) {

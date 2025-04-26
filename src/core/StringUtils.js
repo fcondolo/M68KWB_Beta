@@ -247,11 +247,11 @@ PARSER_getConstValue(_label)
 */
 function PARSER_getConstValue(_label, _canFail = false) {
   let c = CODERPARSER_SINGLETON.fastConst[_label];
-  if (c)
+  if (c != null)
     return CODERPARSER_SINGLETON.constants[c].value;
 
   c = CODERPARSER_SINGLETON.fastConst[_label.toUpperCase()];
-  if (c)
+  if (c != null)
     return CODERPARSER_SINGLETON.constants[c].value;
 
   if (!_canFail) {

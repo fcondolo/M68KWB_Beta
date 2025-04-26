@@ -1,9 +1,15 @@
+26/04/2025	
+==========
+- minor compilation optimization (EQU directives)
+- fixed movem special case when no predecrement or postincrement is used
+- improved behavior of the 'r' key when debugging
+- made sure all words written to address registers are sign extended
+
+
 23/04/2025	
 ==========
-
 - as asked by Depeche, the new protocol for AMIGA_line is: 
 	AMIGA_line(_x0,_y0,_x1,_y1,_bpl, _clr = false) to be able to clear lines.
-
 - Implemented cycles count given in: https://www.atari-forum.com/viewtopic.php?t=16240
 
 
