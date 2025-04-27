@@ -2031,10 +2031,11 @@ function NOP(_instr) {
 }
 
 function EXG(_instr) {
-  let v1 = getArg(_instr.arg1, 4, false);
-  let v2 = getArg(_instr.arg2, 4, false);
-  setArg(_instr.arg1, v2, 4, false);
-  setArg(_instr.arg2, v1, 4, false);
+  let v = new Uint32Array(2);
+  v[0] = _instr.arg1.tab[_instr.arg1.ind];
+  v[1] = _instr.arg2.tab[_instr.arg2.ind];
+  _instr.arg1.tab[_instr.arg1.ind] = v[1];
+  _instr.arg2.tab[_instr.arg2.ind] = v[0];
 }
 
 function NOT(_instr) {

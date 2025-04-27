@@ -1,10 +1,13 @@
+27/04/2025	
+==========
+- fixed EXG instruction
+
 26/04/2025	
 ==========
 - minor compilation optimization (EQU directives)
 - fixed movem special case when no predecrement or postincrement is used
 - improved behavior of the 'r' key when debugging
 - made sure all words written to address registers are sign extended
-
 
 23/04/2025	
 ==========
