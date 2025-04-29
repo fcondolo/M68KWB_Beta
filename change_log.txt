@@ -1,6 +1,10 @@
+29/04/2025	
+==========
+- fixed mask error in function ST_readPix(_x, _y, _formScreen)
+
 27/04/2025	
 ==========
-- fixed EXG instruction
+- fixed EXG instruction (dmn stupid typo)
 
 26/04/2025	
 ==========

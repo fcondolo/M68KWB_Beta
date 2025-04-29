@@ -402,10 +402,10 @@ function ST_readPix(_x, _y, _formScreen) {
     let ret = 0;
     for (let i = 0; i < 4; i++) {
         let data = MACHINE.getRAMValue(adrs + 2*i, 2, false);
-        if ((data | msk) != 0)
+        if ((data & msk) != 0)
             ret |= 1<<i;
     }
-    return 15-ret;
+    return ret;
 }
 
 
