@@ -1,3 +1,11 @@
+30/04/2025	
+==========
+- ;>JS onNewRunningSpeed(<amount>); changes the execution speed (0..100), so that you can slow down for parts you want to debug, and have more time to see what’s happening. 100 is normal speed
+;>JS onNewRunningSpeed(30); ==> run at 30% of the normal speed (70% slow down)
+....
+;>JS onNewRunningSpeed(100); ==> back to full speed
+
+
 29/04/2025	
 ==========
 - fixed mask error in function ST_readPix(_x, _y, _formScreen)

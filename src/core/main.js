@@ -443,7 +443,9 @@ function onNewOutputResolution() {
 }
 
 
-function onNewRunningSpeed() {
+function onNewRunningSpeed(_forceVal) {
+  if (_forceVal)
+    document.getElementById("runningSpeed").value = _forceVal;
   let rez = document.getElementById("runningSpeed").value;
   ANIM_FRAME_WAIT = (100-rez)/40;
   ANIM_FRAME_LAST_TIME =  Date.now();
