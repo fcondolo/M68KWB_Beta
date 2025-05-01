@@ -1465,15 +1465,15 @@ function onRegDataClicked(_index) {
   let v = new Uint32Array(1);
   v[0]  = regs.d[_index];
   const u32 = v[0];
-  const i32 = toInt32(v[0]);
+  const i32 = TOOLS.toInt32(v[0]);
   const u16Hi = (v[0] >>> 16) & 0xffff;
-  const i16Hi = toInt16(u16Hi);
+  const i16Hi = TOOLS.toInt16(u16Hi);
   const u16Lo = v[0] & 0xffff;
-  const i16Lo = toInt16(u16Lo);
+  const i16Lo = TOOLS.toInt16(u16Lo);
   const u16Lo8hi = u16Lo >>> 8;
-  const i16Lo8hi = toInt8(u16Lo8hi);
+  const i16Lo8hi = TOOLS.toInt8(u16Lo8hi);
   const u16Lo8Lo = u16Lo & 0xff;
-  const i16Lo8Lo = toInt8(u16Lo8Lo);
+  const i16Lo8Lo = TOOLS.toInt8(u16Lo8Lo);
   const str32 = "D"+_index+".l";
   const str16Hi = "D"+_index+" >> 16";
   const str16Lo = "D"+_index+" & 0xffff";
@@ -1593,7 +1593,7 @@ function DEBUGGER_update(_force) {
   } else if (DEBUGGER_dumpReg == "last written mem") {
     reg = DEBUGGER_lastWrittenAdrs;
   } else {
-    reg = PARSER_getLabelAdrs(DEBUGGER_dumpReg, true);
+    reg = TOOLS.getLabelAdrs(DEBUGGER_dumpReg, true);
     if (isNaN(reg)) {
       reg = DBG_reg(DEBUGGER_dumpReg, 4, false);
     }

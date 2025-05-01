@@ -20,17 +20,17 @@ class FX_Spherev2 {
       height: 180
     });
 
-    t.PRECALC_FRAMES_COUNT  = PARSER_getConstValue("PRECALC_FRAMES_COUNT");
-    t.PRECALC_CIRCLES_COUNT = PARSER_getConstValue("PRECALC_CIRCLES_COUNT");
-    t.ONE_FRAME_SIZE        = PARSER_getConstValue("ONE_FRAME_SIZE");
-    t.FFT_POINTS_PER_CIRCLE = PARSER_getConstValue("FFT_POINTS_PER_CIRCLE"); 
+    t.PRECALC_FRAMES_COUNT  = TOOLS.getConstValue("PRECALC_FRAMES_COUNT");
+    t.PRECALC_CIRCLES_COUNT = TOOLS.getConstValue("PRECALC_CIRCLES_COUNT");
+    t.ONE_FRAME_SIZE        = TOOLS.getConstValue("ONE_FRAME_SIZE");
+    t.FFT_POINTS_PER_CIRCLE = TOOLS.getConstValue("FFT_POINTS_PER_CIRCLE"); 
     t.CENTER_X              = t.helper.width / 2;
     t.CENTER_Y              = t.helper.height / 2;
     t.MAXRAD                = t.PRECALC_CIRCLES_COUNT + 1;
     t.minY                  = 1000;
     t.maxY                  = -1000;
-    t.frames                = PARSER_getLabelAdrs("precalc_frames");
-    t.FFTFramesPtr          = PARSER_getLabelAdrs("fft_frames");
+    t.frames                = TOOLS.getLabelAdrs("precalc_frames");
+    t.FFTFramesPtr          = TOOLS.getLabelAdrs("fft_frames");
     t.curFramePtr           = t.frames;
     t.mode                  = 0;  // 0 = precalc, 1 = replay
     t.FFTEntriesCount       = 16; // 16 entries per frames
@@ -38,14 +38,14 @@ class FX_Spherev2 {
     t.FFTPoints             = [];
     t.fftData               = new Uint8Array(t.FFTEntriesCount * t.FFTHistorySize);
 
-    t.sintable = PARSER_getLabelAdrs("sintable");
+    t.sintable = TOOLS.getLabelAdrs("sintable");
 
     
-    t.PI                    = PARSER_getConstValue("MTHLIB_PI");
+    t.PI                    = TOOLS.getConstValue("MTHLIB_PI");
     t.ANGLE_STEP            = 16;
     t.ANGLE_COUNT           = (2 * t.PI) / t.ANGLE_STEP;
-    t.msk = PARSER_getConstValue("MTHLIB_OFS_MSK");
-    t.cosOfs = PARSER_getConstValue("MTHLIB_COS_OFS");
+    t.msk = TOOLS.getConstValue("MTHLIB_OFS_MSK");
+    t.cosOfs = TOOLS.getConstValue("MTHLIB_COS_OFS");
     t.iter = 0;
     t.time = 0;
     t.bitplaneAdrs = t.helper.bitplanes;
@@ -203,7 +203,7 @@ class FX_Spherev2 {
         t.mode = 1;  
       }
       t.curFramePtr = t.frames;
-      t.FFTFramesPtr = PARSER_getLabelAdrs("fft_frames");
+      t.FFTFramesPtr = TOOLS.getLabelAdrs("fft_frames");
       t.iter = 0;
     }
   }

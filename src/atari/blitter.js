@@ -12,8 +12,8 @@ function ATARI_bltStart() {
 	how many bytes to add after each word copied (X Increment) 
 	and how many bytes to add after each line copied (Y Increment) to the source address.
 	*/
-	const SRCXINCR 		= toInt16(ST_getCustomFromPtr_W(BLT_SRC_XINCR) & 0xfffe); // Source X Increment (15 Bit - Bit 0 is unused) - signed
-	const SRCYINCR 		= toInt16(ST_getCustomFromPtr_W(BLT_SRC_YINCR) & 0xfffe); // Source Y Increment (15 Bit - Bit 0 is unused) - signed
+	const SRCXINCR 		= TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_SRC_XINCR) & 0xfffe); // Source X Increment (15 Bit - Bit 0 is unused) - signed
+	const SRCYINCR 		= TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_SRC_YINCR) & 0xfffe); // Source Y Increment (15 Bit - Bit 0 is unused) - signed
 	const SRCADRS		= ST_getCustomFromPtr_L(BLT_SRC_ADRS) & 0x7ffffe; // Source Address (23 Bit - Bit 31..24, Bit 0 unused)
 	/*
 	These masks are overlaid with the destination words and only bits that feature a “1” are actually manipulated by the BLiTTER.
@@ -30,8 +30,8 @@ function ATARI_bltStart() {
 	containing increment per word being copied (X), per line (Y) 
 	and the target address to start with.
 	*/
-	const DSTXINCR 		= toInt16(ST_getCustomFromPtr_W(BLT_DST_XINCR) & 0xfffe); // Destination X Increment (15 Bit - Bit 0 is unused) - signed
-	const DSTYINCR 		= toInt16(ST_getCustomFromPtr_W(BLT_DST_YINCR) & 0xfffe); // Destination Y Increment (15 Bit - Bit 0 is unused) - signed
+	const DSTXINCR 		= TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_DST_XINCR) & 0xfffe); // Destination X Increment (15 Bit - Bit 0 is unused) - signed
+	const DSTYINCR 		= TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_DST_YINCR) & 0xfffe); // Destination Y Increment (15 Bit - Bit 0 is unused) - signed
 	const DSTADRS		= ST_getCustomFromPtr_L(BLT_DST_ADRS) & 0x7ffffe; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
 	/*
 	These two registers configure how many words (!) to copy per line (X) 

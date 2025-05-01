@@ -22,7 +22,7 @@ class RevisionLogo_v1 {
     t.CENTER_X  = t.helper.width / 2;
     t.CENTER_Y  = t.helper.height / 2;
 
-    t.sintable = PARSER_getLabelAdrs("sintable");    
+    t.sintable = TOOLS.getLabelAdrs("sintable");    
     t.iter = 0;
     t.bitplaneAdrs = t.helper.bitplanes;
     t.PI = 16384;
@@ -31,7 +31,7 @@ class RevisionLogo_v1 {
     for (let i = 0; i < 2 * t.PI; i++) {
       const angle = 2 * i * Math.PI / t.PI;
       const value = Math.floor(32768*Math.sin(angle));
-      sinadrs = MACHINE.setRAMValue(JSInt16ToAsm(value), sinadrs, 2);
+      sinadrs = MACHINE.setRAMValue(TOOLS.JSInt16ToAsm(value), sinadrs, 2);
     }
 
     invoke68K("init");
@@ -72,9 +72,9 @@ class RevisionLogo_v1 {
   {
     let t = this;
 
-    let adrs = PARSER_getLabelAdrs("logo");
+    let adrs = TOOLS.getLabelAdrs("logo");
     adrs += t.iter * 8;
-    if (adrs > PARSER_getLabelAdrs("endLogo")) return;
+    if (adrs > TOOLS.getLabelAdrs("endLogo")) return;
     while(true) {
       let radStart = MACHINE.getRAMValue(adrs, 2, false);
       if (radStart == 0xffff) 

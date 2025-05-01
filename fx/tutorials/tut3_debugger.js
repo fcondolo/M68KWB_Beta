@@ -42,7 +42,7 @@ class FX_tut3 {
 
   FX_Update()
   {
-    let bitplaneAdrs = PARSER_getLabelAdrs("bitplane");
+    let bitplaneAdrs = TOOLS.getLabelAdrs("bitplane");
     AMIGA_setCustom_L(BPL1PTH, bitplaneAdrs); // needs to be done every frame on Amiga
     bitplaneAdrs += 82*40+20;
      for (let i = 0; i < 16; i++) {

@@ -19,16 +19,16 @@ class RevisionLogo_v2 {
     t.CENTER_X  = t.helper.width / 2;
     t.CENTER_Y  = t.helper.height / 2;
 
-    t.sintable = PARSER_getLabelAdrs("sintable");    
+    t.sintable = TOOLS.getLabelAdrs("sintable");    
     t.iter = 0;
     t.bitplaneAdrs = t.helper.bitplanes;
-    t.PI = PARSER_getConstValue("PI");
+    t.PI = TOOLS.getConstValue("PI");
 
     let sinadrs = t.sintable;
     for (let i = 0; i < 2 * t.PI; i++) {
       const angle = 2 * i * Math.PI / t.PI;
       const value = Math.floor(32768*Math.sin(angle));
-      sinadrs = MACHINE.setRAMValue(JSInt16ToAsm(value), sinadrs, 2);
+      sinadrs = MACHINE.setRAMValue(TOOLS.JSInt16ToAsm(value), sinadrs, 2);
     }
 
     invoke68K("init");
@@ -51,20 +51,20 @@ class RevisionLogo_v2 {
   sin(_ofs) {
     regs.d[0] = _ofs;
     invoke68K("sin");
-    return toInt16(regs.d[0]);
+    return TOOLS.toInt16(regs.d[0]);
   }
 
   cos(_ofs) {
     regs.d[0] = _ofs;
     invoke68K("cos");
-    return toInt16(regs.d[0]);
+    return TOOLS.toInt16(regs.d[0]);
   }
 
   rot(_len,_angle) {
     regs.d[0] = Math.floor(_angle);
     regs.d[1] = Math.floor(_len);
     invoke68K("rot");   
-    return {x: toInt16(regs.d[2]), y: toInt16(regs.d[0])};
+    return {x: TOOLS.toInt16(regs.d[2]), y: TOOLS.toInt16(regs.d[0])};
   }
 
 
@@ -72,9 +72,9 @@ class RevisionLogo_v2 {
   {
     let t = this;
  
-    let adrs = PARSER_getLabelAdrs("logo");
+    let adrs = TOOLS.getLabelAdrs("logo");
     adrs += t.iter * 8;
-    if (adrs > PARSER_getLabelAdrs("endLogo")) return;
+    if (adrs > TOOLS.getLabelAdrs("endLogo")) return;
     while(true) {
       let radStart = MACHINE.getRAMValue(adrs, 2, false);
       if (radStart == 0xffff) 

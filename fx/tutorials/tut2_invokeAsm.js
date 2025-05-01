@@ -30,9 +30,9 @@ class FX_tut2 {
 
   FX_Update() {
     /* let's draw a 16x16 pix square!
-    First, you can get the address of any label in your asm source code using PARSER_getLabelAdrs
+    First, you can get the address of any label in your asm source code using TOOLS.getLabelAdrs
     */
-    let bitplaneAdrs = PARSER_getLabelAdrs("bitplane");
+    let bitplaneAdrs = TOOLS.getLabelAdrs("bitplane");
     AMIGA_setCustom_L(BPL1PTH, bitplaneAdrs); // needs to be done every frame on Amiga
 
     // let's skip 82 lines and x-center a bit

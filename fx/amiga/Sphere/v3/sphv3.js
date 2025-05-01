@@ -15,22 +15,22 @@ class FX_Spherev3 {
   FX_Init() {
     let t = this;
 
-    t.PRECALC_FRAMES_COUNT  = PARSER_getConstValue("PRECALC_FRAMES_COUNT");
-    t.PRECALC_CIRCLES_COUNT = PARSER_getConstValue("PRECALC_CIRCLES_COUNT");
-    t.ONE_FRAME_SIZE        = PARSER_getConstValue("ONE_FRAME_SIZE");
-    t.FFT_POINTS_PER_CIRCLE = PARSER_getConstValue("FFT_POINTS_PER_CIRCLE"); 
-    t.FFT_ALLFRAMES_BYTES   = PARSER_getConstValue("FFT_ALLFRAMES_BYTES");
-    t.PI                    = PARSER_getConstValue("MTHLIB_PI");
-    t.SCR_W_PIX             = PARSER_getConstValue("SCR_W_PIX");
-    t.SCR_H_LN              = PARSER_getConstValue("SCR_H_LN");
-    t.ANGLE_STEP            = PARSER_getConstValue("ANGLE_STEP");
-    t.ANGLE_COUNT           = PARSER_getConstValue("ANGLE_COUNT");
-    t.FFT_ENTRIES_COUNT     = PARSER_getConstValue("FFT_ENTRIES_COUNT");
-    t.FFT_HISTORY_SIZE      = PARSER_getConstValue("FFT_HISTORY_SIZE");
+    t.PRECALC_FRAMES_COUNT  = TOOLS.getConstValue("PRECALC_FRAMES_COUNT");
+    t.PRECALC_CIRCLES_COUNT = TOOLS.getConstValue("PRECALC_CIRCLES_COUNT");
+    t.ONE_FRAME_SIZE        = TOOLS.getConstValue("ONE_FRAME_SIZE");
+    t.FFT_POINTS_PER_CIRCLE = TOOLS.getConstValue("FFT_POINTS_PER_CIRCLE"); 
+    t.FFT_ALLFRAMES_BYTES   = TOOLS.getConstValue("FFT_ALLFRAMES_BYTES");
+    t.PI                    = TOOLS.getConstValue("MTHLIB_PI");
+    t.SCR_W_PIX             = TOOLS.getConstValue("SCR_W_PIX");
+    t.SCR_H_LN              = TOOLS.getConstValue("SCR_H_LN");
+    t.ANGLE_STEP            = TOOLS.getConstValue("ANGLE_STEP");
+    t.ANGLE_COUNT           = TOOLS.getConstValue("ANGLE_COUNT");
+    t.FFT_ENTRIES_COUNT     = TOOLS.getConstValue("FFT_ENTRIES_COUNT");
+    t.FFT_HISTORY_SIZE      = TOOLS.getConstValue("FFT_HISTORY_SIZE");
 
-    t.fftData               = PARSER_getLabelAdrs("fftData");
-    t.frames                = PARSER_getLabelAdrs("precalc_frames");
-    t.FFTFramesPtr          = PARSER_getLabelAdrs("fft_frames");
+    t.fftData               = TOOLS.getLabelAdrs("fftData");
+    t.frames                = TOOLS.getLabelAdrs("precalc_frames");
+    t.FFTFramesPtr          = TOOLS.getLabelAdrs("fft_frames");
 
     t.helper = AMIGA_GetScreenHelper({
       bplCount: 1,
@@ -63,8 +63,8 @@ class FX_Spherev3 {
     t.toDataReg(_y,1);
     t.toDataReg(_z,2);
     invoke68K("project");
-    const a = toInt16(regs.d[0]);
-    const b = toInt16(regs.d[1]);
+    const a = TOOLS.toInt16(regs.d[0]);
+    const b = TOOLS.toInt16(regs.d[1]);
     return {x: a, y: b};
   }
 
@@ -90,8 +90,8 @@ class FX_Spherev3 {
     t.toDataReg(_b,1);
     t.toDataReg(_angle,2);
     invoke68K("rot");
-    const a = toInt16(regs.d[2]);
-    const b = toInt16(regs.d[6]);
+    const a = TOOLS.toInt16(regs.d[2]);
+    const b = TOOLS.toInt16(regs.d[6]);
     return {a: a, b: b};
   }
 
@@ -165,7 +165,7 @@ class FX_Spherev3 {
               t.FFTFramesPtr = MACHINE.setRAMValue(coord.x, t.FFTFramesPtr, 2);
               t.FFTFramesPtr = MACHINE.setRAMValue(coord.y, t.FFTFramesPtr, 2);
               t.FFTFramesPtr = MACHINE.setRAMValue((z3d>>4)*scale, t.FFTFramesPtr, 2);
-              if (t.FFTFramesPtr > PARSER_getLabelAdrs("fft_frames") + t.FFT_ALLFRAMES_BYTES) {
+              if (t.FFTFramesPtr > TOOLS.getLabelAdrs("fft_frames") + t.FFT_ALLFRAMES_BYTES) {
                 alert("overflow");
                 debugger;
               }
@@ -188,8 +188,8 @@ class FX_Spherev3 {
     if (t.iter >= t.PRECALC_FRAMES_COUNT) {
       if (t.mode == 0) {
         if (t.iter == t.PRECALC_FRAMES_COUNT) {
-          if (t.FFTFramesPtr != PARSER_getLabelAdrs("fft_frames") + t.FFT_ALLFRAMES_BYTES) {
-            let delta1 = t.FFTFramesPtr - PARSER_getLabelAdrs("fft_frames");
+          if (t.FFTFramesPtr != TOOLS.getLabelAdrs("fft_frames") + t.FFT_ALLFRAMES_BYTES) {
+            let delta1 = t.FFTFramesPtr - TOOLS.getLabelAdrs("fft_frames");
             let delta2 = delta1 - t.ONE_FRAME_SIZE*t.PRECALC_FRAMES_COUNT;
             alert("written: " + delta1 + " missing: " + delta2);
             debugger;
@@ -198,7 +198,7 @@ class FX_Spherev3 {
         t.mode = 1;  
       }
       t.curFramePtr = t.frames;
-      t.FFTFramesPtr = PARSER_getLabelAdrs("fft_frames");
+      t.FFTFramesPtr = TOOLS.getLabelAdrs("fft_frames");
       t.iter = 0;
     }
   }

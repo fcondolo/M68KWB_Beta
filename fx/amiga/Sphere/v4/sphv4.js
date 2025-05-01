@@ -14,24 +14,24 @@ class FX_Spherev4 {
   FX_Init() {
     let t = this;
 
-    t.PRECALC_FRAMES_COUNT  = PARSER_getConstValue("PRECALC_FRAMES_COUNT");
-    t.PRECALC_CIRCLES_COUNT = PARSER_getConstValue("PRECALC_CIRCLES_COUNT");
-    t.ONE_FRAME_SIZE        = PARSER_getConstValue("ONE_FRAME_SIZE");
-    t.FFT_POINTS_PER_CIRCLE = PARSER_getConstValue("FFT_POINTS_PER_CIRCLE"); 
-    t.FFT_ALLFRAMES_BYTES   = PARSER_getConstValue("FFT_ALLFRAMES_BYTES"); // 4032
-    t.PI                    = PARSER_getConstValue("MTHLIB_PI");
-    t.SCR_W_PIX             = PARSER_getConstValue("SCR_W_PIX");
-    t.SCR_H_LN              = PARSER_getConstValue("SCR_H_LN");
-    t.ANGLE_STEP            = PARSER_getConstValue("ANGLE_STEP");
-    t.ANGLE_COUNT           = PARSER_getConstValue("ANGLE_COUNT");
-    t.FFT_ENTRIES_COUNT     = PARSER_getConstValue("FFT_ENTRIES_COUNT");
-    t.FFT_HISTORY_SIZE      = PARSER_getConstValue("FFT_HISTORY_SIZE");
-    t.REFX                  = PARSER_getConstValue("REFX");
-    t.REFZ                  = PARSER_getConstValue("REFZ");
+    t.PRECALC_FRAMES_COUNT  = TOOLS.getConstValue("PRECALC_FRAMES_COUNT");
+    t.PRECALC_CIRCLES_COUNT = TOOLS.getConstValue("PRECALC_CIRCLES_COUNT");
+    t.ONE_FRAME_SIZE        = TOOLS.getConstValue("ONE_FRAME_SIZE");
+    t.FFT_POINTS_PER_CIRCLE = TOOLS.getConstValue("FFT_POINTS_PER_CIRCLE"); 
+    t.FFT_ALLFRAMES_BYTES   = TOOLS.getConstValue("FFT_ALLFRAMES_BYTES"); // 4032
+    t.PI                    = TOOLS.getConstValue("MTHLIB_PI");
+    t.SCR_W_PIX             = TOOLS.getConstValue("SCR_W_PIX");
+    t.SCR_H_LN              = TOOLS.getConstValue("SCR_H_LN");
+    t.ANGLE_STEP            = TOOLS.getConstValue("ANGLE_STEP");
+    t.ANGLE_COUNT           = TOOLS.getConstValue("ANGLE_COUNT");
+    t.FFT_ENTRIES_COUNT     = TOOLS.getConstValue("FFT_ENTRIES_COUNT");
+    t.FFT_HISTORY_SIZE      = TOOLS.getConstValue("FFT_HISTORY_SIZE");
+    t.REFX                  = TOOLS.getConstValue("REFX");
+    t.REFZ                  = TOOLS.getConstValue("REFZ");
 
-    t.fftData               = PARSER_getLabelAdrs("fftData");
-    t.frames                = PARSER_getLabelAdrs("FX_Heap") + PARSER_getConstValue("precalc_frames");
-    t.s_FFTFramesPtr        = PARSER_getLabelAdrs("FX_Heap") + PARSER_getConstValue("fft_frames");
+    t.fftData               = TOOLS.getLabelAdrs("fftData");
+    t.frames                = TOOLS.getLabelAdrs("FX_Heap") + TOOLS.getConstValue("precalc_frames");
+    t.s_FFTFramesPtr        = TOOLS.getLabelAdrs("FX_Heap") + TOOLS.getConstValue("fft_frames");
 
     t.helper = AMIGA_GetScreenHelper({
       bplCount: 1,
@@ -131,7 +131,7 @@ class FX_Spherev4 {
     if (t.s_iter >= t.PRECALC_FRAMES_COUNT) {
       t.s_mode = 1;  
       t.s_curFramePtr = t.frames;
-      t.s_FFTFramesPtr = PARSER_getLabelAdrs("FX_Heap") + PARSER_getConstValue("fft_frames");
+      t.s_FFTFramesPtr = TOOLS.getLabelAdrs("FX_Heap") + TOOLS.getConstValue("fft_frames");
       t.s_iter = 0;
     }
 

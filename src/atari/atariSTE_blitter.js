@@ -364,8 +364,8 @@ function ATARI_bltStart() {
 	how many bytes to add after each word copied (X Increment) 
 	and how many bytes to add after each line copied (Y Increment) to the source address.
 	*/
-  Blit.SrcXInc        = toInt16(ST_getCustomFromPtr_W(BLT_SRC_XINCR) & 0xfffe); // Source X Increment (15 Bit - Bit 0 is unused) - signed
-	Blit.SrcYInc        = toInt16(ST_getCustomFromPtr_W(BLT_SRC_YINCR) & 0xfffe); // Source Y Increment (15 Bit - Bit 0 is unused) - signed
+  Blit.SrcXInc        = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_SRC_XINCR) & 0xfffe); // Source X Increment (15 Bit - Bit 0 is unused) - signed
+	Blit.SrcYInc        = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_SRC_YINCR) & 0xfffe); // Source Y Increment (15 Bit - Bit 0 is unused) - signed
 	Blit.SrcAdr         = ST_getCustomFromPtr_L(BLT_SRC_ADRS) & 0x7ffffe; // Source Address (23 Bit - Bit 31..24, Bit 0 unused)
 
   /*
@@ -385,8 +385,8 @@ function ATARI_bltStart() {
 	containing increment per word being copied (X), per line (Y) 
 	and the target address to start with.
 	*/
-  Blit.DestXInc 		  = toInt16(ST_getCustomFromPtr_W(BLT_DST_XINCR) & 0xfffe); // Destination X Increment (15 Bit - Bit 0 is unused) - signed
-  Blit.DestYInc 		  = toInt16(ST_getCustomFromPtr_W(BLT_DST_YINCR) & 0xfffe); // Destination Y Increment (15 Bit - Bit 0 is unused) - signed
+  Blit.DestXInc 		  = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_DST_XINCR) & 0xfffe); // Destination X Increment (15 Bit - Bit 0 is unused) - signed
+  Blit.DestYInc 		  = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_DST_YINCR) & 0xfffe); // Destination Y Increment (15 Bit - Bit 0 is unused) - signed
   Blit.DestAdr		    = ST_getCustomFromPtr_L(BLT_DST_ADRS) & 0x7ffffe; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
 
 	/*

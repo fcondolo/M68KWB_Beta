@@ -1048,7 +1048,7 @@ function I_DIVS(_source, _dest) {
   checkSignedWord(_source);
   checkSignedDouble(_dest);
 
-  var s = toInt16(_source);
+  var s = TOOLS.toInt16(_source);
 
   regs.c = false;
   if (s == 0) {

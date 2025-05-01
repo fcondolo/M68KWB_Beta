@@ -12,10 +12,9 @@ class FX_Playground {
 
   FX_Init() {
     let t = this;    
-    debugger;
     if (I_DIVS(1000, 200000) != 200) alert("chiure 1");
-    if (toInt16(I_DIVS(1000, -300000)) != -300) alert("chiure 2");
-    if (toInt16(I_DIVS(-100, 100000)) != -1000) alert("chiure 3");
+    if (TOOLS.toInt16(I_DIVS(1000, -300000)) != -300) alert("chiure 2");
+    if (TOOLS.toInt16(I_DIVS(-100, 100000)) != -1000) alert("chiure 3");
     if (I_DIVS(-100, -100000) != 1000) alert("chiure 4");
     invoke68K("init", false);
   }

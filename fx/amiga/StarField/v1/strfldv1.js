@@ -24,11 +24,11 @@ class FX_StarFieldv1 {
     t.ZSPD = 6;
     t.STARSCOUNT = 128;
 
-    t.sintable = PARSER_getLabelAdrs("sintable");
+    t.sintable = TOOLS.getLabelAdrs("sintable");
     
-    t.PI  = PARSER_getConstValue("MTHLIB_PI");
-    t.msk = PARSER_getConstValue("MTHLIB_OFS_MSK");
-    t.cosOfs = PARSER_getConstValue("MTHLIB_COS_OFS");
+    t.PI  = TOOLS.getConstValue("MTHLIB_PI");
+    t.msk = TOOLS.getConstValue("MTHLIB_OFS_MSK");
+    t.cosOfs = TOOLS.getConstValue("MTHLIB_COS_OFS");
     t.iter = 0;
     t.bitplaneAdrs = t.helper.bitplanes;
     t.startZ = 256; // must be a power of 2

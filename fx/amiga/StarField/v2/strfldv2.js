@@ -23,18 +23,18 @@ class FX_StarFieldv2 {
     t.CENTER_Y              = t.helper.height / 2;
     t.ZSPD = 6;
 
-    t.sintable = PARSER_getLabelAdrs("sintable");
+    t.sintable = TOOLS.getLabelAdrs("sintable");
     
-    t.PI  = PARSER_getConstValue("MTHLIB_PI");
-    t.msk = PARSER_getConstValue("MTHLIB_OFS_MSK");
-    t.cosOfs = PARSER_getConstValue("MTHLIB_COS_OFS");
-    t.startZ = PARSER_getConstValue("STARTZ");
-    t.endZ = PARSER_getConstValue("ENDZ");
-    t.STARSCOUNT = PARSER_getConstValue("STARSCOUNT");
-    t.stars = PARSER_getLabelAdrs("stars");
+    t.PI  = TOOLS.getConstValue("MTHLIB_PI");
+    t.msk = TOOLS.getConstValue("MTHLIB_OFS_MSK");
+    t.cosOfs = TOOLS.getConstValue("MTHLIB_COS_OFS");
+    t.startZ = TOOLS.getConstValue("STARTZ");
+    t.endZ = TOOLS.getConstValue("ENDZ");
+    t.STARSCOUNT = TOOLS.getConstValue("STARSCOUNT");
+    t.stars = TOOLS.getLabelAdrs("stars");
 
     t.bitplaneAdrs = t.helper.bitplanes;
-    MACHINE.setRAMValue(t.bitplaneAdrs, PARSER_getLabelAdrs("bplPtr"), 4);
+    MACHINE.setRAMValue(t.bitplaneAdrs, TOOLS.getLabelAdrs("bplPtr"), 4);
     
     invoke68K("init");
   }

@@ -22,11 +22,11 @@ class FX_Spherev1 {
     t.CENTER_X              = t.helper.width / 2;
     t.CENTER_Y              = t.helper.height / 2;
 
-    t.sintable = PARSER_getLabelAdrs("sintable");
+    t.sintable = TOOLS.getLabelAdrs("sintable");
     
-    t.PI  = PARSER_getConstValue("MTHLIB_PI");
-    t.msk = PARSER_getConstValue("MTHLIB_OFS_MSK");
-    t.cosOfs = PARSER_getConstValue("MTHLIB_COS_OFS");
+    t.PI  = TOOLS.getConstValue("MTHLIB_PI");
+    t.msk = TOOLS.getConstValue("MTHLIB_OFS_MSK");
+    t.cosOfs = TOOLS.getConstValue("MTHLIB_COS_OFS");
     t.iter = 0;
     t.bitplaneAdrs = t.helper.bitplanes;
 

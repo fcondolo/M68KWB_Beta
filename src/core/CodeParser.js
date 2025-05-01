@@ -1048,7 +1048,7 @@ class CodeParser {
         if (ASSEMBLER_CONFIG.no_space_before_EQU) {
           if (ln.isSpace(ln.text[0])) { // ln.text, not ln.filtered because filtered already removed heading spaces
             ln.Failed("found space at the beginning of the line, but 'no_space_before_EQU' option is set in config.js.");
-            return;
+            return lst;
           }
         }
         ln.isInstr = false;
@@ -1150,40 +1150,40 @@ class CodeParser {
           ln.jsString = ln.jsString.replaceAll("d"+rr+".ul","regs.d["+rr+"]");
           ln.jsString = ln.jsString.replaceAll("d"+rr+".uh","((regs.d["+rr+"]>>>16)&0xffff)");
 
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".b","toInt8(regs.d["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".w","toInt16(regs.d["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".l","toInt32(regs.d["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".h","toInt16((regs.d["+rr+"]>>16)&0xffff)");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".b","TOOLS.toInt8(regs.d["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".w","TOOLS.toInt16(regs.d["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".l","TOOLS.toInt32(regs.d["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".h","TOOLS.toInt16((regs.d["+rr+"]>>16)&0xffff)");
 
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".ib","toInt8(regs.d["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".iw","toInt16(regs.d["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".il","toInt32(regs.d["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("d"+rr+".ih","toInt16((regs.d["+rr+"]>>16)&0xffff)");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".ib","TOOLS.toInt8(regs.d["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".iw","TOOLS.toInt16(regs.d["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".il","TOOLS.toInt32(regs.d["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("d"+rr+".ih","TOOLS.toInt16((regs.d["+rr+"]>>16)&0xffff)");
 
           ln.jsString = ln.jsString.replaceAll("a"+rr+".ub","(regs.a["+rr+"]&0xff)");
           ln.jsString = ln.jsString.replaceAll("a"+rr+".uw","(regs.a["+rr+"]&0xffff)");
           ln.jsString = ln.jsString.replaceAll("a"+rr+".ul","regs.a["+rr+"]");
           ln.jsString = ln.jsString.replaceAll("a"+rr+".uh","((regs.a["+rr+"]>>>16)&0xffff)");
 
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".b","toInt8(regs.a["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".w","toInt16(regs.a["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".l","toInt32(regs.a["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".h","toInt16((regs.a["+rr+"]>>16)&0xffff)");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".b","TOOLS.toInt8(regs.a["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".w","TOOLS.toInt16(regs.a["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".l","TOOLS.toInt32(regs.a["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".h","TOOLS.toInt16((regs.a["+rr+"]>>16)&0xffff)");
 
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".ib","toInt8(regs.a["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".iw","toInt16(regs.a["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".il","toInt32(regs.a["+rr+"])");
-          ln.jsString = ln.jsString.replaceAll("a"+rr+".ih","toInt16((regs.a["+rr+"]>>16)&0xffff)");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".ib","TOOLS.toInt8(regs.a["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".iw","TOOLS.toInt16(regs.a["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".il","TOOLS.toInt32(regs.a["+rr+"])");
+          ln.jsString = ln.jsString.replaceAll("a"+rr+".ih","TOOLS.toInt16((regs.a["+rr+"]>>16)&0xffff)");
         }
-        ln.jsString = ln.jsString.replaceAll("label(\"","PARSER_getLabelAdrs(\"");
-        ln.jsString = ln.jsString.replaceAll("label('","PARSER_getLabelAdrs('");
-        ln.jsString = ln.jsString.replaceAll("const(\"","PARSER_getConstValue(\"");
-        ln.jsString = ln.jsString.replaceAll("const('","PARSER_getConstValue('");
-        ln.jsString = ln.jsString.replaceAll("variable(","GET_VARIABLE(");
+        ln.jsString = ln.jsString.replaceAll("label(\"","TOOLS.getLabelAdrs(\"");
+        ln.jsString = ln.jsString.replaceAll("label('","TOOLS.getLabelAdrs('");
+        ln.jsString = ln.jsString.replaceAll("const(\"","TOOLS.getConstValue(\"");
+        ln.jsString = ln.jsString.replaceAll("const('","TOOLS.getConstValue('");
+        ln.jsString = ln.jsString.replaceAll("variable(","TOOLS.getVariable(");
         ln.jsString = ln.jsString.replaceAll("setram(","MACHINE.setRAMValue(");
         ln.jsString = ln.jsString.replaceAll("getram(","MACHINE.getRAMValue(");
         ln.jsString = ln.jsString.replaceAll("print(","DEBUGGER_LOG(");
-        ln.jsString = ln.jsString.replaceAll("struct(","DEBUGGER_GETVARIABLEINSTRUCT(");
+        ln.jsString = ln.jsString.replaceAll("struct(","TOOLS.getStructField(");
         
         for (let rr = 0; rr < t.constants.length; rr++) {
           const ind = ln.jsString.indexOf(t.constants[rr].name);
@@ -1704,7 +1704,7 @@ class CodeParser {
         break;
         case 'LEA': 
           if (CPU_CODE_SECTION) {
-            const ad = PARSER_getLabelAdrs(line.arg1.str, true, true);
+            const ad = TOOLS.getLabelAdrs(line.arg1.str, true, true);
             if (!isNaN(ad)) {
               CPU_CODE_SECTION[line.codeSectionOfs + 2 ] = (ad>>24)&0xff;
               CPU_CODE_SECTION[line.codeSectionOfs + 3 ] = (ad>>16)&0xff;

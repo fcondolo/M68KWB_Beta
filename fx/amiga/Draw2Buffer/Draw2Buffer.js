@@ -7,8 +7,8 @@ REGISTER_FX({
 class Draw2Buffer {
     FX_Init() {
       let t = this;
-      t.CHUNKY_WIDTH  = PARSER_getConstValue('PATH_W');
-      t.CHUNKY_HEIGHT  = PARSER_getConstValue('PATH_H');
+      t.CHUNKY_WIDTH  = TOOLS.getConstValue('PATH_W');
+      t.CHUNKY_HEIGHT  = TOOLS.getConstValue('PATH_H');
       invoke68K("d2b_init");
       t.chunkyBuffer = regs.a[0];
 

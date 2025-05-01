@@ -105,6 +105,7 @@ function main_updateAsmOnly() {
 
 function main_doInit() {
   MYFX.SYS_initialized = true;
+  MYFX.updatedFramesCount = 0;
   if (MYFX.FX_Init) {
     MYFX.FX_Init();
   }
@@ -148,6 +149,7 @@ function main_mainLoop() {
     if (MYFX.FX_Update) {
       try {
         MYFX.FX_Update();
+        MYFX.updatedFramesCount++;
       } catch (err) {
         if (err.message == "WAITING_USERINPUT") {
           console.log("MYFX.FX_Update() - waiting for the user to trace. don't execute JS further");
@@ -296,6 +298,7 @@ function main_startChosenFx(_className) {
     default: alert("REGISTERED_FX : 'platform' field must be 'OCS', 'ST', or 'STE'"); break;
   }
   
+  new JS_ASM_Tools();
   new M68K_TimeMachine();
   new DebugPrimitives();
   
