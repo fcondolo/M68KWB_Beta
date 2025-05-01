@@ -1,4 +1,43 @@
-30/04/2025	
+01/05/2025
+==========
+- Start JSDoc
+- Big Refactor of JS_ASM_Tools.js
+!!! WARNING !!! The refactor implied the following changes in functions interfaces:
+- PARSER_getLabelAdrs			==> TOOLS.getLabelAdrs
+- PARSER_getConstValue			==> TOOLS.getConstValue
+- MULS_68K						==> TOOLS.MULS_68K
+- DIVS_68K(_dest, _source)		==> TOOLS.DIVS_68K(_source, _dest) !!!! args order changed!
+- toInt8						==> TOOLS.toInt8(_v)
+- toInt16						==> TOOLS.toInt16
+- toInt32						==> TOOLS.toInt32
+- JSInt16ToAsm					==> TOOLS.JSInt16ToAsm
+- GET_VARIABLE					==> TOOLS.getVariable
+- DEBUGGER_GETVARIABLEINSTRUCT	==> TOOLS.getStructField
+- D8_SET						==> TOOLS.D8_SET
+- D8_GET						==> TOOLS.D8_GET
+- D16_SET						==> TOOLS.D16_SET
+- D16_GET						==> TOOLS.D16_GET
+- D16_ADD						==> TOOLS.D16_ADD
+- D16_SUB						==> TOOLS.D16_SUB
+- D32_SET						==> TOOLS.D32_SET
+- D32_GET						==> TOOLS.D32_GET
+- D32_SWAP						==> TOOLS.D32_SWAP
+- JS2ASM_Uint8ArrayToRAM		==> TOOLS.Uint8ArrayToRAM
+- JS2ASM_UIn8ArrayToLabel		==> TOOLS.UIn8ArrayToLabel
+- JS2ASM_Uint16ArrayToRAM		==> TOOLS.Uint16ArrayToRAM
+- JS2ASM_Int16ArrayToRAM		==> TOOLS.Int16ArrayToRAM
+- JS2ASM_UIn16ArrayToLabel		==> TOOLS.UIn16ArrayToLabel
+- JS2ASM_In16ArrayToLabel		==> TOOLS.JS2ASM_In16ArrayToLabel
+- ASM2JS_LabelToIn16Array		==> TOOLS.LabelToIn16Array
+- ASM2JS_LabelToUIn16Array		==> TOOLS.LabelToUIn16Array
+- ASM2JS_LabelToIn8Array		==> TOOLS.LabelToIn8Array
+- ASM2JS_LabelToUIn8Array		==> TOOLS.ASM2JS_LabelToUIn8Array
+- downloadView					==> TOOLS.downloadView
+- RAMToFile_bytes				==> TOOLS.RAMToFile_bytes
+- RAMToFile_longs				==> TOOLS.RAMToFile_longs
+
+
+30/04/2025
 ==========
 - ;>JS onNewRunningSpeed(<amount>); changes the execution speed (0..100), so that you can slow down for parts you want to debug, and have more time to see what’s happening. 100 is normal speed
 ;>JS onNewRunningSpeed(30); ==> run at 30% of the normal speed (70% slow down)
