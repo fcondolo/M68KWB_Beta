@@ -107,7 +107,13 @@ function main_doInit() {
   MYFX.SYS_initialized = true;
   MYFX.updatedFramesCount = 0;
   if (MYFX.FX_Init) {
-    MYFX.FX_Init();
+    try {
+      MYFX.FX_Init();
+    } catch (err) {
+      let msg = "Exception occurred while initializing the FX:\n" + err.message;
+      if (err.stack) msg += "\ncallstack:\n" + err.stack;
+      main_Alert(msg, false, true);
+    }
   }
 }
 
@@ -154,8 +160,11 @@ function main_mainLoop() {
         if (err.message == "WAITING_USERINPUT") {
           console.log("MYFX.FX_Update() - waiting for the user to trace. don't execute JS further");
           return; // just waiting for the user to press the trace key, don't execute JS further
+        } {
+          let msg = "Exception occurred while updating the FX:\n" + err.message;
+          msg += "\ncallstack:\n" + err.stack;
+          main_Alert(msg, false, true);
         }
-        alert("Exception occurred while updating the FX: " + err.message);
       }
     } 
     if (DEBUGGER_SHOWCPUCYCLES) {
@@ -485,7 +494,7 @@ function showDebugCanvas() {
 }
 
 
-function main_Alert(_msg, _makeLastMsg = false) {
+function main_Alert(_msg, _makeLastMsg = false, _skipAsm = false) {
   if (MAIN_ALERTS_LIST.length >= 3) {
     if (MAIN_ALERTS_ALLLOWED) {
       MAIN_ALERTS_ALLLOWED = false;
@@ -501,7 +510,7 @@ function main_Alert(_msg, _makeLastMsg = false) {
   if (MAIN_ALERTS_ALLLOWED) {
     let curLine = null;
     if ((typeof PARSER_lines !== 'undefined') && PARSER_lines && ASMBL_ADRSTOLINE) curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
-    if (curLine) {
+    if (curLine && !_skipAsm) {
       _msg += "<br>in file: " + curLine.path + "<br>at line: " + curLine.line;
     }    
     const l = DBGCTX.length;
