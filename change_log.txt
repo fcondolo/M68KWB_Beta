@@ -1,6 +1,9 @@
 03/05/2025
 ==========
-- All js exceptions are now  caught
+- All js exceptions are now caught
+- Moved "./src/other" directory to "./third-party"
+- New wip HTML doc in ./jsdoc folder.
+
 
 01/05/2025
 ==========
