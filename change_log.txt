@@ -1,3 +1,7 @@
+03/05/2025
+==========
+- All js exceptions are now  caught
+
 01/05/2025
 ==========
 - Start JSDoc
