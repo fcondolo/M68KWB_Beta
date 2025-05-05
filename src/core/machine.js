@@ -38,7 +38,8 @@ class M68K_Machine {
         t.constants     = _constants;
         t.super         = false;
         t.userIP        = 0;
-        t.errorContext  = null;
+        t.errorContext  = null; // debug info to document a blit error. Gets erased when blit is done
+        t.lastBlitContext = null;   // debug info that persists after blit is over
 
         DEBUGGER_AllocsList.push({ label: "Total RAM size", adrs: 0, size: _ramSize });
         t.ramIndex          = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES; // current alloc pointer (below = already allocated mem, above = free ram)

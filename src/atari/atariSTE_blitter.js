@@ -110,6 +110,36 @@ struct _BLITTER_STRUCT{
           if (_v<0)
             debugger;
           this.U32Buf[0] = _v;
+        },
+        getHopString() {
+          switch (this.getHop()) {
+            case 0: return "All bits are generated as '1'";
+            case 1: return "All bits taken from halftone patterns";
+            case 2: return "All bits taken from source";
+            case 3: return "Source and halftone are AND combined";
+            default: return "unknown HOP";
+          }
+        },
+        getOpString() {
+          switch (this.getOp()) {
+            case 0: return "Target Bits are all 0";
+            case 1: return "Target Bits are Source AND Target";
+            case 2: return "Target Bits are Source AND NOT Target";
+            case 3: return "Target Bits are Source";
+            case 4: return "Target Bits are NOT Source AND Target";
+            case 5: return "Target Bits are Target";
+            case 6: return "Target Bits are Source XOR Target";
+            case 7: return "Target Bits are Source OR Target";
+            case 8: return "Target Bits are NOT Source AND NOT Target";
+            case 9: return "Target Bits are NOT Source XOR NOT Target";
+            case 10: return "Target Bits are NOT Target";
+            case 11: return "Target Bits are Source OR NOT Target";
+            case 12: return "Target Bits are NOT Source";
+            case 13: return "Target Bits are NOT Source OR Target";
+            case 14: return "Target Bits are NOT Source OR NOT Target";
+            case 15: return "Target Bits are all 1";
+            default: return "unknown OP";
+          }
         }
     };
 
@@ -166,6 +196,7 @@ function Blitter_ReadSource(SrcAdr)
 //---------------------------------------------------------------------------
 function Blitter_Notify_Start(_debugMsg)
 {
+  MACHINE.lastBlitContext = _debugMsg;
   MACHINE.errorContext = _debugMsg;
 	TIME_MACHINE.paused = true;
 }
@@ -196,6 +227,8 @@ function Blitter_Start_Line()
 function Blitter_Start_Now()
 {
   Blit.Busy=true;
+  Blit.XCounter=Blit.getXCount();
+  if (Blit.XCounter==0) Blit.XCounter=65536;
   Blit.YCounter=Blit.getYCount();
   /*Only want to start the line if not in the middle of one.*/
   if (Blit.XCounter-Blit.getXCount() == 0) {
@@ -330,12 +363,15 @@ function Blitter_Draw()
 
 
     let dbgStr = "Blitter op, draw. SrcAdr=$"+Blit.SrcAdr.toString(16);
-    dbgStr += ", SrcXInc="+Blit.SrcXInc+", SrcYInc="+Blit.SrcYInc;
-    dbgStr += ", DestAdr=$"+Blit.DestAdr.toString(16);
-    dbgStr += ", DestXInc="+Blit.DestXInc+", DestYInc="+Blit.DestYInc;
-    dbgStr += ", XCount="+Blit.getXCount()+", YCount="+Blit.getYCount();
-    dbgStr += ", Skew="+Blit.getSkew()+", NFSR="+Blit.NFSR+", FXSR="+Blit.FXSR;
-    dbgStr += ", Hog="+Blit.Hog+", Op="+Blit.getOp()+", Hop="+Blit.getHop();
+    dbgStr += "\nSrcXInc="+Blit.SrcXInc+", SrcYInc="+Blit.SrcYInc;
+    dbgStr += "\nDestAdr=$"+Blit.DestAdr.toString(16);
+    dbgStr += "\nDestXInc="+Blit.DestXInc+", DestYInc="+Blit.DestYInc;
+    dbgStr += "\nXCount="+Blit.getXCount()+", YCount="+Blit.getYCount();
+    dbgStr += "\nSkew="+Blit.getSkew()+", NFSR="+Blit.NFSR+", FXSR="+Blit.FXSR;
+    dbgStr += "\nHog="+Blit.Hog;
+    dbgStr += "\nOp="+Blit.getOp() +": " + Blit.getOpString();
+    dbgStr += "\nHop="+Blit.getHop()+": " + Blit.getHopString();
+
     Blitter_Notify_Start(dbgStr);
     if (DEBUGGER_tracing && Blit.getXCount()>0) alert(dbgStr);
 
@@ -450,8 +486,8 @@ function ATARI_bltStart() {
   if ((MISC_2 & (1<<6)) != 0) Blit.NFSR = true; else Blit.NFSR = false;
   Blit.setSkew(MISC_2 & 15);
 
-
-    Blitter_Start_Now();
+  
+  Blitter_Start_Now();
 
 //    ATARI_bltReset();
 
