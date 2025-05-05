@@ -39,7 +39,7 @@ class M68K_Machine {
         t.super         = false;
         t.userIP        = 0;
         t.errorContext  = null; // debug info to document a blit error. Gets erased when blit is done
-        t.lastBlitContext = null;   // debug info that persists after blit is over
+        t.lastBlitContext = null;   // debug info that persists after vlit is over
 
         DEBUGGER_AllocsList.push({ label: "Total RAM size", adrs: 0, size: _ramSize });
         t.ramIndex          = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES; // current alloc pointer (below = already allocated mem, above = free ram)
@@ -208,7 +208,7 @@ class M68K_Machine {
         if (_f == ALLOW_WRITE) {
             if (!CPU_isCustomAdrs(_v)) {
                 let msg = null;
-                if ((_v + _s) >= CPU_DBG_WRITE_FORBID_START && _v < CPU_DBG_WRITE_FORBID_END) {
+                if ((_v + _s) > CPU_DBG_WRITE_FORBID_START && _v < CPU_DBG_WRITE_FORBID_END) {
                     msg = "Writing outside of CPU_DBG_WRITE_FORBID_START && CPU_DBG_WRITE_FORBID_END boundaries<br>";
                     msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_WRITE_FORBID_START, CPU_DBG_WRITE_FORBID_END);                    
                 }

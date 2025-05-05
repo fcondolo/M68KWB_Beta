@@ -370,10 +370,10 @@ function Blitter_Draw()
     dbgStr += "\nSkew="+Blit.getSkew()+", NFSR="+Blit.NFSR+", FXSR="+Blit.FXSR;
     dbgStr += "\nHog="+Blit.Hog;
     dbgStr += "\nOp="+Blit.getOp() +": " + Blit.getOpString();
-    dbgStr += "\nHop="+Blit.getHop()+": " + Blit.getHopString();
-
-    Blitter_Notify_Start(dbgStr);
+    dbgStr += "\nHop="+Blit.getHop()+": " + Blit.getHopString() + "\n";
     if (DEBUGGER_tracing && Blit.getXCount()>0) alert(dbgStr);
+    dbgStr = dbgStr.replaceAll("\n", "<br>");
+    Blitter_Notify_Start(dbgStr);
 
     while(true) {
         Blit.HasBus=true;

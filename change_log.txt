@@ -2,6 +2,7 @@
 ==========
 - Extend words to longs when ADD/SUB to an address register
 - Added Atari STe blitter debug info
+- Fixed 1 byte error checking for CPU_DBG_WRITE_FORBID_START
 
 
 03/05/2025
@@ -64,7 +65,7 @@
 
 27/04/2025	
 ==========
-- fixed EXG instruction (dmn stupid typo)
+- fixed EXG instruction (damn stupid typo)
 
 26/04/2025	
 ==========
