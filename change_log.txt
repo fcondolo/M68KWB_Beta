@@ -1,3 +1,7 @@
+05/05/2025
+==========
+- Extend words to longs when ADD/SUB to an address registe
+
 03/05/2025
 ==========
 - All js exceptions are now caught
