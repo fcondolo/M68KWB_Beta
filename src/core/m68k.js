@@ -44,6 +44,7 @@ var M68K_TICKS_PER_SECOND = 8000000;
 var M68K_VECTORS_ZONE_SIZE = 0x500; // 0x466 needed for ST VBL counter
 var M68K_TICKS_PER_FRAME = Math.floor(M68K_TICKS_PER_SECOND/50);
 var M68K_FORCENEXTVBL = false;
+var M68K_DEBUGNEXTLINE = false;
 
 var M68K_EXECUTED = 0;
 var M68K_LASTEXEC = new Array(16);
@@ -1901,15 +1902,15 @@ function ADD(_instr) {
   let ret = null;
   let _source = _instr.arg1;
   let _dest = _instr.arg2;
+  let size = _instr.instrSize;
 
-  let src = getArg(_source, _instr.instrSize, true);
+  let src = getArg(_source, size, true);
   if (src.err) return src.err;
 
-  let size = _instr.instrSize;
   let srcVal = src.value;
 
-  // special case for add.w dx,ax ==> extends value of dx to long and adds to ax.l
-  if ((size == 2) && (_source.tab == regs.d) && (_dest.tab == regs.a) && (_dest.type == 'reg')) {
+  // extend to 32 bits when destination is an address register
+  if ((size == 2) && (_dest.tab == regs.a) && (_dest.type == 'reg')) {
     srcVal = extWord(srcVal);
     size = 4;
   }
@@ -1937,8 +1938,8 @@ function ADDA(_instr) {
   let src = getArg(_source, size, true);
   if (src.err) return src.err;
 
-  // special case for add.w dx,ax ==> extends value of dx to long and adds to ax.l
-  if ((size == 2) && (_source.tab == regs.d) && (_dest.tab == regs.a) && (_dest.type == 'reg')) {
+  // extend to long if source is word and writing to address register
+  if ((size == 2) && (_dest.tab == regs.a) && (_dest.type == 'reg')) {
     src.value = extWord(src.value);
     size = 4;
   }
@@ -2181,15 +2182,21 @@ function SUB(_instr) {
   let ret = null;
   let _source = _instr.arg1;
   let _dest = _instr.arg2;
+  let size = _instr.instrSize;
 
-  let src = getArg(_source, _instr.instrSize, true);
+  let src = getArg(_source, size, true);
   if (src.err) return src.err;
 
   DisallowPrePost();
-  let dst = getArg(_dest, _instr.instrSize, true);
+  let dst = getArg(_dest, size, true);
   if (dst.err) return dst.err;
 
-  switch (_instr.instrSize) {
+  if ((size == 2) && (_dest.tab == regs.a) && (_dest.type == 'reg')) {
+    srcVal = extWord(srcVal);
+    size = 4;
+  }
+
+  switch (size) {
     case 1: setArg(_dest, I_SUB_8(src.value, dst.value), 1, true); break;
     case 2: setArg(_dest, I_SUB_16(src.value, dst.value), 2, true); break;
     case 4: setArg(_dest, I_SUB_32(src.value, dst.value), 4, true); break;
@@ -2833,6 +2840,11 @@ async function execCPU() {
     }
 
     if (line.isInstr) { // if actual 68k code
+      if (M68K_DEBUGNEXTLINE) {
+        M68K_DEBUGNEXTLINE = false;
+        alert("open your browser's debugger cause we reached M68K_DEBUGNEXTLINE");
+        debugger;
+      }
       const out = line.call(line);
       if (MACHINE.forceExitAsm) {
         MACHINE.forceExitAsm = false;
