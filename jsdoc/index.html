@@ -311,6 +311,12 @@
                       <li class='h5'><span>Instance members</span></li>
                       
                       <li><a
+                        href='#js_asm_tools__read_me_first__'
+                        class='regular pre-open'>
+                        #__READ_ME_FIRST__
+                      </a></li>
+                      
+                      <li><a
                         href='#js_asm_toolsmuls_68k'
                         class='regular pre-open'>
                         #MULS_68K
@@ -344,6 +350,12 @@
                         href='#js_asm_toolsjsint16toasm'
                         class='regular pre-open'>
                         #JSInt16ToAsm
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolsjsint32toasm'
+                        class='regular pre-open'>
+                        #JSInt32ToAsm
                       </a></li>
                       
                       <li><a
@@ -2642,6 +2654,55 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
     <div class='py1 quiet mt1 prose-big'>Instance Members</div>
     <div class="clearfix">
   
+    <div class='border-bottom' id='js_asm_tools__read_me_first__'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>__READ_ME_FIRST__()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>JS_ASM_Tools is a series of helpers to navigate smoothly between "regular" js and asm. You can invoke all its methods through singleton "TOOLS", using TOOLS.methodname(args). For example: regs.d[0]=TOOLS.MULS_68K(79,regs.d[0]);</p>
+
+    <div class='pre p1 fill-light mt0'>__READ_ME_FIRST__()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
     <div class='border-bottom' id='js_asm_toolsmuls_68k'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
@@ -2654,7 +2715,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
 
   
 
-  <p>Emulates the MULS asm instruction: s.w * d.w ==> (s*d).l. Note: d is NOT modified. Type d = MULS_68K(s,d) if you want d to be updated</p>
+  <p>Emulates the MULS asm instruction: s.w * d.w ==> (s*d).l.</p>
 
     <div class='pre p1 fill-light mt0'>MULS_68K(s: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, d: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
   
@@ -2683,7 +2744,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>d</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
-	    destination (16 bit signed int). NOT MODIFIED
+	    destination (16 bit signed int). NOT MODIFIED AS A M68K WOULD DO: Result is returned, not copied to arg2.
 
           </div>
           
@@ -2698,7 +2759,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        s.w * d.w (32 bit signed word)
+        s.w * d.w (javascript number)
 
       
     
@@ -2716,6 +2777,15 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
     </ul>
   
 
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> yOfs = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">40</span>, lineY);</pre>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title class_">JSInt32ToAsm</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">79</span>, <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]))); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
+    
   
 
   
@@ -2742,7 +2812,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
 
   
 
-  <p>Emulates the DIVS asm instruction: _dest.l / _source.w. Note: _dest is NOT modified. Type _dest = DIVS_68K(_source,_dest) if you want _dest to be updated</p>
+  <p>Partially emulates the DIVS asm instruction: _dest.l / _source.w.</p>
 
     <div class='pre p1 fill-light mt0'>DIVS_68K(_source: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, _dest: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
   
@@ -2771,7 +2841,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
         <div class='space-bottom0'>
           <div>
             <span class='code bold'>_dest</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
-	    destination (32 bit signed int). NOT MODFIFIED
+	    destination (32 bit signed int). NOT MODIFIED AS A M68K WOULD DO: Result is returned, not copied to arg2.
 
           </div>
           
@@ -2786,7 +2856,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
     
       <div class='py1 quiet mt1 prose-big'>Returns</div>
       <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
-        _dest.l/_source.w (32 bit signed word)
+        _dest.l/_source.w (javascript number). DOES NOT RETURN REMAINDER IN THE MSB LIKE THE M68K WOULD DO
 
       
     
@@ -2810,6 +2880,15 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
     </ul>
   
 
+  
+    <div class='py1 quiet mt1 prose-big'>Example</div>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> slope = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(delta, iter);</pre>
+    
+      
+      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title class_">JSInt32ToAsm</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt32</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]), <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">1</span>]))); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
+    
   
 
   
@@ -3049,7 +3128,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
 
   
 
-  <p>Converts a signed or unsigned javascript int 16 to its 2-complement asm version</p>
+  <p>Converts a signed or unsigned javascript int16 to its 2-complement asm version (e.g. transforms -1 to 0xffff)</p>
 
     <div class='pre p1 fill-light mt0'>JSInt16ToAsm(_value: any, _v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
   
@@ -3078,6 +3157,85 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
           <div>
             <span class='code bold'>_v</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
 	    16 bit JS variable to convert
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
+        asm representation of the numbe r(same if positive, 2 complement if negative)
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolsjsint32toasm'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>JSInt32ToAsm(_value, _v)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Converts a signed or unsigned javascript int32 to its 2-complement asm version  (e.g. transforms -1 to 0xffffffff)</p>
+
+    <div class='pre p1 fill-light mt0'>JSInt32ToAsm(_value: any, _v: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_value</span> <code class='quiet'>(any)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_v</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    32 bit JS variable to convert
 
           </div>
           

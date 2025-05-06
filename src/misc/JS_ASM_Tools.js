@@ -2,8 +2,8 @@ var TOOLS = null;
 
 
 /**
- * @class
- * @classdesc A series sof helpers to navigate smoothly between js and asm
+ * @class JS_ASM_Tools
+ * @classdesc A series of helpers to navigate smoothly between "regular" js and asm
  */
 class JS_ASM_Tools {
   constructor() {
@@ -14,16 +14,24 @@ class JS_ASM_Tools {
     }
     TOOLS = this;
   }
+
+  /**
+   * JS_ASM_Tools is a series of helpers to navigate smoothly between "regular" js and asm. You can invoke all its methods through singleton "TOOLS", using TOOLS.methodname(args). For example: regs.d[0]=TOOLS.MULS_68K(79,regs.d[0]);
+   */
+  __READ_ME_FIRST__(){ // empty funtion just here to appear at the top of the doc
+  }
      
 //     =====================
 //      ARITHMETICS HELPERS 
 //     =====================
 
   /**
-   * Emulates the MULS asm instruction: s.w * d.w ==> (s*d).l. Note: d is NOT modified. Type d = MULS_68K(s,d) if you want d to be updated
+   * Emulates the MULS asm instruction: s.w * d.w ==> (s*d).l.
+   * @example let yOfs = TOOLS.MULS_68K(40, lineY);
+   * @example regs.d[0] = TOOLS.JSInt32ToAsm(TOOLS.MULS_68K(79, TOOLS.toInt16(regs.d[0]))); // remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert
    * @param   {number} s - source (16 bit signed int)
-   * @param   {number} d - destination (16 bit signed int). NOT MODIFIED
-   * @returns {number}  s.w * d.w (32 bit signed word)
+   * @param   {number} d - destination (16 bit signed int). NOT MODIFIED AS A M68K WOULD DO: Result is returned, not copied to arg2.
+   * @returns {number}  s.w * d.w (javascript number)
    * @throws error (alert box) if params>32767 or <-32768
    */
   MULS_68K(s, d) {
@@ -45,10 +53,12 @@ class JS_ASM_Tools {
     }
       
   /**
-   * Emulates the DIVS asm instruction: _dest.l / _source.w. Note: _dest is NOT modified. Type _dest = DIVS_68K(_source,_dest) if you want _dest to be updated
+   * Partially emulates the DIVS asm instruction: _dest.l / _source.w.
+   * @example let slope = TOOLS.DIVS_68K(delta, iter);
+   * @example regs.d[0] = TOOLS.JSInt32ToAsm(TOOLS.DIVS_68K(TOOLS.toInt32(regs.d[0]), TOOLS.toInt16(regs.d[1]))); // remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert
    * @param   {number} _source  - source (16 bit signed int)
-   * @param   {number} _dest    - destination (32 bit signed int). NOT MODFIFIED
-   * @returns {number} _dest.l/_source.w (32 bit signed word)
+   * @param   {number} _dest    - destination (32 bit signed int). NOT MODIFIED AS A M68K WOULD DO: Result is returned, not copied to arg2.
+   * @returns {number} _dest.l/_source.w (javascript number). DOES NOT RETURN REMAINDER IN THE MSB LIKE THE M68K WOULD DO
    * @throws error (alert box) if _source>32767 or _source<-32768
    * @throws error (alert box) if _source == 0
    * @throws error (alert box) if division overflow
@@ -114,19 +124,22 @@ class JS_ASM_Tools {
     }
 
   /**
-   * Converts a signed or unsigned javascript int 16 to its 2-complement asm version
+   * Converts a signed or unsigned javascript int16 to its 2-complement asm version (e.g. transforms -1 to 0xffff)
    * @param   {number} _v  - 16 bit JS variable to convert
    * @returns {number} asm representation of the numbe r(same if positive, 2 complement if negative)
   */
   JSInt16ToAsm(_value) {
-      if (_value >= 0) return _value & 0xffff;
-      let complement = Math.abs(_value);
-      complement = ~complement;
-      complement++;
-      complement &= 0xffff;
-      return complement;
-    }
+    return (_value >>> 0) & 0xffff;
+  }
 
+  /**
+   * Converts a signed or unsigned javascript int32 to its 2-complement asm version  (e.g. transforms -1 to 0xffffffff)
+   * @param   {number} _v  - 32 bit JS variable to convert
+   * @returns {number} asm representation of the numbe r(same if positive, 2 complement if negative)
+  */
+  JSInt32ToAsm(_value) {
+    return (_value >>> 0);
+  }
 
 //    ==================================
 //     ACCESSING ASM VARIABLES FROM JS
