@@ -186,8 +186,21 @@ function main_mainLoop() {
 
 
 function main_startAll() {
-  if (FX_INFO.hasAudio)
-    AUDIO_SINGLETON = new Audio();
+  if (FX_INFO.zoom) {
+    try {
+      setZoom(FX_INFO.zoom);
+    } catch(e) {
+      alert("REGISTER_FX: zoom failed:\n" + e);
+    }
+  }
+  if (FX_INFO.hasAudio) {
+    try {
+      AUDIO_SINGLETON = new Audio();
+    } catch(e) {
+      alert("Could not create Audio:\n" + e);
+    }
+  }
+
   MYFX.SYS_initialized = false;
 
   var rAF_ID;
@@ -445,11 +458,27 @@ function main_onload() {
   showModalBox(fxList, onFxChosen);
 }
 
+// _zoom : 0..100
+function setZoom(_zoom) {
+  if (_zoom < 0) {
+    main_Alert("setZoom: argument must be in [0..100] range (you passed: " + _zoom + ")");
+    _zoom = 0;
+  }
+  if (_zoom > 100) {
+    main_Alert("setZoom: argument must be in [0..100] range (you passed: " + _zoom + ")");
+    _zoom = 100;
+  }
+  _zoom += 100; // 100..200 (like the slider) 
+  document.getElementById("outpuResolution").value = _zoom;
+  onNewOutputResolution();
+}
+
+
 function onNewOutputResolution() {
   let rez = document.getElementById("outpuResolution").value;
-  CANVAS_SCALE = rez/100;
-  CANVAS_DISPLAY_WIDTH = Math.floor((rez * SIMU_DEFAULT_WIDTH)/100);
-  CANVAS_DISPLAY_HEIGHT = Math.floor((rez * PAL_VIDEO_LINES_COUNT)/100);
+  CANVAS_SCALE = rez;
+  CANVAS_DISPLAY_WIDTH = Math.floor((rez * SIMU_DEFAULT_WIDTH)/90);
+  CANVAS_DISPLAY_HEIGHT = Math.floor((rez * PAL_VIDEO_LINES_COUNT)/90);
   cvs.width =  CANVAS_DISPLAY_WIDTH;
   cvs.height =  CANVAS_DISPLAY_HEIGHT;
 }

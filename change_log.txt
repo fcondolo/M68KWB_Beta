@@ -1,3 +1,9 @@
+06/05/2025
+==========
+- Updated PDF documentation with a "THE JAVASCRIPT / ASM PING-PONG" chapter
+- Added a "zoom" option in FX_Info
+
+
 05/05/2025
 ==========
 - Extend words to longs when ADD/SUB to an address register
