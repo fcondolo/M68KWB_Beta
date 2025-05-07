@@ -184,6 +184,7 @@ class LineParser {
       'ENDM',4,
       'REPT',4,
       'ENDR',4,
+      'REPTN',5,
       'IFEQ',4,
       'IFNE',4,
       'IFD',3,
