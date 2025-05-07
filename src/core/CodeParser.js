@@ -900,7 +900,6 @@ class CodeParser {
           adrs += ln.attachedLabel.writtenDCBytes;
         for (let cpy = 0; cpy < ln.DxArgs.length; cpy++) {
           ln.dcAddress = adrs;
-          ln.codeSectionOfs = adrs;
           let val = ln.DxArgs[cpy].v;
           if (val == null || isNaN(val))
             ln.Failed("can't evaluate DC.x arg #" + (cpy+1));

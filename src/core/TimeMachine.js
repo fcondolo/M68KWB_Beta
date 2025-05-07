@@ -110,28 +110,47 @@ class M68K_TimeMachine {
 
     traceForwards() {
         let t = this;
-        const target = t.curReplayIndex;
+        if (t.isPresent()) {
+            alert("Time machine: can't go further in the future");
+            return;
+        }
         t.curReplayIndex = (t.curReplayIndex + 1) % t.len;
-        t.jump(target);
+        t.jump(t.curReplayIndex);
     }
     
     traceBackwards() {
         let t = this;
-        const target = t.curReplayIndex;
         if (t.curReplayIndex == 0)
             t.curReplayIndex = t.len - 1;
         else
             t.curReplayIndex--;
-        t.jump(target);
+        t.jump(t.curReplayIndex);
+    }
+
+    restorePresent() {
+        let t = this;
+        let target = t.curReplayIndex;
+        while(target != t.nextWriteIndex) {
+            t.jump(target);
+            target = (target + 1) % t.len;
+        }
+        t.curReplayIndex = target;
+    }
+
+    isPresent() {
+        let t = this;
+        let pres = t.nextWriteIndex - 1;
+        if (pres < 0) pres = t.len-1;
+        return (t.curReplayIndex == pres);
     }
 
     jump(target) {
         let t = this;
-        if (t.curReplayIndex == t.nextWriteIndex) {
-            alert("Time machine: can't go further");
-            t.curReplayIndex = target;
+        if (target == t.nextWriteIndex) {
+            alert("Time machine: can't go there");
             return;
         }
+        t.curReplayIndex = target;
         const e = t.entries[t.curReplayIndex];
 
         switch(e.type) {
@@ -163,7 +182,6 @@ class M68K_TimeMachine {
             break;
             default:
                 alert("Time machine: reached uninitialized point");
-                t.curReplayIndex = target;
             return;
         }
         t.restoreRegs(e.val);

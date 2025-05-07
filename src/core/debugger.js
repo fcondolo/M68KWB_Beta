@@ -443,6 +443,10 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         console.log("RELOADING PAGE...");
         window.location.reload();
       }
+      if (!TIME_MACHINE.isPresent()) {
+        alert("restaure present");
+        TIME_MACHINE.restorePresent();
+      }
       DEBUGGER_justHitRun = true;
       DEBUGGER_traceOneInstr();
     break;
@@ -1276,8 +1280,6 @@ function DEBUGGER_initFile(_refreshCyclesOnly = false) {
   for (let i = DEBUGGER_startRow; i < DEBUGGER_endRow; i++) {
     const IP = DEBUGGER_disamlines[i].IP;
     const parsedLn = PARSER_lines[DEBUGGER_disamlines[i].lineIndex];
-    if (IP !== parsedLn.codeSectionOfs)
-      debugger;
     DEBUGGER_rowToIP.push(IP);
     let lnID = getCodeLineID(IP);
     if (DEBUGGER_disamlines[i].isLabl) lnID = DEBUGGER_disamlines[i].instr.toUpperCase();
