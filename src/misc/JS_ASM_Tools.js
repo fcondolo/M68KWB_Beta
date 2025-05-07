@@ -28,7 +28,7 @@ class JS_ASM_Tools {
   /**
    * Emulates the MULS asm instruction: s.w * d.w ==> (s*d).l.
    * @example let yOfs = TOOLS.MULS_68K(40, lineY);
-   * @example regs.d[0] = TOOLS.JSInt32ToAsm(TOOLS.MULS_68K(79, TOOLS.toInt16(regs.d[0]))); // remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert
+   * @example regs.d[0] = TOOLS.MULS_68K(79, TOOLS.toInt16(regs.d[0])); // remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert
    * @param   {number} s - source (16 bit signed int)
    * @param   {number} d - destination (16 bit signed int). NOT MODIFIED AS A M68K WOULD DO: Result is returned, not copied to arg2.
    * @returns {number}  s.w * d.w (javascript number)
@@ -55,7 +55,7 @@ class JS_ASM_Tools {
   /**
    * Partially emulates the DIVS asm instruction: _dest.l / _source.w.
    * @example let slope = TOOLS.DIVS_68K(delta, iter);
-   * @example regs.d[0] = TOOLS.JSInt32ToAsm(TOOLS.DIVS_68K(TOOLS.toInt32(regs.d[0]), TOOLS.toInt16(regs.d[1]))); // remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert
+   * @example regs.d[0] = TOOLS.DIVS_68K(TOOLS.toInt32(regs.d[0]), TOOLS.toInt16(regs.d[1]); // remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert
    * @param   {number} _source  - source (16 bit signed int)
    * @param   {number} _dest    - destination (32 bit signed int). NOT MODIFIED AS A M68K WOULD DO: Result is returned, not copied to arg2.
    * @returns {number} _dest.l/_source.w (javascript number). DOES NOT RETURN REMAINDER IN THE MSB LIKE THE M68K WOULD DO
