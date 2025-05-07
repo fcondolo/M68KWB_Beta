@@ -26,6 +26,10 @@ init:
 
 blop:
   dc.w 1,2,3
+  REPT 4
+  dc.w  2*REPTN
+  dc.w  REPTN*4+1
+  ENDR
   
 update:
   rts

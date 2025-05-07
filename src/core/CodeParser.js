@@ -61,6 +61,7 @@ class CodeParser {
     t.lateAsmbl = [];
     t.stopGlobalCompilation = false;
     t.macroCounter = 0;
+    t.reptn = -1; // REPTN is -1 outside of any repeat block. See https://github.com/prb28/m68k-instructions-documentation/blob/master/directives/rept.md
     t.showCompilMsg( "starting build process...");
   }
   
@@ -517,10 +518,20 @@ class CodeParser {
               t.strings.lines.splice(endIndex, 1); // remove ENDR
               t.strings.lines.splice(startIndex, 1); // remove REPT
               let writeIndex = endIndex - 1;
+              t.reptn = 1;
               for (let rpt = 0; rpt < count - 1; rpt++) {
-                for (let k = startIndex; k < endIndex - 1; k++) {
-                  t.strings.lines.splice(writeIndex++, 0, t.strings.lines[k].clone());
+                let ns = t.reptn.toString();
+                for (let k = startIndex; k < endIndex - 1; k++) {                                    
+                  let newstr = t.strings.lines[k].clone();
+                  newstr.filtered = newstr.filtered.replaceAll("REPTN",ns);
+                  t.strings.lines.splice(writeIndex++, 0, newstr);
                 }
+                t.reptn++;
+              }
+              t.reptn = -1;
+              // handle REPTN for the cloned line
+              for (let k = startIndex; k < endIndex - 1; k++) {                                    
+                t.strings.lines[k].filtered = t.strings.lines[k].filtered.replaceAll("REPTN",0);
               }
               t.errorContext.pop();
               return true;
@@ -888,6 +899,8 @@ class CodeParser {
         else
           adrs += ln.attachedLabel.writtenDCBytes;
         for (let cpy = 0; cpy < ln.DxArgs.length; cpy++) {
+          ln.dcAddress = adrs;
+          ln.codeSectionOfs = adrs;
           let val = ln.DxArgs[cpy];
           if (val == null || isNaN(val))
             ln.Failed("can't evaluate DC.x arg #" + (cpy+1));

@@ -1239,6 +1239,8 @@ function DEBUGGER_initFile(_refreshCyclesOnly = false) {
       DEBUGGER_disamlines.push(disam);
     else if (l.isLabel)
       DEBUGGER_disamlines.push({lineIndex:i, isLabl:true, IP:l.codeSectionOfs, instr:l.filtered, ext:null, arg1:null, arg2:null, fullString:l.filtered});
+    else if (l.isDC && DEBUGGER_CONFIG.SHOW_DC)
+      DEBUGGER_disamlines.push({lineIndex:i, IP:l.dcAddress.toString(16), instr:l.filtered, ext:null, arg1:null, arg2:null, fullString:l.filtered});
     l.originalIndex = i;
   }
 

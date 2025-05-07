@@ -1,3 +1,9 @@
+07/05/2025
+==========
+- Implemented REPTN
+- Allow Show/hide dc.b/w/l lines in the debugger (see SHOW_DC in config.js)
+
+
 06/05/2025
 ==========
 - Updated PDF documentation with a "THE JAVASCRIPT / ASM PING-PONG" chapter

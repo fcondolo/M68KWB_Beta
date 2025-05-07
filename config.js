@@ -59,6 +59,9 @@ const DEBUGGER_CONFIG = {
     // Maximum hardware breakpoints count (set from the command line). The more, the slower ;)
     MAX_HW_BPT: 4,
 
+    // Tells whether the debugger should show DC.B/W/L lines or not
+    SHOW_DC: true,
+
     // --------------------------------------------------
     // SYNTAX COLORING SETTINGS
     // HTML web colors (#rrggbb, check on the web if you don't know what HTML colors are)
