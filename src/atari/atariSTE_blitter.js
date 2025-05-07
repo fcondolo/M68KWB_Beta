@@ -227,9 +227,13 @@ function Blitter_Start_Line()
 function Blitter_Start_Now()
 {
   Blit.Busy=true;
+
   Blit.XCounter=Blit.getXCount();
   if (Blit.XCounter==0) Blit.XCounter=65536;
   Blit.YCounter=Blit.getYCount();
+  const op = Blit.getOp();
+  Blit.NeedDestRead=(op && (op!=3) && (op!=12) && (op!=15));
+  
   /*Only want to start the line if not in the middle of one.*/
   if (Blit.XCounter-Blit.getXCount() == 0) {
     Blitter_Notify_Start("blitter start");

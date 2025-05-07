@@ -2,6 +2,7 @@
 ==========
 - Implemented REPTN
 - Allow Show/hide dc.b/w/l lines in the debugger (see SHOW_DC in config.js)
+- Fixed Atari STe XOR blitter fill
 
 
 06/05/2025
