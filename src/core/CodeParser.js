@@ -836,7 +836,7 @@ class CodeParser {
         if (ln.isDS) {
           let amount = 0;
           for (let cpy = 0; cpy < ln.DxArgs.length; cpy++) {
-            const argVal = ln.DxArgs[cpy];
+            const argVal = ln.DxArgs[cpy].v;
             if (isNaN(argVal))
               ln.Failed("DS: can't calculate size to alloc, unsupported argument #" + (cpy+1));
             else
@@ -901,11 +901,14 @@ class CodeParser {
         for (let cpy = 0; cpy < ln.DxArgs.length; cpy++) {
           ln.dcAddress = adrs;
           ln.codeSectionOfs = adrs;
-          let val = ln.DxArgs[cpy];
+          let val = ln.DxArgs[cpy].v;
           if (val == null || isNaN(val))
             ln.Failed("can't evaluate DC.x arg #" + (cpy+1));
-          else
+          else {
+            if ((!ln.hideDxArgsDbg) && (ln.DxArgs[cpy].dbg != undefined))
+              ln.filtered += " ($" + ln.DxArgs[cpy].dbg.toString(16) + ")"
             adrs = MACHINE.setRAMValue(val, adrs, ln.instrSize);
+          }
           ln.attachedLabel.writtenDCBytes += ln.instrSize;
         }
       }

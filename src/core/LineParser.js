@@ -780,7 +780,7 @@ class LineParser {
             return false;              
           }  
         }
-        ln.DxArgs.push(Math.floor(found));
+        ln.DxArgs.push({v:Math.floor(found),dbg:Math.floor(found)});
         numberAdded = true;
       } else { // cant read number, maybe it's a string
         if (ln.instrSize == 1) { // strings can only be dc.b
@@ -790,7 +790,8 @@ class LineParser {
           if (strchar) {
             ln.ofs++;
             while ((ln.ofs < filtLen) && (ln.filtered[ln.ofs] != strchar)) {
-              ln.DxArgs.push(ln.filtered.charCodeAt(ln.ofs));
+              ln.hideDxArgsDbg = true;
+              ln.DxArgs.push({v:ln.filtered.charCodeAt(ln.ofs),dbg:undefined});
               numberAdded = true;
               ln.ofs++;
             }
@@ -809,11 +810,11 @@ class LineParser {
               ln.Failed("number exceeds instr size: " + Math.floor(found) + ". reason: " + failMsg);
               return false;              
             } 
-            ln.DxArgs.push(Math.floor(found));
+            ln.DxArgs.push({v:Math.floor(found),dbg:Math.floor(found)});
             numberAdded = true; 
           }
         }
-        if (!numberAdded) ln.DxArgs.push(NaN);
+        if (!numberAdded) ln.DxArgs.push({v:NaN,dbg:undefined});
       }
       ln.skipNextComa();
       if (ln.ofs == whileIterOfs) ln.ofs++; // avoid being stuck in an infinite loop

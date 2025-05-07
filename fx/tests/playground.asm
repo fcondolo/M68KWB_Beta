@@ -24,6 +24,9 @@ init:
   ;>JS if (d2.uw != 6) debug("movem wrong value")
   rts
 
+blip:
+  dc.b "ABCD"
+
 blop:
   dc.w 1,2,3
   REPT 4
