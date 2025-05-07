@@ -110,6 +110,8 @@ function main_doInit() {
     try {
       MYFX.FX_Init();
     } catch (err) {
+      if (err.message == "WAITING_USERINPUT")
+        return; // just waiting for the user to press the trace key, don't execute JS further
       let msg = "Exception occurred while initializing the FX:\n" + err.message;
       if (err.stack) msg += "\ncallstack:\n" + err.stack;
       main_Alert(msg, false, true);
@@ -133,7 +135,7 @@ function main_mainLoop() {
       }
     } catch (err) {
       if (err.message == "WAITING_USERINPUT")  {
-        console.log("main_updateAsmOnly - waiting for the user to trace. don't execute further");
+        //console.log("main_updateAsmOnly - waiting for the user to trace. don't execute further");
         return; // just waiting for the user to trace. don't execute further
       }
       alert("Exception occurred while tracing assembler: " + err.message);
