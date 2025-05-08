@@ -24,24 +24,22 @@ update:
        rts
 
 palette
-;	palette for: Explora-ST
-;	Thu Jan 04 2024 01:29:57 GMT+0100 (Central European Standard Time)
-	dc.w	$0000
-	dc.w	$0808
-	dc.w	$0888
-	dc.w	$0181
+	dc.w	$0881
+	dc.w	$0280
+	dc.w	$0811
 	dc.w	$0199
-	dc.w	$0119
+	dc.w	$0a90
 	dc.w	$0922
-	dc.w	$0bb3
-	dc.w	$0cc4
-	dc.w	$0a3a
-	dc.w	$044b
-	dc.w	$02a2
-	dc.w	$0ddc
-	dc.w	$0665
-	dc.w	$0ee6
-	dc.w	$0ff7
+	dc.w	$02aa
+	dc.w	$0ba0
+	dc.w	$0a3b
+	dc.w	$0b33
+	dc.w	$05b0
+	dc.w	$0bcb
+	dc.w	$0d58
+	dc.w	$0553
+	dc.w	$0663
+	dc.w	$07fd
 
 
-image     incbin "SYSROOT/images/Explora-bitplanes-STE.bin"
+image     incbin "SYSROOT/images/alone-bitplanes-STE.bin"
