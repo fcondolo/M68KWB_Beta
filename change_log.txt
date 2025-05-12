@@ -1,3 +1,7 @@
+12/05/2025
+==========
+- Fixed a bug in ROL/ROR introduced with cycles counting
+
 08/05/2025
 ==========
 - Added AtariSTe_BlitterFill sample

@@ -695,8 +695,6 @@ function I_ASL_32(_instr) {
 
   var n = src.value & 63;
   _instr.updateShiftCycles(n);
-
-  _instr.cycles = 8+2*n;
   var d = dst.tab[dst.ind];
   if (n) {
     var sign = (d & 0x80000000) != 0;
@@ -1106,7 +1104,6 @@ function I_DIVU(_source, _dest) {
 function I_ROL_32(_amount, _dest) {
   var d = _dest;
   var n = _amount & 63;
-  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (32 - n))) != 0;
     d = (((d << n) | (d >>> (32 - n))) & 0xffffffff) >>> 0;
@@ -1121,7 +1118,6 @@ function I_ROL_32(_amount, _dest) {
 function I_ROL_16(_amount, _dest) {
   var d = _dest & 0xffff;
   var n = _amount & 63;
-  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (16 - n))) != 0;
     d = (((d << n) | (d >> (16 - n))) & 0xffff) >>> 0;
@@ -1136,7 +1132,6 @@ function I_ROL_16(_amount, _dest) {
 function I_ROL_8(_amount, _dest) {
   var d = _dest & 0xff;
   var n = _amount & 63;
-  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (8 - n))) != 0;
     d = (((d << n) | (d >> (8 - n))) & 0xff) >>> 0;
@@ -1151,7 +1146,6 @@ function I_ROL_8(_amount, _dest) {
 function I_ROR_32(_amount, _dest) {
   var d = _dest;
   var n = _amount & 63;
-  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n - 1))) != 0;
     d = (((d << (32 - n)) | (d >>> n)) & 0xffffffff) >>> 0;
@@ -1166,7 +1160,6 @@ function I_ROR_32(_amount, _dest) {
 function I_ROR_16(_amount, _dest) {
   var d = _dest & 0xffff;
   var n = _amount & 63;
-  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n - 1))) != 0;
     d = (((d << (16 - n)) | (d >>> n)) & 0xffff) >>> 0;
@@ -1181,7 +1174,6 @@ function I_ROR_16(_amount, _dest) {
 function I_ROR_8(_amount, _dest) {
   var d = _dest & 0xff;
   var n = _amount & 63;
-  _instr.updateShiftCycles(n);
   if (n) {
     regs.c = (d & (1 << (n - 1))) != 0;
     d = (((d << (8 - n)) | (d >>> n)) & 0xff) >>> 0;
@@ -1876,6 +1868,7 @@ function ROR(_instr) {
   let ret = null;
   let amount = getArg(_instr.arg1, _instr.instrSize, false).value & 63;
   let r = _instr.arg2; // let r = registerFromName(_instr.arg2.reg);
+  _instr.updateShiftCycles(amount&63);
   switch (_instr.instrSize) {
     case 1: r.tab[r.ind] = I_ROR_8(amount, r.tab[r.ind]); break;
     case 2: r.tab[r.ind] = I_ROR_16(amount, r.tab[r.ind]); break;
@@ -1889,6 +1882,7 @@ function ROL(_instr) {
   let ret = null;
   let amount = getArg(_instr.arg1, _instr.instrSize, false) & 63;
   let r = _instr.arg2; // let r = registerFromName(_instr.arg2.reg);
+  _instr.updateShiftCycles(amount&63);
   switch (_instr.instrSize) {
     case 1: r.tab[r.ind] = I_ROL_8(amount, r.tab[r.ind]); break;
     case 2: r.tab[r.ind] = I_ROL_16(amount, r.tab[r.ind]); break;
