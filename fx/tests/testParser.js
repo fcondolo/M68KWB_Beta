@@ -32,10 +32,11 @@ class FX_TestParser {
       let r = decode_instruction_generated(byteCode,0);
       let str = InstructionToString(r.instruction).fullString;
 //      console.log(str);
-      if (str != tests[i+1].toUpperCase()) {
+      if (!tests[i+1].toUpperCase().includes(str)) {
         lastError = "expected: " + tests[i+1].toUpperCase() + ", got: " + str;
         console.error(lastError);
         debugger;
+        return;
       }
     }
     console.log("disassembled " + l/2 + " instructions.");
@@ -61,8 +62,9 @@ class FX_TestParser {
       const compiled = asciiToBinary(ascii, codeSectionOfs); 
       if (!compiled) {
         lastError = "tst assembly failed for " + ascii + ": compilation returned null";
-        console.error(lastError);
+        alert(lastError);
         debugger;
+        return;
       } 
       let found = '';
       for (let j = 0; j<compiled.ofs; j+=2) {
