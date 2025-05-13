@@ -839,8 +839,11 @@ class CodeParser {
             const argVal = ln.DxArgs[cpy].v;
             if (isNaN(argVal))
               ln.Failed("DS: can't calculate size to alloc, unsupported argument #" + (cpy+1));
-            else
+            else {
+              if (argVal < 0) ln.Failed("DS: can't calculate size to alloc, negative argument #" + (cpy+1));
+              if ((argVal == 0) && (!ASSEMBLER_CONFIG.allow_ds_0)) ln.Failed("DS: null size for argument #" + (cpy+1) + " (you can allow it in config.js, ASSEMBLER_CONFIG.allow_ds_0)");
               amount += argVal;
+            }
           }
           bufLen = amount * ln.instrSize;
         } else {

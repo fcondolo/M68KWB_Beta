@@ -48,7 +48,10 @@ const ASSEMBLER_CONFIG = {
     check_branch_size : true,
 
     // number of instructions that can be rewound (still experimental)
-    time_machine : 128
+    time_machine : 128,
+
+    // Allow ds.x 0, e.g: "ds.l 0". Not allowed by default, avoids stupid mistakes when wanting to tyoe "dc.l 0" and typing "ds.l 0" instead 
+    allow_ds_0 : false
 };
 
 

@@ -668,6 +668,23 @@ function showChunky(_srcAdrs,_w,_h) {
   ckycvs.style.visibility = 'hidden';
 }
 
+var SCRIPT_LOG_MSG = [];
 function SCRIPT_LOG(_msg) {
-  console.log(_msg);
+  let str = "";
+  if (SCRIPT_LOG_MSG.length > 0) {
+    SCRIPT_LOG_MSG.push(_msg);
+    str += SCRIPT_LOG_MSG[0]; // title
+    for (let i = 1; i < SCRIPT_LOG_MSG.length; i++) {
+      str += "<br>--> " + SCRIPT_LOG_MSG[i]; // content
+    }
+    ShowDebugLog(str);
+  } else ShowDebugLog(_msg);
+}
+
+function SCRIPT_LOG_STARTLIST(_msg) {
+  SCRIPT_LOG_MSG.push(_msg);
+}
+
+function SCRIPT_LOG_ENDLIST() {
+  SCRIPT_LOG_MSG = [];
 }

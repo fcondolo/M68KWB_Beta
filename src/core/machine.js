@@ -11,6 +11,10 @@
 */
 var MACHINE = null;
 
+/**
+ * @class M68K_Machine
+ * @classdesc Holds RAM, read/write to RAM and to custom registers
+ */
 class M68K_Machine {
     constructor(
         _ramSize        = 1024*1024,    // bytes to alloc for RAM
@@ -111,14 +115,6 @@ class M68K_Machine {
         }
     }
 
-    /**
-    allocRAM(_bytes, _align=2, _label = null)
-    @param      _bytes  :   bytes to allocate
-    @param      _align  :   allocated buffer alignment (4 by default)
-    @param      _label  :   optional name for the memory block for debugging purposes
-    @return     the index of the allocated buffer (index in the ram array) 
-    @throws     alert box if no more RAM
-    */
     allocRAM(_bytes, _align = 2, _label = null) {
         let t = this;
         while (t.ramIndex % _align !== 0)
@@ -304,13 +300,14 @@ class M68K_Machine {
         }
     }   
 
-    
     /**
-    getRAMValue(_at, _size, _signed)
-    @param      _at     :   'address' to read (index in the ram array)
-    @param      _size   :   bytes to read (1, 2 or 4).
-    @param      _signed :   true or false. Tells weather the read value should be signed or not
+    getRAMValue fetches a byte, word or long from a given address
+    @param      {number} _at     -   'address' to read
+    @param      {number} _size   -   bytes to read (1, 2 or 4).
+    @param      {boolean}_signed :   true or false. Tells weather the read value should be signed or not
     @return     the value. Will return NaN if _size is not 1,2 or 4 (no exception or error thrown though)
+    @throws     error if the address is invalid
+    @throws     breakpoint if address infringes the CPU_DBG_READ_ALLOW_START/CPU_DBG_READ_ALLOW_END policy
     */
     getRAMValue(_at, _size, _signed) {
         let t = this;
@@ -338,7 +335,14 @@ class M68K_Machine {
     }
 
     /**
-    setRAMValue(_value, _at, _size)
+    setRAMValue writes a byte, word or long to a given address
+    @param      {number} _v      -   value to write
+    @param      {number} _at     -   'address' to write to
+    @param      {number} _size   -   bytes to write (1, 2 or 4).
+    @return     _at + _size (so pointer incremented by size)
+    @throws     error if the address is invalid
+    @throws     breakpoint if address infringes the CPU_DBG_WRITE_ALLOW_START/CPU_DBG_WRITE_ALLOW_END policy
+    @throws     breakpoint if address infringes the CPU_DBG_WRITE_FORBID_START/CPU_DBG_WRITE_FORBID_END policy
     */
     setRAMValue(_v, _at, _size) {
         let t = this;
