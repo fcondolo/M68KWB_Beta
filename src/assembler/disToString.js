@@ -186,6 +186,7 @@ function asciiToBinary(_line, _codeSectionOfs) {
     l.codeSectionOfs = _codeSectionOfs;
     if (CODERPARSER_SINGLETON == null) CODERPARSER_SINGLETON = new CodeParser();
     CODERPARSER_SINGLETON.process_oneLineInstr(l);
+    if (CODERPARSER_SINGLETON.stopGlobalCompilation) return null;
     let out = { tab: new Uint8Array(16), ofs: 0 };
     asmbl_go(l, out);
     if (out.ofs > 0) {

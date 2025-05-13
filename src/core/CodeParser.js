@@ -401,6 +401,7 @@ class CodeParser {
     let t = this;
     for (let i = 0; i < t.lateArgs.length; i++) {
       t.decodeArg(t.lateArgs[i].arg, t.lateArgs[i].line, true);
+      if (t.stopGlobalCompilation) return;
     }
   }
 
@@ -1309,7 +1310,7 @@ class CodeParser {
     }
   }
 
-  decodeArg(_arg, _l, _lastChance = false) {
+  decodeArg(_arg, _l, _lastChance = false, _isArg1 = false) {
     _arg.cycles = 0;        // default (register)
     _arg.isLabelIndex = NaN;
 
@@ -1522,8 +1523,15 @@ class CodeParser {
         if (!_lastChance) this.lateArgs.push({arg:_arg, line:_l});
       }
       else {
+        isconst = Math.floor(isconst);
+        if (_isArg1) {
+          if ((_l.instr != "LEA") && (_l.arg2) && (!_l.isErrorImmune()) && (isconst < M68K_VECTORS_ZONE_SIZE)) {
+            this.stopGlobalCompilation = true;
+            return _l.Failed("arg1 is an address, missing '#' ?. Add 'M68K_NOERROR' in this line's comments to disable this error");
+          }
+        }
         _arg.type = 'adrs';
-        _arg.value = Math.floor(isconst)
+        _arg.value = isconst;
         if (_l.instrSize == 4)
           _arg.cycles = 16;
        else
@@ -1594,37 +1602,39 @@ class CodeParser {
         }
       }
       // read args
-      let ofsBeforeArg = ln.ofs;
+      let ofsBeforeArg1 = ln.ofs;
       let arg1 = ln.readArg();
       if (arg1 == "READARG-ERROR") {
         t.stopGlobalCompilation = true;
         return;
       }
-      let ofsAfterArg = ln.ofs;
-      if (arg1.length > 0) {
-        ln.arg1 = { str: arg1 };
-        ln.ofs = ofsBeforeArg;
-        t.decodeArg(ln.arg1, ln);
-      }
-
-      ln.ofs = ofsAfterArg;
+      let ofsAfterArg1 = ln.ofs;
+      ln.ofs = ofsAfterArg1;
       ln.skipNextComa();
-      ofsBeforeArg = ln.ofs;
+      let ofsBeforeArg2 = ln.ofs;
       let arg2 = ln.readArg();
       if (arg2 == "READARG-ERROR") {
         t.stopGlobalCompilation = true;
         return;
       }
-      ofsAfterArg = ln.ofs;
+      let ofsAfterArg2 = ln.ofs;
+      if (arg1.length > 0) ln.arg1 = { str: arg1 };
+      if (arg2.length > 0) ln.arg2 = { str: arg2 };
+
+      if (arg1.length > 0) {
+        ln.ofs = ofsBeforeArg1;
+        t.decodeArg(ln.arg1, ln, false, true);
+        if (t.stopGlobalCompilation) return;
+      }
+
       if (arg2.length > 0) {
-        ln.arg2 = { str: arg2 };
-        ln.ofs = ofsBeforeArg;
+        ln.ofs = ofsBeforeArg2;
         t.decodeArg(ln.arg2, ln);
         if (ln.arg2.reg == "A7") {
             ln.intentionallyWritingToStack = true;  
         }
       }
-      ln.ofs = ofsAfterArg;
+      ln.ofs = ofsAfterArg2;
       if (defaultSizeUsed) {
         switch (ln.instr) {
           case 'BTST':
@@ -1666,6 +1676,7 @@ class CodeParser {
       if (ln.isLabel)
         continue;
       t.process_oneLineInstr(ln);
+      if (t.stopGlobalCompilation) return false;
     }
   }
 
@@ -1838,7 +1849,8 @@ class CodeParser {
     for (let i = 0; i < t.lateAsmbl.length; i++) {
       let out = { tab: new Uint8Array(16), ofs: 0 };
       let ln = t.lateAsmbl[i];
-      if (ln.arg1) t.decodeArg(ln.arg1, ln, true);
+      if (ln.arg1) t.decodeArg(ln.arg1, ln, true, true);
+      if (this.stopGlobalCompilation) return;
       if (ln.arg2) t.decodeArg(ln.arg2, ln, true);
       let ret = asmbl_go(ln, out);
       if (ret.solveError != null) {

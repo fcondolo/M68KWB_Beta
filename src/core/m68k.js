@@ -2664,6 +2664,7 @@ function reAssemble(_ip,_count) {
     let str = InstructionToString(r.instruction).fullString;
     line = new LineParser("disassembly", str, str);
     CODERPARSER_SINGLETON.process_oneLineInstr(line);
+    if (CODERPARSER_SINGLETON.stopGlobalCompilation) return null;
     CODERPARSER_SINGLETON.process_executionCallback_oneLine(line);
     line.IP = _ip;
     line.codeSectionOfs = _ip;

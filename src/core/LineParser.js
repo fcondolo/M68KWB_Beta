@@ -161,6 +161,12 @@ class LineParser {
     return "file: " + t.path + ", line " + (t.line + 1).toString();
   }
 
+  isErrorImmune() {
+    let t = this;
+    if (t.text.toUpperCase().includes("M68K_NOERROR")) return true;
+    return false;
+  }
+
   getFailString(_err) {
     let t = this;
     CODERPARSER_SINGLETON.stopGlobalCompilation = true;

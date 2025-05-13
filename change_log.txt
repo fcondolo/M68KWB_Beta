@@ -1,6 +1,7 @@
 13/05/2025
 ==========
 - Added ASSEMBLER_CONFIG.allow_ds_0
+- Raise error if reading from low memory to avoid move 0,d0 instead of move #0,d0.
 
 12/05/2025
 ==========

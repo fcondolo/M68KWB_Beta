@@ -46,6 +46,7 @@ function AMIGA_bltStart() {
 	if (CON0 == 0x100) { // clear
 		for (let y = 0; y < height; y++) {
 			MACHINE.errorContext = "Blitter Clear, line " + (y+1) + "/" + height;
+			MACHINE.lastBlitContext = "Blitter Clear, line " + (y+1) + "/" + height;
 			for (let x = 0; x < wordCount; x++) {
 				MACHINE.setRAMValue(0, ofsD, 2);
 				ofsD += 2;
@@ -62,6 +63,7 @@ function AMIGA_bltStart() {
 	if (useD) {
 		for (let y = 0; y < height; y++) {
 			MACHINE.errorContext = "Blitter copy, line " + (y+1) + "/" + height;
+			MACHINE.lastBlitContext = "Blitter copy, line " + (y+1) + "/" + height;
 			for (let x = 0; x < wordCount; x++) {
 				let word = 0;
 				let aOfs = Math.max(0, ofsA - 4 * ASHIFT);
