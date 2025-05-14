@@ -22,7 +22,7 @@ init:
        add.w         #STARTZ,d0
        move.w        d0,(a0)+             ; z
        add.w         d5,d6                ; incr angle
-       dbra          d7,.initStars       
+       dbra          d7,.initStars
 
        moveq         #0,d0
        lea           mul40,a0

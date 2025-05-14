@@ -314,7 +314,8 @@ class M68K_Machine {
         let r;
         let r32 = new Uint32Array(1); // avoid having negative numbers when grabbing 32 bits value with highet bit set
         _at &= 0xffffff; // 24 bit addressing
-        t.chkMem(_at, _size, ALLOW_READ);
+        if (!M68K_CURLINE || !M68K_CURLINE.isErrorImmune)
+            t.chkMem(_at, _size, ALLOW_READ);
         DEBUGGER_lastReadAdrs = _at;
         switch (_size) {
             case 1: r32[0] = t.ram[_at]; break;
@@ -357,7 +358,8 @@ class M68K_Machine {
                 debugger;
             }
         }
-        t.chkMem(_at, _size, ALLOW_WRITE, _v);
+        if (!M68K_CURLINE || !M68K_CURLINE.isErrorImmune)
+            t.chkMem(_at, _size, ALLOW_WRITE, _v);
         if (TIME_MACHINE) {
             switch (_size) {
                 case 1: TIME_MACHINE.onMemoryWrite(_at, t.ram[_at], 1); break;

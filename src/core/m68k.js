@@ -235,22 +235,32 @@ function lock(_reg, _mask, _reason) {
 }
 
 
-function checklocks() {
+function checklocks(_line = null) {
   for (let i = 0; i < 8; i++) {
     if (lockDataA[i]) {
       if ((regs.a[i] & lockDataA[i].mask) != lockDataA[i].val) {
-        if (lockDataA[i].reason)
-          debug('sorry, register A' + i + ' is locked for: ' + lockDataA[i].reason);
-        else
-          debug('sorry, register A' + i + ' is locked');
+        const immune = (_line && _line.isErrorImmune) ? true : false;
+        if (immune) {
+          lockDataA[i].val = regs.a[i] & lockDataA[i].mask; // update with new value
+        } else {
+          if (lockDataA[i].reason)
+            debug('sorry, register A' + i + ' is locked for: ' + lockDataA[i].reason);
+          else
+            debug('sorry, register A' + i + ' is locked');  
+        }
       }
     }
     if (lockDataD[i]) {
       if (regs.d[i] & lockDataD[i].mask != lockDataD[i].val) {
-        if (lockDataD[i].reason)
-          debug('sorry, register D' + i + ' is locked for: ' + lockDataD[i].reason);
-        else
-          debug('sorry, register D' + i + ' is locked');
+        const immune = (_line && _line.isErrorImmune) ? true : false;
+        if (immune) {
+          lockDataD[i].val = regs.d[i] & lockDataA[i].mask;  // update with new value
+        } else {
+          if (lockDataD[i].reason)
+            debug('sorry, register D' + i + ' is locked for: ' + lockDataD[i].reason);
+          else
+            debug('sorry, register D' + i + ' is locked');
+        }
       }
     }
   }
@@ -2894,7 +2904,7 @@ async function execCPU() {
       DEBUGGER_AfterInstr();
     
     if (DEBUGGER_paranoid)
-      checklocks();
+      checklocks(line);
 
     M68K_PREVIP = M68K_IP;
     M68K_IP = M68K_NEXTIP;

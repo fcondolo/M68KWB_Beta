@@ -165,7 +165,7 @@ const test_opcodes = [
   [0x23fc,0x0000,0xbeef,0xabcd,0x1234],"move.l #$beef,$abcd1234",
 
   [0x3240],"movea.w d0,a1",
-  [0x2479,0x0000,0x0006],"movea.l $6,a2 ; M68K_NOERROR",
+  [0x2479,0x0000,0x0006],"movea.l $6,a2 ; M68KWB_NOERROR",
 	[0x3a7c,0xdead],"movea.w #$dead,a5",
 	[0x287c,0xdead,0xbeef],"movea.l #$deadbeef,a4",
   [0x3248],"movea.w a0,a1",
@@ -194,7 +194,7 @@ const test_opcodes = [
   [0x41f9,0x0000,0x0012],"lea $12,a0",
   [0x4e4e],"trap #$e",
 
-  [0x83f9,0x0000,0x00ab],"divs $ab,d1 ; M68K_NOERROR",
+  [0x83f9,0x0000,0x00ab],"divs $ab,d1 ; M68KWB_NOERROR",
   [0x83fc,0x00ab],"divs #$ab,d1",
   [0x85f9,0x0000,0xabcd],"divs $abcd,d2",
   [0x85fc,0xabcd],"divs #$abcd,d2",
@@ -205,7 +205,7 @@ const test_opcodes = [
   [0x8df3,0x5012],"divs $12(a3,d5.w),d6",
   [0x83c0],"divs d0,d1",
   [0x82c0],"divu d0,d1",
-  [0x82f9,0x0000,0x00ab],"divu $ab,d1 ; M68K_NOERROR",
+  [0x82f9,0x0000,0x00ab],"divu $ab,d1 ; M68KWB_NOERROR",
   [0x82fc,0x00ab],"divu #$ab,d1",
   [0x84f9,0x0000,0xabcd],"divu $abcd,d2",
   [0x84fc,0xabcd],"divu #$abcd,d2",
@@ -216,7 +216,7 @@ const test_opcodes = [
   [0x8cf3,0x5012],"divu $12(a3,d5.w),d6",
 
 
-  [0xc3f9,0x0000,0x00ab],"muls $ab,d1 ; M68K_NOERROR",
+  [0xc3f9,0x0000,0x00ab],"muls $ab,d1 ; M68KWB_NOERROR",
   [0xc3fc,0x00ab],"muls #$ab,d1",
   [0xc5f9,0x0000,0xabcd],"muls $abcd,d2",
   [0xc5fc,0xabcd],"muls #$abcd,d2",
@@ -229,7 +229,7 @@ const test_opcodes = [
   [0xc4fc,0x0028],"mulu #$28,d2",
 
   
-  [0xc2f9,0x0000,0x00ab],"mulu $ab,d1 ; M68K_NOERROR",
+  [0xc2f9,0x0000,0x00ab],"mulu $ab,d1 ; M68KWB_NOERROR",
   [0xc2fc,0x00ab],"mulu #$ab,d1",
   [0xc4f9,0x0000,0xabcd],"mulu $abcd,d2",
   [0xc4fc,0xabcd],"mulu #$abcd,d2",

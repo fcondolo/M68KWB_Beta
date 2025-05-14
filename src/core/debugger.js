@@ -1204,10 +1204,11 @@ function DEBUGGER_initFile(_refreshCyclesOnly = false) {
   DEBUGGER_rowToIP = []; // translates debugger line to IP
   PARSER_lines = CODERPARSER_SINGLETON.strings.lines;
   let bpList = [];
-  for (let i = 0; i < PARSER_lines.length; i++) {
+  for (let i = 0; i < PARSER_lines.length; i++) {    
     let disam = null;
     let l = PARSER_lines[i];
     if (l.isInstr) {
+      l.updateImmunityflag();
       if (l.breakpoint) {
         bpList.push(i);
       }

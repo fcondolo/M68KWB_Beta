@@ -1525,9 +1525,10 @@ class CodeParser {
       else {
         isconst = Math.floor(isconst);
         if (_isArg1) {
-          if ((_l.instr != "LEA") && (_l.arg2) && (!_l.isErrorImmune()) && (isconst < M68K_VECTORS_ZONE_SIZE)) {
+          _l.updateImmunityflag();
+          if ((_l.instr != "LEA") && (_l.arg2) && (!_l.isErrorImmune) && (isconst < M68K_VECTORS_ZONE_SIZE)) {
             this.stopGlobalCompilation = true;
-            return _l.Failed("arg1 is an address, missing '#' ?. Add 'M68K_NOERROR' in this line's comments to disable this error");
+            return _l.Failed("arg1 is an address, missing '#' ?. Add 'M68KWB_NOERROR' in this line's comments to disable this error");
           }
         }
         _arg.type = 'adrs';

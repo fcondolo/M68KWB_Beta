@@ -29,6 +29,7 @@ class LineParser {
     t.filter();
     t.lastFoundNumberIndex = NaN;
     t.IP = NaN;
+    t.updateImmunityflag();
   }
 
   clone() {
@@ -53,6 +54,7 @@ class LineParser {
     ret.originalIndex = t.originalIndex;
     ret.IP = t.IP;
     ret.endLabelIndex = t.endLabelIndex;
+    ret.isErrorImmune = t.isErrorImmune;
     return ret;
   }
 
@@ -161,10 +163,11 @@ class LineParser {
     return "file: " + t.path + ", line " + (t.line + 1).toString();
   }
 
-  isErrorImmune() {
-    let t = this;
-    if (t.text.toUpperCase().includes("M68K_NOERROR")) return true;
-    return false;
+  updateImmunityflag() {
+    if (this.text.includes("M68KWB_NOERROR"))
+      this.isErrorImmune = true;
+    else
+      this.isErrorImmune = false;
   }
 
   getFailString(_err) {
