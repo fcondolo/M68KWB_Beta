@@ -373,6 +373,7 @@ function main_startChosenFx(_className) {
 }
 
 function onFxChosen() {
+  hideModalBox();
   let sel = document.getElementById("fxListSelect");
   const name = sel.options[sel.selectedIndex].value;
   if (!main_startChosenFx(name)) {
@@ -553,6 +554,7 @@ function main_Alert(_msg, _makeLastMsg = false, _skipAsm = false) {
     }  
     MAIN_ALERTS_LIST.push(_msg);
     let strippedMsg = _msg.replaceAll("<br>","\n");
+    strippedMsg = strippedMsg.replaceAll("\t","\u00A0");
     alert(strippedMsg);  
   }
   if (_makeLastMsg) {
