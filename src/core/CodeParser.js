@@ -1602,6 +1602,10 @@ class CodeParser {
           }
         }
       }
+      switch (ln.instr) {
+        case "BLO" : ln.instr = "BCS"; ln.filtered.replace("BLO", "BCS"); break; 
+        case "BHS" : ln.instr = "BCC"; ln.filtered.replace("BHS", "BCC");  break; 
+      }
       // read args
       let ofsBeforeArg1 = ln.ofs;
       let arg1 = ln.readArg();

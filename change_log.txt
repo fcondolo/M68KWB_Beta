@@ -1,6 +1,7 @@
 15/05/2025
 ==========
 - Better handling of tabs in error box
+- Support for BHS and BLO
 
 
 14/05/2025
