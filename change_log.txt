@@ -2,6 +2,7 @@
 ==========
 - DIVS/DIVU overflow error messages can be ignored with ";M68KWB_NOERROR"
 - Added basic regression tests system
+- Finally, you can launch the selected FX from the filter textbox by pressing enter
 
 
 15/05/2025

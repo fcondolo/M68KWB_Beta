@@ -293,6 +293,9 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     case document.getElementById('command'): 
     case document.getElementById('filterLabel'): 
     return;
+    case document.getElementById('searchfx'):
+      if (event.keyCode == 13) onFxChosen(); // enter 
+    return;
     default:
     break;
   }
