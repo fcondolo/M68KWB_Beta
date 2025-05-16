@@ -1,19 +1,26 @@
 REGISTER_FX({
-  classname:"Non_Regressin_Tests", 
+  classname:"Non_Regression_Tests", 
   platform:"STE", 
   rootPath:"fx/tests",
-  source:"Non_Regressin_Tests.asm",
+  source:"Non_Regression_Tests.asm",
 });
 
-class Non_Regressin_Tests {
+class Non_Regression_Tests {
   constructor() {
     let t = this;
     t.curTestIndex = 0;
     t.executedUpdates = 0;
-    t.msg = "Running non-regreswion tests...<br>";
+    t.msg = "Running non-regression tests...<br>";
     /*
-    tests table format:
-    {jsInit:"myJSfuncName", asmInit:"myAsmLabel", jsUpdate:"myJSfuncName", asmUpdate: "myAsmLabel", updatesToExecute: 0, msg:"Test something"},
+    tests table entries format:
+    {
+      jsInit:"methodName"   ==> name of the JS method within the "Non_Regressin_Tests" class to execute before asm init. Name must be between quotes, without parenthesis
+      asmInit:"asmLabel"    ==> name of the asm lablel to call at init
+      jsUpdate:"methodName" ==> name of the JS method within the "Non_Regressin_Tests" class to execute before asm update. Name must be between quotes, without parenthesis
+      asmUpdate:"asmLabel"  ==> name of the asm lablel to call at update
+      updatesToExecute:10   ==> number of times (frames) the JS and asm updates should be called before passing to next test
+      msg:"Test something"  ==> info message displayed while running test
+      }
     */
     t.tests = [      
       {jsInit:"test_Tools", msg:"Test TOOLS"},
@@ -23,11 +30,6 @@ class Non_Regressin_Tests {
     ];
   }
 
-  FX_Init() {
-    let t = this;    
-  }
-
-  
   FX_Update()
   {
     let t = this;
