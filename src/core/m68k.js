@@ -1053,7 +1053,8 @@ function I_MULU(_instr) {
 
 // _dest.l / _source.w
 // must check if result fits in a word or raise error
-function I_DIVS(_source, _dest) {
+// _e : non-blocking errors are allowed
+function I_DIVS(_source, _dest, _e) {
   checkSignedWord(_source);
   checkSignedDouble(_dest);
 
@@ -1069,8 +1070,8 @@ function I_DIVS(_source, _dest) {
     regs.v = false;
     if ((quo < -32768) || (quo > 32767)) {
       regs.v = true;
-      if (CPU_CONFIG.check_div_overflow) {
-        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo);
+      if (CPU_CONFIG.check_div_overflow && _e) {
+        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ".\nIf this behavior was intended, just add comment '; M68KWB_NOERROR' at the end of the line.\n");
       }
     }
     var rem = Math.abs(Math.floor(d % s));
@@ -1083,7 +1084,8 @@ function I_DIVS(_source, _dest) {
   return _dest;
 }
 
-function I_DIVU(_source, _dest) {
+// _e : non-blocking errors are allowed
+function I_DIVU(_source, _dest, _e = true) {
   checkUnsignedWord(_source);
 
   var s = Math.floor(_source) & 0xffff;
@@ -1098,8 +1100,8 @@ function I_DIVU(_source, _dest) {
     regs.v = false;
     if (quo > 0xffff) {
       regs.v = true;
-      if (CPU_CONFIG.check_div_overflow) {
-        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo);
+      if (CPU_CONFIG.check_div_overflow && _e) {
+        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ".\nIf this behavior was intended, just add comment '; M68KWB_NOERROR' at the end of the line.\n");
       }
     } else {
       var rem = d % s;
@@ -1773,7 +1775,7 @@ function DIVU(_instr) {
   let dst = getArg(_dest, 4, false);
   if (dst.err) { return dst.err; }
 
-  setArg(_dest, I_DIVU(src.value, dst.value), 4, false);
+  setArg(_dest, I_DIVU(src.value, dst.value, !_instr.isErrorImmune), 4, false);
   return ret;
 }
 
@@ -1788,7 +1790,7 @@ function DIVS(_instr) {
   let dst = getArg(_dest, 4, true);
   if (dst.err) { return dst.err; }
 
-  setArg(_dest, I_DIVS(src.value, dst.value), 4, true);
+  setArg(_dest, I_DIVS(src.value, dst.value, !_instr.isErrorImmune), 4, true);
   return ret;
 }
 

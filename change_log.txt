@@ -1,3 +1,9 @@
+16/05/2025
+==========
+- DIVS/DIVU overflow error messages can be ignored with ";M68KWB_NOERROR"
+- Added basic regression tests system
+
+
 15/05/2025
 ==========
 - Better handling of tabs in error box
