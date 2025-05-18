@@ -439,7 +439,7 @@ function main_onload() {
     if (FXName) {
       if (main_startChosenFx(FXName))
         return;
-      if (CODERPARSER_SINGLETON.stopGlobalCompilation) {
+      if (CODERPARSER_SINGLETON && CODERPARSER_SINGLETON.stopGlobalCompilation) {
         hideModalBox();
         return;
       }
