@@ -332,6 +332,7 @@ class CodeParser {
         elm.innerHTML += '<br>' + t.errors[i];
         str += '\n' + t.errors[i];
       }
+      hideModalBox();
       main_Alert("Errors while assembling:" + str);
       return false;
     }
@@ -440,7 +441,9 @@ class CodeParser {
           str = "<br>file already included:<br>" + finalPath;
         console.warn(str);
         showHTMLError(str);
-        return true;
+        CODERPARSER_SINGLETON.push_error(str);
+        CODERPARSER_SINGLETON.Error(str);
+        return false;  
       }
     }
     CODERPARSER_SINGLETON.includes.push(finalPath);

@@ -86,11 +86,16 @@ function showHTMLError(_err) {
   if (!_err) return;
   if (_err.indexOf("TypeError: Cannot read properties of undefined") >= 0)
     debugger;
-  if (PARSER_lines) {
-    const curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
-    if (curLine) {
-      _err += "<br> in file: " + curLine.path + "<br>at line: " + curLine.line;
-    }    
+  if (PARSER_lines && ASMBL_ADRSTOLINE && M68K_IP) {
+    if (M68K_IP >= 0 && M68K_IP < ASMBL_ADRSTOLINE.length) {
+      const idx = ASMBL_ADRSTOLINE[M68K_IP];
+      if (idx >= 0 && idx < PARSER_lines.length) {
+        const curLine = PARSER_lines[idx];
+        if (curLine) {
+          _err += "<br> in file: " + curLine.path + "<br>at line: " + curLine.line;
+        }
+      }
+    }
   }
   const l = DBGCTX.length;
   if (l > 0) {

@@ -193,18 +193,12 @@ function xbios_ssbrk() {
 
 // A call to the operating System to find the physical screen address
 function xbios_physbase() {
-    if (ST_PHYSICAL_SCREEN == -1) {
-        debug("trap #14: OS screen is not emulated: You can't ask for PHYBASE before setting it.");
-    }
-    regs.d[0] = ST_PHYSICAL_SCREEN;
+    regs.d[0] = ST_PHYSICAL_SCREEN; // OS screen is not emulated, so you'll get crap if not set before, but this remains so that your nativ ecode still runs
     return ST_PHYSICAL_SCREEN;
 }
 
 function xbios_logbase() {
-    if (ST_LOGICAL_SCREEN == -1) {
-        debug("trap #14: OS screen is not emulated: You can't ask for LOGBASE before setting it.");
-    }
-    regs.d[0] = ST_LOGICAL_SCREEN;
+    regs.d[0] = ST_LOGICAL_SCREEN;  // OS screen is not emulated, so you'll get crap if not set before, but this remains so that your nativ ecode still runs
     return ST_LOGICAL_SCREEN;
 }
 

@@ -40,7 +40,7 @@ const ASSEMBLER_CONFIG = {
     // this can be useful to have specific code assembled only on the real emulator/machine and vice-versa.
     // e.g. IFD M68KWB .... ELSE ... ENDC
     defines : [
-        {name: "M68KWB", value: 1}, // same as "M68KWB EQU 1" in a .asm file
+        {name: "M68KWB", value: 1}, // DO NOT REMOVE THIS ONE!!!!! same as "M68KWB EQU 1" in a .asm file
         //... add your own defines here
     ],
 

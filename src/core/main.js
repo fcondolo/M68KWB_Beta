@@ -438,7 +438,11 @@ function main_onload() {
     FXName = localStorage.getItem(LOCALSTORAGE_FX_NAME);
     if (FXName) {
       if (main_startChosenFx(FXName))
-        return;  
+        return;
+      if (CODERPARSER_SINGLETON.stopGlobalCompilation) {
+        hideModalBox();
+        return;
+      }
       fxList += "FX " + FXName + " from last session could not be started<br>";
     }
   }
