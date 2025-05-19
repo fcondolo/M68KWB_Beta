@@ -209,13 +209,14 @@ function xbios_getrez() {
 
 function xbios_setscreen() {
     const logBase = MACHINE.getRAMValue(regs.a[7]+2, 4, false);
-    if (logBase != -1)
+    if (logBase != 0xffffffff)
         ST_LOGICAL_SCREEN = logBase;
     const phyBase = MACHINE.getRAMValue(regs.a[7]+6, 4, false);
-    if (phyBase != -1)
+    if (phyBase != 0xffffffff)
         ST_PHYSICAL_SCREEN = phyBase;
     ST_setCustomFromPtr_B(ST_SCREEN_HI,(ST_PHYSICAL_SCREEN>>>16)&255);
     ST_setCustomFromPtr_B(ST_SCREEN_MID,(ST_PHYSICAL_SCREEN>>>8)&255);
+    if (ST_PHYSICAL_SCREEN == -1) return null;
     switch(ST_MODEL) {
         case ATARI_MODEL_ST:
             if ((ST_PHYSICAL_SCREEN&255) != 0) console.error("xbios_setscreen: on ST, screen address must be aligned on 256 bytes");
