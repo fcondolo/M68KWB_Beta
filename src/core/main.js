@@ -279,8 +279,6 @@ function main_startChosenFx(_className) {
     localStorage.setItem(LOCALSTORAGE_FX_NAME, FXName);
   }
 
-  smallRenderCvs = document.getElementById("smallrender");
-  smallRenderCtx = get2DContext(smallRenderCvs);
 
   // Create canvases
   cvs = document.getElementById("mycvs");
@@ -324,6 +322,11 @@ function main_startChosenFx(_className) {
   PLAYFIELD_LINES_COUNT = PAL_PLAYFIELD_LINES_COUNT;
   CANVAS_DISPLAY_WIDTH = SIMU_DEFAULT_WIDTH;
   CANVAS_DISPLAY_HEIGHT = PAL_VIDEO_LINES_COUNT;
+  smallRenderCvs = document.getElementById("smallrender");
+  smallRenderCvs.width = Math.floor(BACKBUF_CVS.width * 0.7);
+  smallRenderCvs.height = Math.floor(BACKBUF_CVS.height * 0.7);
+  smallRenderCtx = smallRenderCvs.getContext('2d');
+
 
   if (FX_INFO.source) {
     let finalPath  = "";
@@ -474,6 +477,14 @@ function onNewOutputResolution() {
     case "OCS":
       CANVAS_DISPLAY_WIDTH = Math.floor((rez * 483)/100);
       CANVAS_DISPLAY_HEIGHT = Math.floor((rez * 470)/100);
+    break;    
+    case "ST":
+      CANVAS_DISPLAY_WIDTH = Math.floor((rez * 390)/100);
+      CANVAS_DISPLAY_HEIGHT = Math.floor((rez * 312)/100);
+    break;    
+    case "STE":
+      CANVAS_DISPLAY_WIDTH = Math.floor((rez * 390)/100);
+      CANVAS_DISPLAY_HEIGHT = Math.floor((rez * 312)/100);
     break;    
   }
   cvs.width =  CANVAS_DISPLAY_WIDTH;
