@@ -1,3 +1,4 @@
+// maybe try https://github.com/PSP-Archive/PSPUAE/blob/main/blitter.c to be closer to the actual machine, especially for line draw
 
 function AMIGA_bltStart() {
 	const old_dmacon = AMIGA_customregs[DMACONR];

@@ -348,6 +348,9 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
       }
       $("tr[tabindex=" + idx + "]").focus();
     break;
+    case 65: // a
+      if (DEBUGPRIM) DEBUGPRIM.showCard = !DEBUGPRIM.showCard;
+    break;
     case 66: // b
     /*
       if (DEBUGGER_SHIFT_PRESSED) {
@@ -584,7 +587,7 @@ function DEBUGGER_memoryStats() {
 function DEBUGGER_help() {
   let msg = "<center><b style='color:white'>M68KWorkbench Help</b></center><br>";
   msg += "<table><tr><th>KEY(s)</th><th>COMMAND</th><th>DESCRIPTION</th></tr>";
-  
+  msg += "<tr><td>a</td><td>Anchors</td><td>Show anchors / test card</td></tr>";
   msg += "<tr><td>b</td><td>Bitplanes visibility</td><td>Switch bitplanes on/off</td></tr>";
   msg += "<tr><td>alt + b</td><td>break update</td><td>trigger breakpoint at the beginning of update (on/off)</td></tr>";
   msg += "<tr><td>c</td><td>cycles</td><td>toggle show CPU cycles per frame on/off</td></tr>";

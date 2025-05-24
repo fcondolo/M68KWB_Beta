@@ -189,8 +189,8 @@
         M68K_TICKS_PER_SECOND   = OCS_CONFIG.M68K_TICKS_PER_SECOND;
         M68K_TICKS_PER_FRAME = Math.floor(M68K_TICKS_PER_SECOND/50);
        
-        SIMU_DEFAULT_WIDTH          = 390;
-        PAL_VIDEO_LINES_COUNT       = 312;
+        SIMU_DEFAULT_WIDTH          = 368;      // max horiz pix in lowres (http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0085.html) 
+        PAL_VIDEO_LINES_COUNT       = 312;      // PAL lines (http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0063.html)
         PAL_PLAYFIELD_LINES_COUNT   = 256
         SIMU_START_BITPLANE         = ((SIMU_DEFAULT_WIDTH - 320) / 2);
         SIMU_END_BITPLANE           = (SIMU_DEFAULT_WIDTH - SIMU_START_BITPLANE);

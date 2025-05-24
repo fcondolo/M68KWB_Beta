@@ -232,31 +232,12 @@ function setTooltipPos(e, d) {
 }
 
 function showMouseCoord(event) {
-  bounds=this.getBoundingClientRect();
-
-  let hardcoded_skip_monitor_x = 0;
-  let hardcoded_skip_monitor_y = 0;
-
-  switch (FX_INFO.platform) {
-    case "OCS":
-      if (AMIGA_Chunky8 == null) {
-        hardcoded_skip_monitor_x = 35;
-        hardcoded_skip_monitor_y = 41;  
-      }
-    break;
-    case "ST" : ST_start();
-    case "STE" : STE_start();
-      hardcoded_skip_monitor_x = 35;
-      hardcoded_skip_monitor_y = 56;
-    break;
-  }
-
-  var x = Math.floor((event.pageX - this.offsetLeft) / CANVAS_SCALE);
-  var y = Math.floor((event.pageY - this.offsetTop) / CANVAS_SCALE);
-  x -= hardcoded_skip_monitor_x;
-  y -= hardcoded_skip_monitor_y;
-  var px=x;
-  var py=y;
+  let x = (event.pageX - this.offsetLeft) * 100 / CANVAS_SCALE;
+  let y = (event.pageY - this.offsetTop) * 100 / CANVAS_SCALE;
+  x -= DEBUGPRIM.startScreenX;
+  y -= DEBUGPRIM.startScreenY;
+  let px = Math.floor(x);
+  let py = Math.floor(y);
   cvs.style.cursor = "crosshair";
   document.getElementById("mouseCoordLabel").innerHTML = px + ", " + py;
 
@@ -314,9 +295,10 @@ function main_startChosenFx(_className) {
   });
 
 
-
+  let backbufw = SIMU_DEFAULT_WIDTH;
+  let backbufh = PAL_VIDEO_LINES_COUNT;
   switch (FX_INFO.platform) {
-    case "OCS" : AMIGA_start(); break;
+    case "OCS" : AMIGA_start(); backbufw = 483; backbufh = 470; break;
     case "ST" : ST_start(); break;
     case "STE" : STE_start(); break;
     default: alert("REGISTERED_FX : 'platform' field must be 'OCS', 'ST', or 'STE'"); break;
@@ -330,8 +312,8 @@ function main_startChosenFx(_className) {
 
   // now that machine is started, we can create the backbuff of the right resolution
   BACKBUF_CVS = document.getElementById('backBuffer');
-  BACKBUF_CVS.width = SIMU_DEFAULT_WIDTH;
-  BACKBUF_CVS.height = PAL_VIDEO_LINES_COUNT;
+  BACKBUF_CVS.width = backbufw;
+  BACKBUF_CVS.height = backbufh;
 	BACKBUF_CTX = get2DContext(BACKBUF_CVS);
   SIMU_START_BITPLANE = ((SIMU_DEFAULT_WIDTH - 320) / 2);
   SIMU_END_BITPLANE = (SIMU_DEFAULT_WIDTH - SIMU_START_BITPLANE);
@@ -465,27 +447,31 @@ function main_onload() {
   showModalBox(fxList, onFxChosen);
 }
 
-// _zoom : 0..100
+// _zoom : 100..200
 function setZoom(_zoom) {
-  if (_zoom < 0) {
-    main_Alert("setZoom: argument must be in [0..100] range (you passed: " + _zoom + ")");
-    _zoom = 0;
-  }
-  if (_zoom > 100) {
-    main_Alert("setZoom: argument must be in [0..100] range (you passed: " + _zoom + ")");
+  if (_zoom < 100) {
+    main_Alert("setZoom: argument must be in [100..200] range (you passed: " + _zoom + ")");
     _zoom = 100;
   }
-  _zoom += 100; // 100..200 (like the slider) 
+  if (_zoom > 200) {
+    main_Alert("setZoom: argument must be in [100..200] range (you passed: " + _zoom + ")");
+    _zoom = 200;
+  }
   document.getElementById("outpuResolution").value = _zoom;
   onNewOutputResolution();
 }
 
 
 function onNewOutputResolution() {
+  // default resolution: 100
   let rez = document.getElementById("outpuResolution").value;
   CANVAS_SCALE = rez;
-  CANVAS_DISPLAY_WIDTH = Math.floor((rez * SIMU_DEFAULT_WIDTH)/90);
-  CANVAS_DISPLAY_HEIGHT = Math.floor((rez * PAL_VIDEO_LINES_COUNT)/90);
+  switch (FX_INFO.platform) {
+    case "OCS":
+      CANVAS_DISPLAY_WIDTH = Math.floor((rez * 483)/100);
+      CANVAS_DISPLAY_HEIGHT = Math.floor((rez * 470)/100);
+    break;    
+  }
   cvs.width =  CANVAS_DISPLAY_WIDTH;
   cvs.height =  CANVAS_DISPLAY_HEIGHT;
 }
@@ -505,7 +491,10 @@ function imgDataToScreen(imagedata) {
   BACKBUF_CTX.putImageData(imagedata,0,0);
   DEBUGPRIM.draw(BACKBUF_CTX);
   ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(BACKBUF_CVS, 0, 0, BACKBUF_CVS.width, BACKBUF_CVS.height, 0, 0, CANVAS_DISPLAY_WIDTH, CANVAS_DISPLAY_HEIGHT);
+  if (CANVAS_SCALE == 100)
+    ctx.drawImage(BACKBUF_CVS, 0, 0);
+  else
+    ctx.drawImage(BACKBUF_CVS, 0, 0, BACKBUF_CVS.width, BACKBUF_CVS.height, 0, 0, CANVAS_DISPLAY_WIDTH, CANVAS_DISPLAY_HEIGHT);
 }
 
 

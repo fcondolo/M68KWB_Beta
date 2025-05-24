@@ -14,6 +14,11 @@ class DebugPrimitives {
         t.lines         = [];
         t.startScreenX  = 0;
         t.startScreenY  = 0;
+        t.showCard      = false;
+        t.startScreenX  = 0;
+        t.startScreeny  = 0;
+        t.screenW       = 320;
+        t.screenH       = 200;
     }
 
     addPoint(_x = 0, _y = 0, _color = 0xffffff, _rad = 1) {
@@ -56,6 +61,24 @@ class DebugPrimitives {
             _ctx.fill();
         }
         t.points = [];
+
+        if (t.showCard) {
+            _ctx.strokeStyle = "#ff00ff";
+            _ctx.beginPath();
+            _ctx.moveTo(t.startScreenX, t.startScreenY);
+            _ctx.lineTo(t.startScreenX + t.screenW - 1, t.startScreenY);
+            _ctx.moveTo(t.startScreenX, t.startScreenY + t.screenH - 1);
+            _ctx.lineTo(t.startScreenX + t.screenW - 1, t.startScreenY + t.screenH - 1);
+            _ctx.moveTo(t.startScreenX, t.startScreenY);
+            _ctx.lineTo(t.startScreenX, t.startScreenY + t.screenH - 1);
+            _ctx.moveTo(t.startScreenX + t.screenW - 1, t.startScreenY);
+            _ctx.lineTo(t.startScreenX + t.screenW - 1, t.startScreenY + t.screenH - 1);
+            _ctx.moveTo(t.startScreenX + t.screenW / 2, t.startScreenY + t.screenH / 2 - 10);
+            _ctx.lineTo(t.startScreenX + t.screenW / 2, t.startScreenY + t.screenH / 2 + 10);
+            _ctx.moveTo(t.startScreenX + t.screenW / 2 - 10, t.startScreenY + t.screenH / 2);
+            _ctx.lineTo(t.startScreenX + t.screenW / 2 + 10, t.startScreenY + t.screenH / 2);
+            _ctx.stroke();
+        }
     }
 }
   

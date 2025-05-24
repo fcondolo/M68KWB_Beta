@@ -57,6 +57,8 @@ function bitplanes_updateAllValues() {
 		DisplayDataFetchLastPix = DisplayDataFetchFirstPix + 16 * wordCount;
 	}
 
+	PLAYFIELD_LINES_COUNT = DisplayWindowStop_y - DisplayWindowStart_y;
+
 	bplHorizByteCount = (DisplayDataFetchLastPix - DisplayDataFetchFirstPix) / 8;
 	bitplaneAdrs[0] = (AMIGA_getCustom(BPL1PTH) << 16) | AMIGA_getCustom(BPL1PTL);
 	bitplaneAdrs[1] = (AMIGA_getCustom(BPL2PTH) << 16) | AMIGA_getCustom(BPL2PTL);
@@ -92,11 +94,18 @@ function bitplanes_update() {
 		return;
 	}
 
-	let monitor = document.getElementById("OCSMonitorImage");
+	const monitor = document.getElementById("OCSMonitorImage");
+	const monitor_w = 483;
+	const monitor_h = 470;
+	const monitor_left_border_w = 57;
+	const monitor_top_border_h = 62;
+	const first_visible_copper_y = 0x1b; // 27
+	const last_visible_copper_y = 0x37; // 55 (+ 256 = 311 ==> so 312 high total)
+	const first_visible_bitplane_y = 0x2c; // 44 ==> 44-27 = 17 lines before bitplanes start
 	BACKBUF_CTX.imageSmoothingEnabled = false;
-	BACKBUF_CTX.drawImage(monitor, 0, 0, SIMU_DEFAULT_WIDTH, PAL_VIDEO_LINES_COUNT, 0, 0, SIMU_DEFAULT_WIDTH, PAL_VIDEO_LINES_COUNT);
+	BACKBUF_CTX.drawImage(monitor, 0, 0, monitor_w, monitor_h, 0, 0, monitor_w, monitor_h);
 	BACKBUF_CTX.imageSmoothingEnabled = false;
-	let imgdata = BACKBUF_CTX.getImageData(0, 0, SIMU_DEFAULT_WIDTH, PAL_VIDEO_LINES_COUNT);
+	let imgdata = BACKBUF_CTX.getImageData(0, 0, monitor_w, monitor_h);
 
 	PLATFORM_OFSX = (SIMU_DEFAULT_WIDTH - 320) / 2;
 	PLATFORM_OFSY = (PAL_VIDEO_LINES_COUNT - 180) / 2;
@@ -108,11 +117,33 @@ function bitplanes_update() {
 		bplReadY[i] = 0;
 	}
 	copperExecMove = 0;
-	DEBUGPRIM.startScreenX = DisplayDataFetchFirstPix;
-	DEBUGPRIM.startScreenY = DisplayWindowStart_y-25;
-	let d = 4 * DEBUGPRIM.startScreenY * SIMU_DEFAULT_WIDTH;
-	for (let y = 0; y < PLAYFIELD_LINES_COUNT; y++) {
-		let rasterY = y + DisplayWindowStart_y;
+	const bitplanesStartY = DisplayWindowStart_y;
+	DEBUGPRIM.startScreenX = DisplayDataFetchFirstPix + monitor_left_border_w;
+	DEBUGPRIM.startScreenY = bitplanesStartY + monitor_top_border_h - first_visible_copper_y;
+	DEBUGPRIM.screenW = 320;
+	DEBUGPRIM.screenH = PLAYFIELD_LINES_COUNT;
+	// DRAW COLOR00 FOR THE TOP BORDER (0 to DisplayWindowStart_y)
+	let rasterY = first_visible_copper_y;
+	let remainingLines = PAL_VIDEO_LINES_COUNT;
+	let d = 4 * monitor_w * monitor_top_border_h + 4 * monitor_left_border_w;
+	for (let y = 0; y < bitplanesStartY - first_visible_copper_y; y++, rasterY++, remainingLines--) {
+		for (let rasterX = 0; rasterX < SIMU_DEFAULT_WIDTH; rasterX++, copperExecMove--) {
+			if (DMA_Copper && (copperExecMove <= 0)) {
+				if (copper_processOneInstr(rasterX, rasterY))
+					bitplanes_updateAllValues(); // in case the just executed copper instruction modified some HW register
+			}
+			useColorIndex(0);	// write color00 outside of display window
+			data[d++] = BPL_R;
+			data[d++] = BPL_G;
+			data[d++] = BPL_B;
+			data[d++] = 255;
+		}
+		d += 4 * (monitor_w - SIMU_DEFAULT_WIDTH);
+	}
+
+	// DRAW PLAYFIELDS
+	let bplY = 0;
+	for (;bplY < PLAYFIELD_LINES_COUNT; bplY++, rasterY++, remainingLines--) {
 		let bplReadX = 0;
 		for (let rasterX = 0; rasterX < SIMU_DEFAULT_WIDTH; rasterX++, copperExecMove--) {
 			if (DMA_Copper && (copperExecMove <= 0)) {
@@ -125,13 +156,11 @@ function bitplanes_update() {
 			}
 			// update only color0 if outside of bitplanes visible area
 			if (rasterX < DisplayDataFetchFirstPix || rasterX >= DisplayDataFetchLastPix || rasterY >= DisplayWindowStop_y) {
-				if (data[d] + data[d + 1] + data[d + 2] < 10) { // do not overwrite javascript graphics
-					useColorIndex(0);	// write color00 outside of display window
-					data[d++] = BPL_R;
-					data[d++] = BPL_G;
-					data[d++] = BPL_B;
-					data[d++] = 255;
-				} else d += 4;
+				useColorIndex(0);	// write color00 outside of display window
+				data[d++] = BPL_R;
+				data[d++] = BPL_G;
+				data[d++] = BPL_B;
+				data[d++] = 255;
 			}
 			else { // update bitplanes
 				let colorIndex = 0;
@@ -153,20 +182,33 @@ function bitplanes_update() {
 					}	
 				}
 				bplReadX++;
-				if (data[d] + data[d + 1] + data[d + 2] < 10) { // do not overwrite javascript graphics
-					useColorIndex(colorIndex);
-					data[d++] = BPL_R;
-					data[d++] = BPL_G;
-					data[d++] = BPL_B;
-					data[d++] = 255;
-				} else {
-					d += 4;
-				}
+				useColorIndex(colorIndex);
+				data[d++] = BPL_R;
+				data[d++] = BPL_G;
+				data[d++] = BPL_B;
+				data[d++] = 255;
 			}
 		}
 		for (let i = 0; i < 6; i++) {
 			bplReadY[i] += bplHorizByteCount + bitplaneMod[i];
 		}
+		d += 4 * (monitor_w - SIMU_DEFAULT_WIDTH);
+	}
+	
+	// DRAW COLOR00 FOR THE BOTTOM BORDER (PLAYFIELD_LINES_COUNT to PAL_VIDEO_LINES_COUNT)
+	for (; remainingLines>0; bplY++, rasterY++, remainingLines--) {
+		for (let rasterX = 0; rasterX < SIMU_DEFAULT_WIDTH; rasterX++, copperExecMove--) {
+			if (DMA_Copper && (copperExecMove <= 0)) {
+				if (copper_processOneInstr(rasterX, rasterY))
+					bitplanes_updateAllValues(); // in case the just executed copper instruction modified some HW register
+			}
+			useColorIndex(0);	// write color00 outside of display window
+			data[d++] = BPL_R;
+			data[d++] = BPL_G;
+			data[d++] = BPL_B;
+			data[d++] = 255;
+		}
+		d += 4 * (monitor_w - SIMU_DEFAULT_WIDTH);
 	}
 
 	// update BPLxPT (should be done every 16 pix in theory, but no difference here as it's write only registers)

@@ -56,11 +56,11 @@ function copper_onNewFrame() {
 	}
 	if (!cper_cur) return;
 	wait255Reached = 0;
-	// Execute first copperlist instructions before bitplanes start. 
+	// Execute first copperlist instructions occurring during VBL.
 	// This is totally rough and inaccurate. 
 	// Basically, executes the first 100 copper MOVES, unless a WAIT is met
 	for (let i = 0; i < 100; i++) {
-		if (!copper_processOneInstr(0, 0))
+		if (!copper_processOneInstr(0, 0, true))
 			break;
 	}
 	copperExecMove = 0;
@@ -88,7 +88,7 @@ According to tests:
 */
 
 let next5BplInstrDuration = 8;
-function copper_processOneInstr(_x, _y) {
+function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 	if (!cplist || !cper_cur)
 		return false;
 
@@ -97,6 +97,8 @@ function copper_processOneInstr(_x, _y) {
 	const word2 = MACHINE.getRAMValue(cper_cur+2,2,false);
 
 	if ((word1&1)  != 0) { // wait --> NOT taking into account blitter wait flag. Very basic implementation
+		if (_breakIfWait)
+			return false;
 		if (word1 == 0xffff) { // end of copperlist?
 			return false;
 		}
