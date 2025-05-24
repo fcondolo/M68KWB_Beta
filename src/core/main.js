@@ -302,8 +302,8 @@ function main_startChosenFx(_className) {
   let backbufh = PAL_VIDEO_LINES_COUNT;
   switch (FX_INFO.platform) {
     case "OCS" : AMIGA_start(); backbufw = 483; backbufh = 470; break;
-    case "ST" : ST_start(); break;
-    case "STE" : STE_start(); break;
+    case "ST" : ST_start(); backbufw = 390; backbufh = 312; break;
+    case "STE" : STE_start(); backbufw = 390; backbufh = 312; break;
     default: alert("REGISTERED_FX : 'platform' field must be 'OCS', 'ST', or 'STE'"); break;
   }
   
