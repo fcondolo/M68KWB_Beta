@@ -1393,7 +1393,7 @@ class CodeParser {
         let reg = readNextRegister(_arg.str, r, true, isMovem, _l);
         if (reg) {
           r = reg.index;
-          if ((_arg.str.charAt(r) == '.') && (_arg.str.charAt(r + 1) == 'W')) {
+          if ((_l.instr == 'LEA') || ((_arg.str.charAt(r) == '.') && (_arg.str.charAt(r + 1) == 'W'))) {
             _arg.indReg = reg.reg;
             _arg.indTab = reg.tab;
             _arg.indInd = reg.ind;

@@ -1,6 +1,10 @@
 OFFSET EQU 4
 
 testLabels_init:
+  lea       testLabels_mylabel,a0
+  move.w    #2,d0
+	lea	      (a0,d0),a3
+  ;>JS if (a3.ul != a0.ul+2) debug();
   lea     testLabels_myroutine,a0
   ;>JS if (a0.ul != label("testLabels_myroutine")) debug("FAILED: lea     testLabels_myroutine,a0")
   lea     testLabels_mylabel+OFFSET,a1

@@ -1695,6 +1695,8 @@ function breakpoint(_alertMessage) {
 }
 
 function debug(_alertMessage) {
+  if (MACHINE.errorContext)
+      _alertMessage += "<br>CONTEXT:" + MACHINE.errorContext;
   let beg = "code OFS = $" + M68K_IP.toString(16) + ", paused: ";
   if (_alertMessage) {
     DEBUGGER_AdditionalDbgMsg = _alertMessage;

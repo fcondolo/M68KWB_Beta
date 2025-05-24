@@ -201,10 +201,18 @@ Checks if a write to a custom register should trigger a reaction from the Amiga
 */
 function AMIGA_onCustomWrite(_index, _value) {
 	switch (_index) {
-		case BLTSIZE: AMIGA_bltStart(); break;
+		case BLTSIZE: 
+			TIME_MACHINE.paused = true;
+			AMIGA_BLITTER.blitter_fillStruct();
+			AMIGA_BLITTER.decide_blitter(); // AMIGA_bltStart();
+			TIME_MACHINE.paused = false;
+		break;
 		case DMACON: {
-			if (_value & 0x8000) AMIGA_customregs[DMACONR/2] |= _value; // switch on
-			else AMIGA_customregs[DMACONR/2] &= ~_value; // switch off				
+			if (_value & 0x8000) 
+				AMIGA_customregs[DMACONR/2] |= _value; // switch on
+			else 
+				AMIGA_customregs[DMACONR/2] &= ~_value; // switch off
+			AMIGA_customregs[DMACON/2] = AMIGA_customregs[DMACONR/2];
 		}
 		break;
 		case INTREQ: { // test vblank interrupt strobe register specific case

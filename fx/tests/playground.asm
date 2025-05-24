@@ -1,5 +1,9 @@
 
 init:
+  lea       blip,a0
+  move.w    #2,d0
+	lea	      (a0,d0),a3
+  ;>JS if (a3.ul != a0.ul+2) debug();
   move.w    #10,d0
   cmp.w     #10,d0
   bhs       .ww

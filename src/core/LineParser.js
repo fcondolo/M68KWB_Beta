@@ -399,6 +399,8 @@ class LineParser {
     t.lastFoundNumberIndex = exprStr.length;
 
       // convert from asm to js conventions
+    exprStr = exprStr.replace('$-', '-0x');
+    exprStr = exprStr.replace('%-', '-0b');
     exprStr = exprStr.replace('$', '0x');
     exprStr = exprStr.replace('%', '0b');
     exprStr = exprStr.replace('#', ' ');

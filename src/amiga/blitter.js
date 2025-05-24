@@ -8,7 +8,7 @@ function AMIGA_bltStart() {
 	}
 	TIME_MACHINE.paused = true;
 
-	AMIGA_customregs[DMACONR] |= 1<<6; // set blitter busy
+	AMIGA_customregs[DMACONR/2] |= 1<<6; // set blitter busy
 
 	const AMOD = AMIGA_getCustom(BLTAMOD);
 	const BMOD = AMIGA_getCustom(BLTBMOD);
@@ -55,7 +55,7 @@ function AMIGA_bltStart() {
 			ofsD += DMOD;
 		
 		}
-		AMIGA_customregs[DMACONR] = old_dmacon;
+		AMIGA_customregs[DMACONR/2] = old_dmacon;
 		MACHINE.errorContext = null;
 		TIME_MACHINE.paused = false;
 		return;
@@ -69,6 +69,8 @@ function AMIGA_bltStart() {
 				let word = 0;
 				let aOfs = Math.max(0, ofsA - 4 * ASHIFT);
 				let bOfs = Math.max(0, ofsB - 4 * BSHIFT);
+				aOfs &= 0xfffffffe;
+				bOfs &= 0xfffffffe;
 				let wA, wB, wC;
 				if (useA) wA = MACHINE.getRAMValue(aOfs, 2, false); else wA = AMIGA_getCustom(BLTADAT);
 				if (useB) wB = MACHINE.getRAMValue(bOfs, 2, false); else wB = AMIGA_getCustom(BLTBDAT);
@@ -117,7 +119,7 @@ function AMIGA_bltStart() {
 			ofsD += DMOD;
 		}
 	}
-	AMIGA_customregs[DMACONR] = old_dmacon;
+	AMIGA_customregs[DMACONR/2] = old_dmacon;
 	MACHINE.errorContext = null;
 	TIME_MACHINE.paused = false;
 }

@@ -200,6 +200,8 @@
         AMIGA_setCustomFromPtr_L(0xdff080, null);
     
         MACHINE.OnVectorWritten = AMIGA_OnVectorWritten;
+        AMIGA_BLITTER = new SAEO_Blitter();
+        AMIGA_BLITTER.setup();
     }
     
     function AMIGA_OnVectorWritten(_v, _at, _size) {

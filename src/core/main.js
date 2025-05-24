@@ -22,7 +22,7 @@ var PLATFORM_OFSY = 0;
 
 var PAUSED = false;
 
-var cvs, ctx;
+var cvs, ctx, smallRenderCtx, smallRenderCvs;
 var REQUEST_ANIMFRAME = true;
 var WAITING_USERINPUT = false;
 
@@ -279,6 +279,9 @@ function main_startChosenFx(_className) {
     localStorage.setItem(LOCALSTORAGE_FX_NAME, FXName);
   }
 
+  smallRenderCvs = document.getElementById("smallrender");
+  smallRenderCtx = get2DContext(smallRenderCvs);
+
   // Create canvases
   cvs = document.getElementById("mycvs");
   ctx = get2DContext(cvs);
@@ -315,6 +318,7 @@ function main_startChosenFx(_className) {
   BACKBUF_CVS.width = backbufw;
   BACKBUF_CVS.height = backbufh;
 	BACKBUF_CTX = get2DContext(BACKBUF_CVS);
+  BACKBUF_CVS.style.display = "none";
   SIMU_START_BITPLANE = ((SIMU_DEFAULT_WIDTH - 320) / 2);
   SIMU_END_BITPLANE = (SIMU_DEFAULT_WIDTH - SIMU_START_BITPLANE);
   PLAYFIELD_LINES_COUNT = PAL_PLAYFIELD_LINES_COUNT;
@@ -495,7 +499,9 @@ function imgDataToScreen(imagedata) {
     ctx.drawImage(BACKBUF_CVS, 0, 0);
   else
     ctx.drawImage(BACKBUF_CVS, 0, 0, BACKBUF_CVS.width, BACKBUF_CVS.height, 0, 0, CANVAS_DISPLAY_WIDTH, CANVAS_DISPLAY_HEIGHT);
-}
+
+    smallRenderCtx.drawImage(BACKBUF_CVS, 0, 0, BACKBUF_CVS.width, BACKBUF_CVS.height, 0, 0, smallRenderCvs.width, smallRenderCvs.height);
+  }
 
 
 function hideModalBox(_content, _closeCallback) {

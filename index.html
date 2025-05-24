@@ -52,7 +52,7 @@
   <script src='src/amiga/customReg.js'></script>
   <script src='src/amiga/bitplanes.js'></script>
   <script src='src/amiga/copper.js'></script>
-  <script src='src/amiga/blitter.js'></script>
+  <script src='src/amiga/Amiga_Blitter.js'></script>
  
   <!-- ATARI ST SPECIFIC -->
   <script src='src/atari/atariST_Constants.js'></script>
@@ -88,6 +88,7 @@
   <script src='fx/tutorials/tut_Atari1.js'></script>
   <script src='fx/tutorials/tut_Atari_HBL.js'></script>
   <script src='fx/tutorials/testSTEBlitter.js'></script>
+  <script src='fx/tutorials/testAmigaBlitter.js'></script>
   <script src='fx/tutorials/AtariSTe_BlitterFill.js'></script>
   <script src='fx/tutorials/AtariVBL.js'></script>
   
@@ -109,6 +110,7 @@
   <script src='fx/amiga/StarField/v1/strfldv1.js'></script>
   <script src='fx/amiga/StarField/v2/strfldv2.js'></script>
   <script src='fx/amiga/TestCopper.js'></script>
+  <script src='fx/amiga/fairlight/fairlight.js'></script>
   
  
   <!-- ... put your next Amiga FX here...  -->
@@ -131,10 +133,11 @@
   </div>
   <div id="content">
     <!--   <img src="city_ref.png"> -->
-    <canvas id="mycvs" width="390" height="312" style="background-color:black"></canvas>
+    <canvas id="mycvs" width="483" height="470" style="background-color:black"></canvas>
     <br>
-    <canvas id="chunkyShow" width="390" height="312" style="display:none; position:fixed; z-index:10; background-color:black"></canvas>
-    <canvas id="chunkyDraw" width="390" height="312" style="display:none; position:fixed; z-index:10; background-color:black"></canvas>
+    <canvas id="chunkyShow" width="483" height="470" style="display:none; position:fixed; z-index:10; background-color:black"></canvas>
+    <canvas id="chunkyDraw" width="483" height="470" style="display:none; position:fixed; z-index:10; background-color:black"></canvas>
+    <canvas id="backBuffer" width="483" height="470" style="display:none;"></canvas>
     <br>
     <!-- <button onclick="if (play) play=false; else play = true;">></button> -->
     Zoom: <input type="range" min="100" max="200" value="100" class="slider" id="outpuResolution"
@@ -156,7 +159,7 @@
     <div id="debugger-left" class="col_8" style="overflow:auto; max-height:768px;"></div>
     <div id="rightPane" class="col_4" style="overflow:auto; max-height:768px;">
       <div id="registersDump"></div>
-      <canvas id="backBuffer" width="390" height="312"></canvas>
+      <center><canvas id="smallrender" width="338" height="329"></canvas></center>
       <div id="debugger-right"></div>
     </div>
     <div id="log" class="col_12"></div>
