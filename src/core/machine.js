@@ -317,7 +317,14 @@ class M68K_Machine {
         if (!M68K_CURLINE || !M68K_CURLINE.isErrorImmune)
             t.chkMem(_at, _size, ALLOW_READ);
         DEBUGGER_lastReadAdrs = _at;
-        switch (_size) {
+        if (CPU_isCustomAdrs(_at)) {
+            switch (_size) {
+                case 1: r32[0] = CPU_getCustom_B(_at - CPU_CUSTOM_START, _at & 0xff); break;
+                case 2: r32[0] = CPU_getCustom_W(_at - CPU_CUSTOM_START, _at & 0xffff); break;
+                case 4: r32[0] = CPU_getCustom_L(_at - CPU_CUSTOM_START, _at); break;
+            }
+        }
+        else switch (_size) {
             case 1: r32[0] = t.ram[_at]; break;
             case 2: r32[0] = (t.ram[_at] << 8) + (t.ram[_at + 1]); break;
             case 4: r32[0] = (t.ram[_at] << 24) + (t.ram[_at + 1] << 16) + (t.ram[_at + 2] << 8) + (t.ram[_at + 3]); break;

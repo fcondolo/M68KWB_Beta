@@ -147,6 +147,8 @@ const COLOR31 =  0x1be;
 const FMODE =	 0x1fc;
 
 
+var AMIGA_NEED_WAIT_BLT  = false;
+var AMIGA_LASTBLIT_LINE = null;
 
 /**
 AMIGA_getCustom(_index)
@@ -155,7 +157,13 @@ Returns the current 16 bit value of a custom register
 @return     the register's 16 bit value
 */
 function AMIGA_getCustom(_index) {
+	if (_index == DMACONR)
+		AMIGA_NEED_WAIT_BLT = false; // very approximate way to test if blitter status has been checked
 	return AMIGA_customregs[_index/2];
+}
+
+function AMIGA_getCustom_B(_index) {
+	return (AMIGA_getCustom(_index)>>>8)&0xff;
 }
 
 /**
@@ -201,10 +209,25 @@ Checks if a write to a custom register should trigger a reaction from the Amiga
 */
 function AMIGA_onCustomWrite(_index, _value) {
 	switch (_index) {
-		case BLTSIZE: 
+		case BLTSIZE:
+			let showErr = true;
+			if (M68K_CURLINE && M68K_CURLINE.isErrorImmune) showErr = false;
+			if (AMIGA_NEED_WAIT_BLT && OCS_CONFIG.force_blitter_wait) {
+				if (showErr && AMIGA_LASTBLIT_LINE) {
+					debug("Seems like you did not check DMACONR since you last invoked the Blitter.\nBlitter previously invoked in file: " + AMIGA_LASTBLIT_LINE.path + "\nat line: " + AMIGA_LASTBLIT_LINE.line + "\nAdd comment '; M68KWB_NOERROR' at the end of the current line to disable this error, or set OCS_CONFIG.force_blitter_wait to false.");
+				}
+			}
+			if (M68K_CURLINE) {
+				AMIGA_NEED_WAIT_BLT = true;
+				AMIGA_LASTBLIT_LINE = M68K_CURLINE;
+			}
 			TIME_MACHINE.paused = true;
+			const saveDMACON = AMIGA_customregs[DMACONR/2];
+			if ((showErr) && ((saveDMACON & (1<<6)) == 0)) debug("trying to start blitter but DMACON bit 6 shows blitter is disabled.\nDMACON: $" + saveDMACON.toString(16));
+			AMIGA_customregs[DMACONR/2] |= 1<<14; // set blitter busy bit
 			AMIGA_BLITTER.blitter_fillStruct();
 			AMIGA_BLITTER.decide_blitter(); // AMIGA_bltStart();
+			AMIGA_customregs[DMACONR/2] = saveDMACON; // clear blitter busy bit
 			TIME_MACHINE.paused = false;
 		break;
 		case DMACON: {

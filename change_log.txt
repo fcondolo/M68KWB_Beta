@@ -1,3 +1,7 @@
+25/05/2025
+==========
+- Better Amiga Blitter support
+
 24/05/2025
 ==========
 - Fixed mouse coordinates

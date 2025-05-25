@@ -452,6 +452,7 @@ function main_onload() {
   fxList += '<br><hr><br>Filter by name:<br><br><input type="text" id="searchfx" name="searchfx" oninput="updateFxList()"><br><br>';
   fxList += "<br><br>You can also use '?FX=classname' in the address bar</center>";
   showModalBox(fxList, onFxChosen);
+  document.getElementById("searchfx").focus();
 }
 
 // _zoom : 100..200

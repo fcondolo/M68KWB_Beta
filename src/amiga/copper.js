@@ -96,14 +96,24 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 	const word1 = MACHINE.getRAMValue(cper_cur,2,false);
 	const word2 = MACHINE.getRAMValue(cper_cur+2,2,false);
 
-	if ((word1&1)  != 0) { // wait --> NOT taking into account blitter wait flag. Very basic implementation
+	if ((word1&1)  != 0) { // wait --> NOT taking mask into account. Very basic implementation
 		if (_breakIfWait)
 			return false;
+		if ((word2 & (1<<15)) == 0) // wait blitter bit is cleared ==> wait for blitter (yes, wait when it's cleared, not set)
+			AMIGA_NEED_WAIT_BLT = false;
+		if ((word2 & 1) != 0)
+			debug("Copper wait at $" + (cper_cur+2).toString(16) + " should have bit 0 cleared.");
 		if (word1 == 0xffff) { // end of copperlist?
 			return false;
 		}
-		copper_xToWait = ((word1 & 0xff) - OCS_CONFIG.COPPER_SCREEN_LEFT_X) / 4; // Division by 4 : see note 2
-		copper_yToWait = (word1 >> 8) & 0xff;
+		if ((word2&0xff) == 0)
+			copper_xToWait = 0;
+		else 
+			copper_xToWait = ((word1 & 0xff) - OCS_CONFIG.COPPER_SCREEN_LEFT_X) / 4; // Division by 4 : see note 2
+		if ((word2&0xff00) == 0)
+			copper_yToWait = 0;
+		else 
+			copper_yToWait = (word1 >> 8) & 0xff;
 		if (copper_yToWait < 64) // handling the case when we are still on line 255
 			copper_yToWait += wait255Reached;
 		if (_x >= copper_xToWait && _y >= copper_yToWait) {

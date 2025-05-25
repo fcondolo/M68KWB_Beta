@@ -114,7 +114,13 @@ const OCS_CONFIG = {
     // Copper X coordinate of the first visible bitplane pixel (leftmost pixel) for low resolution, without overscan.
     COPPER_SCREEN_LEFT_X    : 0x2d,
     // Avoid drawing insanely long lines and freeze your browser 8below value is max dx or dy in pixels)
-    AMIGA_line_maxLen       : 1000
+    AMIGA_line_maxLen       : 1000,
+    // Tries to force you to wait for blitter before any write to BLTSIZE.
+    // Blitter operations are executed immediately and entierely, so in M68KWB, there is no need to wait for Blitter.
+    // Still, to help avoid issues on the real Amiga, a flag is set when the blitter starts. 
+    // This flag is cleared whenever an instruction reads DMACONR (not even bit 6, just any bus read access to DMACONR).
+    // When the blitter starts, it checks if the flag is cleared, and raises a breakpoint otherwise.
+    force_blitter_wait      : true
 }
 
 // -----------------------------------------------------------------------

@@ -1,14 +1,12 @@
-// maybe try https://github.com/PSP-Archive/PSPUAE/blob/main/blitter.c to be closer to the actual machine, especially for line draw
-
 function AMIGA_bltStart() {
-	const old_dmacon = AMIGA_customregs[DMACONR];
-	if ((old_dmacon & (1<<6)) != 0) {
+	const old_dmacon = AMIGA_customregs[DMACONR/2];
+	if ((old_dmacon & (1<<14)) != 0) {
 		runtimeError68k("blitter is already working");
 		return;
 	}
 	TIME_MACHINE.paused = true;
 
-	AMIGA_customregs[DMACONR/2] |= 1<<6; // set blitter busy
+	AMIGA_customregs[DMACONR/2] |= 1<<14; // set blitter busy
 
 	const AMOD = AMIGA_getCustom(BLTAMOD);
 	const BMOD = AMIGA_getCustom(BLTBMOD);

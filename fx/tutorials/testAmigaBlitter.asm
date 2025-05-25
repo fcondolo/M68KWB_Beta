@@ -44,7 +44,12 @@ update:
        move.b        #1,(a0)
        move.b        #1,10(a0)
        add.l         #40,a0
-       dbra          d7,.next       
+       dbra          d7,.next
+
+.waitBlt:
+	btst	       #6,$dff002
+	bne.s	       .waitBlt
+
        bsr           v2d_fillBitplane
        rts
 

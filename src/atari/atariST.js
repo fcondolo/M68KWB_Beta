@@ -123,6 +123,10 @@ function Atari_Common_Start(_ramSize, _stackSize) {
     CPU_setCustom_B     = ST_setCustom_B;
     CPU_setCustom_W     = ST_setCustom_W;
     CPU_setCustom_L     = ST_setCustom_L;
+    CPU_getCustom_B     = ST_getCustom_B;
+    CPU_getCustom_W     = ST_getCustom_W;
+    CPU_getCustom_L     = ST_getCustom_L;
+
     CPU_CUSTOM_START    = ST_CUSTOM_START;
     M68K_TICKS_PER_SECOND   = ST_CONFIG.M68K_TICKS_PER_SECOND;
     M68K_TICKS_PER_FRAME = Math.floor(M68K_TICKS_PER_SECOND/50);
@@ -473,15 +477,21 @@ function ST_custom_update() {
 
 
 /**
-ST_getCustom(_index)
-Returns the current 16 bit value of a custom register
+ST_getCustom_W(_index)
+Returns the current 8 bit value of a custom register
 @param      _index  :   custom register index (relative to ST_CUSTOM_START)
-@return     the register's 16 bit value
+@return     the register's 8 bit value
 */
 function ST_getCustom_B(_index) {
 	return ST_customregs[_index];
 }
 
+/**
+ST_getCustom_W(_index)
+Returns the current 16 bit value of a custom register
+@param      _index  :   custom register index (relative to ST_CUSTOM_START)
+@return     the register's 16 bit value
+*/
 function ST_getCustom_W(_index) {
     let r = new Uint32Array(1);
     r[0] = ST_customregs[_index]<<8; 

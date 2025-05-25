@@ -169,7 +169,7 @@
         const totalRAMAllocated = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES + OCS_CONFIG.RAMSIZE  + OCS_CONFIG.STACKSIZE;
         DEBUGGER_AllocsList.push({ label: "Total RAM size", adrs: 0, size: totalRAMAllocated });
     
-        AMIGA_customregs[DMACONR] = 0;  // set blitter ready
+        AMIGA_customregs[DMACONR/2] = 0;  // set blitter ready
     
         MACHINE = new M68K_Machine(
             totalRAMAllocated,
@@ -185,6 +185,9 @@
         CPU_setCustom_B     = AMIGA_setCustom;
         CPU_setCustom_W     = AMIGA_setCustom;
         CPU_setCustom_L     = AMIGA_setCustom_L;
+        CPU_getCustom_B     = AMIGA_getCustom_B;
+        CPU_getCustom_W     = AMIGA_getCustom;
+        CPU_getCustom_L     = AMIGA_getCustom_L;
         CPU_CUSTOM_START    = AMIGA_CUSTOM_START;
         M68K_TICKS_PER_SECOND   = OCS_CONFIG.M68K_TICKS_PER_SECOND;
         M68K_TICKS_PER_FRAME = Math.floor(M68K_TICKS_PER_SECOND/50);

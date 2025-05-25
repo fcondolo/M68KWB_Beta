@@ -21,7 +21,7 @@ function useColorIndex(_index) {
 
 
 function bitplanes_updateAllValues() {
-	const DMACONVal = AMIGA_getCustom(DMACONR);
+	const DMACONVal = AMIGA_customregs[DMACONR/2]; // don't use AMIGA_getCustom(DMACONR), it will make the system believe the user waited for blitter
 	if (((DMACONVal >>> 7) & 1) != 0)
 		DMA_Copper = true;
 	else
@@ -31,25 +31,25 @@ function bitplanes_updateAllValues() {
 	else
 		DMA_Bitplane = false;
 
-	let DIWSTRT_val = AMIGA_getCustom(DIWSTRT);
+	let DIWSTRT_val = AMIGA_customregs[DIWSTRT/2];
 	if (DIWSTRT_val != 0) {
 		DisplayWindowStart_x = (DIWSTRT_val & 0xff)*SIMU_DEFAULT_WIDTH/640;
 		DisplayWindowStart_y = ((DIWSTRT_val >>> 8) & 0xff);
 	}
 
-	let DIWSTOP_val = AMIGA_getCustom(DIWSTOP);
+	let DIWSTOP_val = AMIGA_customregs[DIWSTOP/2];
 	if (DIWSTOP_val != 0) {
 		DisplayWindowStop_x = 256 + (DIWSTOP_val & 0xff);
 		DisplayWindowStop_y = ((DIWSTOP_val >>> 8) & 0xff);
 		if ((DisplayWindowStop_y & (1<<7)) == 0) DisplayWindowStop_y += 256;
 	}
 
-	let DDFSTRT_val = AMIGA_getCustom(DDFSTRT);
+	let DDFSTRT_val = AMIGA_customregs[DDFSTRT/2];
 	if (DDFSTRT_val != 0) {
 		DisplayDataFetchFirstPix = (DDFSTRT_val & 0b11111100) / 2 + 8;
 	}
 
-	let DDFSTOP_val = AMIGA_getCustom(DDFSTOP);
+	let DDFSTOP_val = AMIGA_customregs[DDFSTOP/2];
 	if (DDFSTOP_val != 0) {
 		DisplayDataFetchLastPix = (DDFSTOP_val & 0b11111100);
 		let wordCount = DisplayDataFetchLastPix - (DDFSTRT_val & 0b11111100);
@@ -60,28 +60,28 @@ function bitplanes_updateAllValues() {
 	PLAYFIELD_LINES_COUNT = DisplayWindowStop_y - DisplayWindowStart_y;
 
 	bplHorizByteCount = (DisplayDataFetchLastPix - DisplayDataFetchFirstPix) / 8;
-	bitplaneAdrs[0] = (AMIGA_getCustom(BPL1PTH) << 16) | AMIGA_getCustom(BPL1PTL);
-	bitplaneAdrs[1] = (AMIGA_getCustom(BPL2PTH) << 16) | AMIGA_getCustom(BPL2PTL);
-	bitplaneAdrs[2] = (AMIGA_getCustom(BPL3PTH) << 16) | AMIGA_getCustom(BPL3PTL);
-	bitplaneAdrs[3] = (AMIGA_getCustom(BPL4PTH) << 16) | AMIGA_getCustom(BPL4PTL);
-	bitplaneAdrs[4] = (AMIGA_getCustom(BPL5PTH) << 16) | AMIGA_getCustom(BPL5PTL);
-	bitplaneAdrs[5] = (AMIGA_getCustom(BPL6PTH) << 16) | AMIGA_getCustom(BPL6PTL);
+	bitplaneAdrs[0] = (AMIGA_customregs[BPL1PTH/2] << 16) | AMIGA_customregs[BPL1PTL/2];
+	bitplaneAdrs[1] = (AMIGA_customregs[BPL2PTH/2] << 16) | AMIGA_customregs[BPL2PTL/2];
+	bitplaneAdrs[2] = (AMIGA_customregs[BPL3PTH/2] << 16) | AMIGA_customregs[BPL3PTL/2];
+	bitplaneAdrs[3] = (AMIGA_customregs[BPL4PTH/2] << 16) | AMIGA_customregs[BPL4PTL/2];
+	bitplaneAdrs[4] = (AMIGA_customregs[BPL5PTH/2] << 16) | AMIGA_customregs[BPL5PTL/2];
+	bitplaneAdrs[5] = (AMIGA_customregs[BPL6PTH/2] << 16) | AMIGA_customregs[BPL6PTL/2];
 
-	bitplaneMod[0] = AMIGA_getCustom(BPL1MOD);
-	bitplaneMod[1] = AMIGA_getCustom(BPL2MOD);
-	bitplaneMod[2] = AMIGA_getCustom(BPL1MOD);
-	bitplaneMod[3] = AMIGA_getCustom(BPL2MOD);
-	bitplaneMod[4] = AMIGA_getCustom(BPL1MOD);
-	bitplaneMod[5] = AMIGA_getCustom(BPL2MOD);
+	bitplaneMod[0] = AMIGA_customregs[BPL1MOD/2];
+	bitplaneMod[1] = AMIGA_customregs[BPL2MOD/2];
+	bitplaneMod[2] = AMIGA_customregs[BPL1MOD/2];
+	bitplaneMod[3] = AMIGA_customregs[BPL2MOD/2];
+	bitplaneMod[4] = AMIGA_customregs[BPL1MOD/2];
+	bitplaneMod[5] = AMIGA_customregs[BPL2MOD/2];
 
-	bitplaneHScroll[0] = AMIGA_getCustom(BPLCON1) & 0x0f;
-	bitplaneHScroll[1] = (AMIGA_getCustom(BPLCON1) & 0xf0) >>> 4;
+	bitplaneHScroll[0] = AMIGA_customregs[BPLCON1/2] & 0x0f;
+	bitplaneHScroll[1] = (AMIGA_customregs[BPLCON1/2] & 0xf0) >>> 4;
 	bitplaneHScroll[2] = bitplaneHScroll[0];
 	bitplaneHScroll[3] = bitplaneHScroll[1];
 	bitplaneHScroll[4] = bitplaneHScroll[0];
 	bitplaneHScroll[5] = bitplaneHScroll[1];
 
-	let BPLCON0_Val = AMIGA_getCustom(BPLCON0);
+	let BPLCON0_Val = AMIGA_customregs[BPLCON0/2];
 	bitpane_bplCount = (BPLCON0_Val >>> 12) & 7;
 	if ((BPLCON0_Val & 1<<11) != 0) {
 		isHAMMode = true;
