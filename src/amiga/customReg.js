@@ -157,6 +157,7 @@ Returns the current 16 bit value of a custom register
 @return     the register's 16 bit value
 */
 function AMIGA_getCustom(_index) {
+	if (_index%2 != 0) debug("reading CUSTOM register at an ODD address");
 	if (_index == DMACONR)
 		AMIGA_NEED_WAIT_BLT = false; // very approximate way to test if blitter status has been checked
 	return AMIGA_customregs[_index/2];
@@ -226,7 +227,6 @@ function AMIGA_onCustomWrite(_index, _value) {
 			if ((showErr) && ((saveDMACON & (1<<6)) == 0)) debug("trying to start blitter but DMACON bit 6 shows blitter is disabled.\nDMACON: $" + saveDMACON.toString(16));
 			AMIGA_customregs[DMACONR/2] |= 1<<14; // set blitter busy bit
 			AMIGA_BLITTER.blitter_fillStruct();
-			AMIGA_BLITTER.decide_blitter(); // AMIGA_bltStart();
 			AMIGA_customregs[DMACONR/2] = saveDMACON; // clear blitter busy bit
 			TIME_MACHINE.paused = false;
 		break;

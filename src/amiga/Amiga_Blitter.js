@@ -28,6 +28,10 @@ var SAEV_Blitter_dangerous = false;
 
 /*---------------------------------*/
 
+function SAEF_Custom_dmaen() {
+	return (AMIGA_customregs[DMACONR/2] & (1<<6)) != 0;
+}
+
 function SAEO_Blitter() {
 	//const BLITTER_DEBUG = 0;
 	// 1 = logging
@@ -329,7 +333,7 @@ function SAEO_Blitter() {
 			return;
 		if (ch == bltptxc) {
 			bltptxpos = -1;
-			SAEF_warn("blitter.check_channel_mods() %08x write to %d ignored!", bltptx, ch);
+			//SAEF_warn("blitter.check_channel_mods() %08x write to %d ignored!", bltptx, ch);
 		}
 	}
 
@@ -1047,8 +1051,8 @@ function SAEO_Blitter() {
 
 		if (blt_delayed_irq > 0 && hsync) {
 			blt_delayed_irq--;
-			if (!blt_delayed_irq)
-				SAER.custom.send_interrupt(SAEC_Custom_INTF_BLIT, 2 * SAEC_Events_CYCLE_UNIT);
+			//if (!blt_delayed_irq)
+			//	SAER.custom.send_interrupt(SAEC_Custom_INTF_BLIT, 2 * SAEC_Events_CYCLE_UNIT);
 		}
 
 		if (SAEV_Blitter_bltstate == SAEC_Blitter_bltstate_DONE)
@@ -1183,7 +1187,7 @@ function SAEO_Blitter() {
 					SAER.blitter.decide_blitter(-1);
 					rounds--;
 				}
-				if (rounds == 0) SAEF_warn("blitter.blitter_force_finish() froze!?");
+				//if (rounds == 0) SAEF_warn("blitter.blitter_force_finish() froze!?");
 				blit_startcycles = 0;
 			} else
 				actually_do_blit();
@@ -1205,10 +1209,10 @@ function SAEO_Blitter() {
 			blitdesc = bltcon1 & 2;
 			blt_info.blitbshift = bltcon1 >> 12;
 			blt_info.blitdownbshift = 16 - blt_info.blitbshift;
-			if ((bltcon1 & 1) && !blitline_started) {
+		/*	if ((bltcon1 & 1) && !blitline_started) {
 				SAEF_warn("blitter.blit_bltset() linedraw enabled after starting normal blit!");
 				return;
-			}
+			}*/
 		}
 		if (con & 1) {
 			blt_info.blitashift = bltcon0 >> 12;
@@ -1224,7 +1228,7 @@ function SAEO_Blitter() {
 			blitline = 0;
 			SAEV_Blitter_bltstate = SAEC_Blitter_bltstate_DONE;
 			SAEV_Blitter_interrupt = true;
-			SAEF_warn("blitter.blit_bltset() register modification during linedraw!");
+			//SAEF_warn("blitter.blit_bltset() register modification during linedraw!");
 		}
 
 		if (blitline) {
@@ -1270,7 +1274,7 @@ function SAEO_Blitter() {
 			var iseo = old_diag_type == DT_BLOCKFILL; //OWN
 			if (iseo != isen) {
 				if (freezes > 0) {
-					SAEF_warn("blitter.blit_bltset() on the fly %d (%d) -> %d (%d) switch!", original_ch, iseo, blit_ch, isen);
+					//SAEF_warn("blitter.blit_bltset() on the fly %d (%d) -> %d (%d) switch!", original_ch, iseo, blit_ch, isen);
 					freezes--;
 				}
 			}
@@ -1278,7 +1282,7 @@ function SAEO_Blitter() {
 				blit_frozen = 0; // switched back to original fill mode? unfreeze
 			} else if (iseo && !isen) {
 				blit_frozen = 1;
-				SAEF_warn("blitter.blit_bltset() frozen! %d (%d) -> %d (%d)", original_ch, iseo, blit_ch, isen);
+				//SAEF_warn("blitter.blit_bltset() frozen! %d (%d) -> %d (%d)", original_ch, iseo, blit_ch, isen);
 			} else if (!iseo && isen) {
 				if (!this.SAEF_Custom_dmaen()) // subtle shades / nuance bootblock bug
 					blit_frozen = 1;
@@ -1296,7 +1300,7 @@ function SAEO_Blitter() {
 			if (o != n) {
 				if (changetable[o * 32 + n] < 10) {
 					changetable[o * 32 + n]++;
-					SAEF_warn("blitter.blit_bltset() channel mode changed while active (%02x->%02x)", o, n);
+					//SAEF_warn("blitter.blit_bltset() channel mode changed while active (%02x->%02x)", o, n);
 				}
 			}
 			if (blit_ch == 13 && original_ch == 1)
@@ -1356,7 +1360,7 @@ function SAEO_Blitter() {
 		}
 		if (warned1 && waited) {
 			warned1--;
-			SAEF_warn("blitter.waitingblits() waiting blits detected");
+			//SAEF_warn("blitter.waitingblits() waiting blits detected");
 		}
 		return SAEV_Blitter_bltstate == SAEC_Blitter_bltstate_DONE;
 	}
@@ -1418,7 +1422,7 @@ function SAEO_Blitter() {
 			cycles = blt_info.vblitsize;
 		} else {
 			cycles = blt_info.vblitsize * blt_info.hblitsize;
-			blit_firstline_cycles = blit_first_cycle + (blit_diag[0] * blt_info.hblitsize) * SAEC_Events_CYCLE_UNIT + SAEV_CPU_cycles;
+			blit_firstline_cycles = blit_first_cycle + (blit_diag[0] * blt_info.hblitsize);
 		}
 
 		if (cleanstart) {
@@ -1446,7 +1450,7 @@ function SAEO_Blitter() {
 		SAEV_Blitter_bltstate = SAEC_Blitter_bltstate_INIT;
 		blit_slowdown = 0;
 
-		SAEF_setSpcFlags(SAEC_spcflag_BLTNASTY);
+		//SAEF_setSpcFlags(SAEC_spcflag_BLTNASTY);
 
 		if (this.SAEF_Custom_dmaen())
 			SAEV_Blitter_bltstate = SAEC_Blitter_bltstate_WORK;
@@ -1528,11 +1532,11 @@ function SAEO_Blitter() {
 			//debugtest (DEBUGTEST_BLITTER, "program does not wait for blitter tc=%d", blit_cyclecounter);
 			//if (log_blitter) warned2 = 0;
 			//if (log_blitter & 2)
-			{
+			//{
 				//warned2 = 10;
-				SAEF_warn("blitter.maybe_blit() program does not wait for blitter");
+				//SAEF_warn("blitter.maybe_blit() program does not wait for blitter");
 				//blitter_done(hpos);
-			}
+			//}
 		}
 
 		if (blitter_cycle_exact) {
@@ -1730,7 +1734,7 @@ function SAEO_Blitter() {
 			blt_info.vblitsize = 1024;
 		if (!blt_info.hblitsize)
 			blt_info.hblitsize = 64;
-	//	do_blitter(hpos, SAEV_Copper_access);
+		do_blitter(0,0);
 	//	SAER.playfield.dcheck_is_blit_dangerous();
 	}
 
@@ -1748,7 +1752,7 @@ function SAEO_Blitter() {
 			blt_info.vblitsize = 0x8000;
 		if (!blt_info.hblitsize)
 			blt_info.hblitsize = 0x0800;
-	//	do_blitter(hpos, SAEV_Copper_access);
+		do_blitter(0,0);
 	}
 
 	/*-----------------------------------------------------------------------*/

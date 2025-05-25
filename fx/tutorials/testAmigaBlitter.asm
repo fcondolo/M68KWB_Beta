@@ -1,4 +1,5 @@
-
+       include "Amiga_Slowline.asm"
+       
 init
        move.w        #$000,$dff180
        move.w        #$fff,$dff182
@@ -9,6 +10,12 @@ v2d_blitheight	= 255
 v2d_blitlinemod	= v2d_blitwidth/8
 v2d_blitmod          = (320-v2d_blitwidth)/8
 bplSizeInBytes       = 10240
+
+Wblit:	macro
+.wb\@:	
+	btst	#6,$2(a6)
+	bne.s	.wb\@
+	endm
 
 v2d_fillBitplane:
        lea		$dff000,a6
@@ -30,7 +37,7 @@ v2d_fillBitplane:
 										       ; 0 : bit 0 --> line. OFF
 	move.l	       a5,BLTAPTR(a6)                      		; src address = end of 3rd screen´s address
        move.l	       a5,BLTDPTR(a6)               	              ; dst address = same as source (fill)
-       move.w       #v2d_blitheight*64+v2d_blitlinemod/2,BLTSIZE(a6)  ; (height << 6) | linemod >> 1). lower 6 bits are width (in words), the rest is height (in lines count)
+       move.w       #v2d_blitheight*64+v2d_blitlinemod/2,BLTSIZE(a6)  ; M68KWB_NOERROR) (height << 6) | linemod >> 1). lower 6 bits are width (in words), the rest is height (in lines count)
 											; linemod is the screen width in bytes, so we divide by 2 to convert to words
 											; this instruction also triggers the blitter
 	rts
@@ -46,11 +53,19 @@ update:
        add.l         #40,a0
        dbra          d7,.next
 
-.waitBlt:
-	btst	       #6,$dff002
-	bne.s	       .waitBlt
+       Wblit
 
+       move.w        #10,d0
+       move.w        #10,d1
+       move.w        #100,d2
+       move.w        #100,d3
+       bsr           INITLINE
+
+       bsr           DRAWLINE
+
+       Wblit
        bsr           v2d_fillBitplane
+
        rts
 
 screenBuf
