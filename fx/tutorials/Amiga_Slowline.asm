@@ -3,7 +3,7 @@
 ; Thank you balrogsoft!
 
 
-SINGLE = 0      ; 2 = SINGLE BIT WIDTH
+SINGLE = 2      ; 2 = SINGLE BIT WIDTH, 0 = full line
 BYTEWIDTH = 40
 
 INITLINE:
@@ -124,5 +124,5 @@ DRAW_DONTSETSIGN:
    MOVE.L   D7,$40(A6)      ; BLTCON0 + BLTCON1
    MOVE.L   D3,$48(A6)      ; Source C
    MOVE.L   D3,$54(A6)      ; Destination D
-   MOVE.W   D0,$58(A6)      ; Size M68KWB_NOERROR
+   MOVE.W   D0,$58(A6)      ; Size
    RTS

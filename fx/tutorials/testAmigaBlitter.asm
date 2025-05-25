@@ -37,7 +37,7 @@ v2d_fillBitplane:
 										       ; 0 : bit 0 --> line. OFF
 	move.l	       a5,BLTAPTR(a6)                      		; src address = end of 3rd screen´s address
        move.l	       a5,BLTDPTR(a6)               	              ; dst address = same as source (fill)
-       move.w       #v2d_blitheight*64+v2d_blitlinemod/2,BLTSIZE(a6)  ; M68KWB_NOERROR) (height << 6) | linemod >> 1). lower 6 bits are width (in words), the rest is height (in lines count)
+       move.w       #v2d_blitheight*64+v2d_blitlinemod/2,BLTSIZE(a6)  ; (height << 6) | linemod >> 1). lower 6 bits are width (in words), the rest is height (in lines count)
 											; linemod is the screen width in bytes, so we divide by 2 to convert to words
 											; this instruction also triggers the blitter
 	rts
@@ -45,22 +45,31 @@ v2d_fillBitplane:
        
 update:
        move.l        a5,a0
-       add.l         #40*50+10,a0
-       move.w        #140,d7
-.next:
-       move.b        #1,(a0)
-       move.b        #1,10(a0)
-       add.l         #40,a0
-       dbra          d7,.next
 
-       Wblit
-
-       move.w        #10,d0
-       move.w        #10,d1
-       move.w        #100,d2
-       move.w        #100,d3
        bsr           INITLINE
 
+       move.w        #140,d0
+       move.w        #10,d1
+       move.w        #10,d2
+       move.w        #120,d3
+       bsr           DRAWLINE
+
+       move.w        #10,d0
+       move.w        #120,d1
+       move.w        #100,d2
+       move.w        #240,d3
+       bsr           DRAWLINE
+
+       move.w        #100,d0
+       move.w        #240,d1
+       move.w        #300,d2
+       move.w        #200,d3
+       bsr           DRAWLINE
+
+       move.w        #300,d0
+       move.w        #200,d1
+       move.w        #141,d2
+       move.w        #10,d3
        bsr           DRAWLINE
 
        Wblit

@@ -1,6 +1,6 @@
 /*-------------------------------------------------------------------------
 | Don't get me wrong, this file is filled with egregious plagiarism.
-| Mostly stolen form SAE - Scripted Amiga Emulator (SAE) by Rupert Hausberger
+| Taken from Scripted Amiga Emulator (SAE) by Rupert Hausberger
 | Also note that SAE was ported from WinUAE 3.2.x
 -------------------------------------------------------------------------*/
 
