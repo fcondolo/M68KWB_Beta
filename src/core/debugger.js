@@ -723,7 +723,7 @@ function DEBUGGER_help() {
   msg += "<tr><td>r</td><td>run</td><td>exit trace mode</td></tr>";
   msg += "<tr><td>shift + r</td><td>restart</td><td>reloads the page and restarts the same FX, and restores breakpoints, pause and zoom</td></tr>";
   msg += "<tr><td>t</td><td>trace</td><td>step into (while tracing)</td></tr>";
-  msg += "<tr><td>shift + t</td>Toggle Toolbox<td>spce</td><td>Show/Hide the Toolbox</td></tr>";
+  msg += "<tr><td>shift + t</td><td>Toolbox</td><td>Toggle Toolbox</td></tr>";
   msg += "<tr><td>alt + v</td><td>break vbl update</td><td>trigger breakpoint at the beginning of vbl update (on/off)</td></tr>";
   msg += "<tr><td>w</td><td>Where am I?</td><td>shows current instruction info + callstack and latest branches</td></tr>";
   msg += "<tr><td>y</td><td>Backwards</td><td>Time Machine go to prev instruction</td></tr>";
