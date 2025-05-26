@@ -132,3 +132,11 @@ input[type=submit] {
 }
 
 /* ---------------------- END MODDAL BOX */
+
+.colorbox {
+  float: left;
+  height: 15px;
+  width: 50px;
+  border: 1px solid black;
+  clear: both;
+}

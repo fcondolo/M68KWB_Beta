@@ -10,7 +10,17 @@
   <link rel="stylesheet" href="third-party/HTML-KickStart-master/css/kickstart.css" media="all" /> <!-- KICKSTART -->
   <link rel="stylesheet" href="soundy.css" media="all" />
 
-  <script src='third-party/jquery-3.6.3.min.js'></script>
+  <!-- BEGIN For draggable toolbox -->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+  <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
+  <style>
+  #draggable { width: 150px; height: 150px; padding: 0.5em; overflow:auto;}
+  </style>
+  <!-- END For draggable toolbox -->
+ 
+ 
+
   <script src="third-party/HTML-KickStart-master/js/kickstart.js"></script> <!-- KICKSTART -->
 
   <!-- BASE -->
@@ -187,6 +197,64 @@
   <!-- PAUSED -->
   <div id = "paused" style = "display:none; position:fixed; z-index:10; background-color: #FF0000; color: white;">
     <span><h2>PAUSED - Press P</h2></span>
+  </div>
+
+  <!-- TOOLBOX -->
+  <div id="draggable" class="ui-widget-content" style="width: 30%; height: 50%; background-color: rgba(200, 200, 200, 0.8); display:none">
+    <p>
+      <center style="background-color: rgba(208, 151, 222, 0.8);"><b>Toolbox</b></center>
+      <table>
+        <tr><td>Bitplanes zone</td><td><input type="checkbox" onclick="DEBUGGER_ToggleCard(this.checked);"></td></tr>
+        <tr><td>CPU cycles</td><td><input type="checkbox" onclick="DEBUGGER_ToggleCycles(this.checked);"></td></tr>
+        <tr><td>Inline JS</td><td><input type="checkbox" checked onclick="DEBUGGER_AllowJS = this.checked;"></td></tr>
+        <tr><td>Palette</td><td><input type="checkbox" onclick="if(this.checked) document.getElementById('tbox_palette').style.display = null; else document.getElementById('tbox_palette').style.display = 'none';"></td></tr>
+        <tr id ="tbox_bpl0"><td>Bitplane 1</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[0] = 1; else bitplaneWeight[0] = 0;"></td></tr>
+        <tr id ="tbox_bpl1"><td>Bitplane 2</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[1] = 1; else bitplaneWeight[1] = 0;"></td></tr>
+        <tr id ="tbox_bpl2"><td>Bitplane 3</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[2] = 1; else bitplaneWeight[2] = 0;"></td></tr>
+        <tr id ="tbox_bpl3"><td>Bitplane 4</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[3] = 1; else bitplaneWeight[3] = 0;"></td></tr>
+        <tr id ="tbox_bpl4"><td>Bitplane 5</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[4] = 1; else bitplaneWeight[4] = 0;"></td></tr>
+        <tr id ="tbox_bpl5"><td>Bitplane 6</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[5] = 1; else bitplaneWeight[5] = 0;"></td></tr>
+      </table>
+      <span id = "amigaonly">
+        <br><button class="inset" onclick="DEBUGGER_DumpCopperList = 1;"><i class="fa fa-bars"></i>&nbsp Copperlist</button>
+      </span>
+      <br><button class="inset" onclick="DEBUGGER_memoryStats();"><i class="fa fa-bar-chart"></i>&nbsp Mem Stats</button>      
+      <br><button class="inset" onclick="DEBUGGER_showContext();"><i class="fa fa-map-marker"></i>&nbsp Where am I?</button>
+      <br><span id ="tbox_palette" style = "display: none;">Palette:
+        <br><span id ="tbox_pal0"><div class='colorbox' id="tbox_c0"></div> COLOR0</span>
+        <br><span id ="tbox_pal1"><div class='colorbox' id="tbox_c1"></div> COLOR1</span>
+        <br><span id ="tbox_pal2"><div class='colorbox' id="tbox_c2"></div> COLOR2</span>
+        <br><span id ="tbox_pal3"><div class='colorbox' id="tbox_c3"></div> COLOR3</span>
+        <br><span id ="tbox_pal4"><div class='colorbox' id="tbox_c4"></div> COLOR4</span>
+        <br><span id ="tbox_pal5"><div class='colorbox' id="tbox_c5"></div> COLOR5</span>
+        <br><span id ="tbox_pal6"><div class='colorbox' id="tbox_c6"></div> COLOR6</span>
+        <br><span id ="tbox_pal7"><div class='colorbox' id="tbox_c7"></div> COLOR7</span>
+        <br><span id ="tbox_pal8"><div class='colorbox' id="tbox_c8"></div> COLOR8</span>
+        <br><span id ="tbox_pal9"><div class='colorbox' id="tbox_c9"></div> COLOR9</span>
+        <br><span id ="tbox_pal10"><div class='colorbox' id="tbox_c10"></div> COLOR10</span>
+        <br><span id ="tbox_pal11"><div class='colorbox' id="tbox_c11"></div> COLOR11</span>
+        <br><span id ="tbox_pal12"><div class='colorbox' id="tbox_c12"></div> COLOR12</span>
+        <br><span id ="tbox_pal13"><div class='colorbox' id="tbox_c13"></div> COLOR13</span>
+        <br><span id ="tbox_pal14"><div class='colorbox' id="tbox_c14"></div> COLOR14</span>
+        <br><span id ="tbox_pal15"><div class='colorbox' id="tbox_c15"></div> COLOR15</span>
+        <br><span id ="tbox_pal16"><div class='colorbox' id="tbox_c16"></div> COLOR16</span>
+        <br><span id ="tbox_pal17"><div class='colorbox' id="tbox_c17"></div> COLOR17</span>
+        <br><span id ="tbox_pal18"><div class='colorbox' id="tbox_c18"></div> COLOR18</span>
+        <br><span id ="tbox_pal19"><div class='colorbox' id="tbox_c19"></div> COLOR19</span>
+        <br><span id ="tbox_pal20"><div class='colorbox' id="tbox_c20"></div> COLOR20</span>
+        <br><span id ="tbox_pal21"><div class='colorbox' id="tbox_c21"></div> COLOR21</span>
+        <br><span id ="tbox_pal22"><div class='colorbox' id="tbox_c22"></div> COLOR22</span>
+        <br><span id ="tbox_pal23"><div class='colorbox' id="tbox_c23"></div> COLOR23</span>
+        <br><span id ="tbox_pal24"><div class='colorbox' id="tbox_c24"></div> COLOR24</span>
+        <br><span id ="tbox_pal25"><div class='colorbox' id="tbox_c25"></div> COLOR25</span>
+        <br><span id ="tbox_pal26"><div class='colorbox' id="tbox_c26"></div> COLOR26</span>
+        <br><span id ="tbox_pal27"><div class='colorbox' id="tbox_c27"></div> COLOR27</span>
+        <br><span id ="tbox_pal28"><div class='colorbox' id="tbox_c28"></div> COLOR28</span>
+        <br><span id ="tbox_pal29"><div class='colorbox' id="tbox_c29"></div> COLOR29</span>
+        <br><span id ="tbox_pal30"><div class='colorbox' id="tbox_c30"></div> COLOR30</span>
+        <br><span id ="tbox_pal31"><div class='colorbox' id="tbox_c31"></div> COLOR31</span>
+      </span>      
+    </p>
   </div>
 
 </body>

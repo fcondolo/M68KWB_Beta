@@ -12,6 +12,9 @@ var PLAYFIELD_LINES_COUNT;
 var MAIN_ALERTS_LIST = [];
 var MAIN_ALERTS_ALLLOWED = true;
 
+var GLOBAL_MOUSEX = 0;
+var GLOBAL_MOUSEY = 0;
+
 var FRAME = 0;
 var ANIM_FRAME_WAIT = 0;
 var ANIM_FRAME_LAST_TIME = 0;
@@ -279,6 +282,10 @@ function main_startChosenFx(_className) {
     localStorage.setItem(LOCALSTORAGE_FX_NAME, FXName);
   }
 
+  document.addEventListener('mousemove', function(event) {
+    GLOBAL_MOUSEX = event.pageX;
+    GLOBAL_MOUSEY = event.pageY;
+  });
 
   // Create canvases
   cvs = document.getElementById("mycvs");

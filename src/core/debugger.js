@@ -327,11 +327,6 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
 
   var idx;
   switch (event.keyCode) {
-    case 32: // space
-      focusOnCodeLine(M68K_IP);
-      event.stopPropagation();
-    break;
-
     case 38: // up
       idx = $("tr:focus").attr("tabindex");
       idx--;
@@ -349,7 +344,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
       $("tr[tabindex=" + idx + "]").focus();
     break;
     case 65: // a
-      if (DEBUGPRIM) DEBUGPRIM.showCard = !DEBUGPRIM.showCard;
+      DEBUGGER_ToggleCard();
     break;
     case 66: // b
     /*
@@ -374,11 +369,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         MACHINE.customUpdate();
       }
       else {
-        if (DEBUGGER_SHOWCPUCYCLES) {
-          DEBUGGER_SHOWCPUCYCLES = false;
-          HideDebugLog();
-        } 
-         else DEBUGGER_SHOWCPUCYCLES = true;
+        DEBUGGER_ToggleCycles();
       }
     break;
     case 68: // d
@@ -464,7 +455,10 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     case 83: // s
     break;
     case 84: // t
-      DEBUGGER_traceOneInstr();
+      if (DEBUGGER_SHIFT_PRESSED)
+        DEBUGGER_toggleShowToolbox();
+      else
+        DEBUGGER_traceOneInstr();
     break;
     case 86: // v
       if (DEBUGGER_ALT_PRESSED) {
@@ -501,6 +495,26 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
   }
  // if (stop) event.stopPropagation();
 
+}
+
+function DEBUGGER_ToggleCycles(_force = "zob") {
+  if (_force == "zob") {
+    if (DEBUGGER_SHOWCPUCYCLES) DEBUGGER_SHOWCPUCYCLES = false;
+    else DEBUGGER_SHOWCPUCYCLES = true;
+  } else {
+    DEBUGGER_SHOWCPUCYCLES = _force;
+  }
+  if (!DEBUGGER_SHOWCPUCYCLES)
+    HideDebugLog();
+}
+
+function DEBUGGER_ToggleCard(_force = "zob") {
+  if (DEBUGPRIM) {
+    if (_force == "zob")
+      DEBUGPRIM.showCard = !DEBUGPRIM.showCard;
+    else
+      DEBUGPRIM.showCard = _force;
+  }
 }
 
 function SET_PAUSEUPDATE(p) {
@@ -584,8 +598,111 @@ function DEBUGGER_memoryStats() {
   showModalBox(msg, null);
 }
 
+function DEBUGGER_2digitHex(_s) {
+  if (!_s) return "00";
+  _s >>>= 0;
+  let r = _s.toString(16);
+  while (r.length < 2) r = "0" + r;
+  return r;
+}
+
+function DEBUGGER_toggleShowToolbox() {
+  let bplCount = bitpane_bplCount;
+  let amigaonly = document.getElementById("amigaonly");
+  switch (FX_INFO.platform) {
+    case "OCS" : 
+      bplCount = bitpane_bplCount;
+      amigaonly.style.display = null;
+    break;
+    case "ST" :
+    case "STE" : 
+      bplCount = 4;
+      amigaonly.style.display = "none";
+    break;
+    default: alert("DEBUGGER_toggleShowToolbox : 'platform' field must be 'OCS', 'ST', or 'STE'"); break;
+  }
+
+  let elm = document.getElementById("draggable");
+  if (elm.style.display == "none") {
+    for (let i = 0; i < 6; i++) {
+      let e = document.getElementById("tbox_bpl"+i);
+      if (bplCount > i) e.style.display = null; else e.style.display = "none";
+    }
+
+    const colCount = 1 << bplCount;
+    for (let i = 0; i < 32; i++) {
+      let e = document.getElementById("tbox_pal"+i);
+      if (colCount > i) {
+        let htmlCol = "#";
+        switch (FX_INFO.platform) {
+          case 'OCS': 
+          {
+            const color = AMIGA_customregs[0x180/2 + i];
+            htmlCol += DEBUGGER_2digitHex(((color >>> 8) & 15) * 16);
+            htmlCol += DEBUGGER_2digitHex(((color >>> 4) & 15) * 16);
+            htmlCol += DEBUGGER_2digitHex((color & 15) * 16);
+          }
+          break;
+          case 'ST':
+          {
+            const stCol = ST_getCustomFromPtr_W(ST_COLOR0 + 2 * i, 2, false);
+            const red = (stCol>>8)&7;
+            const green = (stCol>>4)&7;
+            const blue = stCol&7;
+            htmlCol += DEBUGGER_2digitHex(ST_To_HTML[red]);
+            htmlCol += DEBUGGER_2digitHex(ST_To_HTML[green]);
+            htmlCol += DEBUGGER_2digitHex(ST_To_HTML[blue]);
+          }
+          break;
+          case 'STE':
+          {
+            const stCol = ST_getCustomFromPtr_W(ST_COLOR0 + 2 * i, 2, false);
+            const red = (stCol>>8)&15;
+            const green = (stCol>>4)&15;
+            const blue = stCol&15;
+            htmlCol += DEBUGGER_2digitHex(STE_To_HTML[red]);
+            htmlCol += DEBUGGER_2digitHex(STE_To_HTML[green]);
+            htmlCol += DEBUGGER_2digitHex(STE_To_HTML[blue]);
+          }
+          break;
+          default:
+            htmlCol += "000000";
+          break;
+        }
+        let c = document.getElementById("tbox_c"+i);
+        c.style.backgroundColor = htmlCol;
+        e.style.display = null; 
+      }
+      else {
+        e.style.display = "none";
+      }
+    }
+
+    elm.style.display = null;
+    $("#draggable").draggable();   
+    $("#draggable").css({
+      position: "absolute",
+      top: GLOBAL_MOUSEY.toString()+"px",
+      left: GLOBAL_MOUSEX.toString()+"px",
+      width: "30%",
+      height: "50%",
+      overflowY: "auto",   // Scrollbar when needed
+      overflowX: "hidden", // Optional
+      padding: "10px",
+      border: "1px solid #ccc",
+      background: "rgba(130,130,150,0.9"
+    });
+    // Make it draggable
+    $('body').scrollTo('#draggable');
+  }
+  else {
+    elm.style.display = "none";
+  }
+}
+
+
 function DEBUGGER_help() {
-  let msg = "<center><b style='color:white'>M68KWorkbench Help</b></center><br>";
+  let msg = "<center><b style='color:white'>M68KWB Help</b></center><br>";
   msg += "<table><tr><th>KEY(s)</th><th>COMMAND</th><th>DESCRIPTION</th></tr>";
   msg += "<tr><td>a</td><td>Anchors</td><td>Show anchors / test card</td></tr>";
   msg += "<tr><td>b</td><td>Bitplanes visibility</td><td>Switch bitplanes on/off</td></tr>";
@@ -606,6 +723,7 @@ function DEBUGGER_help() {
   msg += "<tr><td>r</td><td>run</td><td>exit trace mode</td></tr>";
   msg += "<tr><td>shift + r</td><td>restart</td><td>reloads the page and restarts the same FX, and restores breakpoints, pause and zoom</td></tr>";
   msg += "<tr><td>t</td><td>trace</td><td>step into (while tracing)</td></tr>";
+  msg += "<tr><td>shift + t</td>Toggle Toolbox<td>spce</td><td>Show/Hide the Toolbox</td></tr>";
   msg += "<tr><td>alt + v</td><td>break vbl update</td><td>trigger breakpoint at the beginning of vbl update (on/off)</td></tr>";
   msg += "<tr><td>w</td><td>Where am I?</td><td>shows current instruction info + callstack and latest branches</td></tr>";
   msg += "<tr><td>y</td><td>Backwards</td><td>Time Machine go to prev instruction</td></tr>";

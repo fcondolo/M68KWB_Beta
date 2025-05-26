@@ -58,7 +58,7 @@ function copper_onNewFrame() {
 	wait255Reached = 0;
 	// Execute first copperlist instructions occurring during VBL.
 	// This is totally rough and inaccurate. 
-	// Basically, executes the first 100 copper MOVES, unless a WAIT is met
+	// Basically, executes the first 100 copper MOVES, unless a WAIT or SKIP is met
 	for (let i = 0; i < 100; i++) {
 		if (!copper_processOneInstr(0, 0, true))
 			break;
@@ -101,8 +101,6 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 			return false;
 		if ((word2 & (1<<15)) == 0) // wait blitter bit is cleared ==> wait for blitter (yes, wait when it's cleared, not set)
 			AMIGA_NEED_WAIT_BLT = false;
-		if ((word2 & 1) != 0)
-			debug("Copper wait at $" + (cper_cur+2).toString(16) + " should have bit 0 cleared.");
 		if (word1 == 0xffff) { // end of copperlist?
 			return false;
 		}
@@ -119,9 +117,17 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 		if (_x >= copper_xToWait && _y >= copper_yToWait) {
 			if ((word1 >> 8) == 0xff)
 				wait255Reached = _y;
-			cper_cur += 4;
+			if ((word2 & 1) == 0)
+				cper_cur += 4;	// this was a WAIT, go to next instruction
+			else
+				cper_cur += 8;	// this was a SKIP, skip next instruction
 			copperExecMove = 0; // See note 1
 			return true;
+		} else {
+			if ((word2 & 1) != 0) {
+				cper_cur += 4;	// this was a SKIP, go to next instruction
+				copperExecMove = 0;
+			}
 		}
 		return false;
 	}

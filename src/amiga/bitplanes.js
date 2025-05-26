@@ -1,6 +1,6 @@
 let DisplayDataFetchFirstPix = 0;
 let DisplayDataFetchLastPix = 0;
-let bitpane_bplCount = 0;
+let bitpane_bplCount = 0; // Beware, also used by DEBUGGER_toggleShowToolbox()
 let bitplaneAdrs = new Uint32Array(6);
 let bitplaneMod = new Int16Array(6);
 let bitplaneHScroll = new Uint16Array(6);

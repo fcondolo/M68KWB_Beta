@@ -1,5 +1,10 @@
 25/05/2025
 ==========
+- Added Copper SKIP
+- Added a Toolbox triggered by pressing shift+t
+
+25/05/2025
+==========
 - Better Amiga Blitter support (line draw, fill)
 
 24/05/2025
