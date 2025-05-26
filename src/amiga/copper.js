@@ -6,6 +6,14 @@ let copper_yToWait = 0;
 let copperExecMove = 0;	// simulates time taken to execute a MOVE instruction
 
 
+function CPER_4digitHex(_s) {
+  if (!_s) return "0000";
+  _s >>>= 0;
+  let r = _s.toString(16);
+  while (r.length < 4) r = "0" + r;
+  return r;
+}
+
 function copper_toHTML() {
 	let ptr = AMIGA_getCustomFromPtr_L(0xdff080);
 	if (!ptr) {
@@ -19,13 +27,13 @@ function copper_toHTML() {
 		const word1 = MACHINE.getRAMValue(ptr,2,false);
 		const word2 = MACHINE.getRAMValue(ptr+2,2,false);
 	
-		let w1s = word1.toString(16);
+		let w1s = CPER_4digitHex(word1);
 		while (w1s.length<4) w1s = "0"+w1s;
-		let w2s = word2.toString(16);
+		let w2s = CPER_4digitHex(word2);
 		while (w2s.length<4) w2s = "0"+w2s;
-		DEBUGGER_copperListDump += "<tr><td>"+ptr.toString(16)+"</td><td>"+w1s+","+w2s+"</td>";
+		DEBUGGER_copperListDump += "<tr><td>"+CPER_4digitHex(ptr)+"</td><td>"+w1s+","+w2s+"</td>";
 	
-		if ((word1&1)  != 0) { // wait --> NOT taking into account blitter wait flag. Very basic implementation
+		if ((word1&1)  != 0) { // wait
 			if (word1 == 0xffff) { // end of copperlist?
 				DEBUGGER_copperListDump += "<td>END OF COPPERLIST</td></tr></table>";
 				return DEBUGGER_copperListDump;
@@ -33,10 +41,10 @@ function copper_toHTML() {
 			let yToWait = (word1 >> 8) & 0xff;
 			if (yToWait < 64) // handling the case when we are still on line 255
 				yToWait += reached255;
-			DEBUGGER_copperListDump += "<td>WAIT x: $" + (word1 & 0xff).toString(16)  + ", y: $" + yToWait.toString(16) + "</td></tr>";
+			DEBUGGER_copperListDump += "<td>WAIT x: $" + CPER_4digitHex(word1 & 0xff)  + ", y: $" + CPER_4digitHex(yToWait) + "</td></tr>";
 		}
 		else { // move
-			DEBUGGER_copperListDump += "<td>" + AMIGA_GetConstantName(word1) + " = $" + word2.toString(16) + "</td></tr>";
+			DEBUGGER_copperListDump += "<td>" + AMIGA_GetConstantName(word1) + " = $" + CPER_4digitHex(word2) + "</td></tr>";
 		}
 		ptr += 4;
 		watchdog++;
@@ -96,7 +104,7 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 	const word1 = MACHINE.getRAMValue(cper_cur,2,false);
 	const word2 = MACHINE.getRAMValue(cper_cur+2,2,false);
 
-	if ((word1&1)  != 0) { // wait --> NOT taking mask into account. Very basic implementation
+	if ((word1&1)  != 0) { // wait
 		if (_breakIfWait)
 			return false;
 		if ((word2 & (1<<15)) == 0) // wait blitter bit is cleared ==> wait for blitter (yes, wait when it's cleared, not set)

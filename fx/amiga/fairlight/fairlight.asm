@@ -17,7 +17,7 @@ HALF_LINES_COUNT	EQU	LINES_COUNT/2
 DUR_1	EQU 75
 DUR_2	EQU 100
 
-Wblit:	macro
+Wblit	macro
 .wb\@:	
 	btst	#6,$2(a6)
 	bne.s	.wb\@
@@ -25,11 +25,12 @@ Wblit:	macro
 
 init:
 	lea		buffers,a0
+	lea		endBuf,a1
 	moveq	#0,d0
-	move.w	#((64+LINES_COUNT*2)*96)/4-1,d7
 .clr:
 	move.l	d0,(a0)+
-	dbra	d7,.clr	
+	cmp.l	a1,a0
+	ble		.clr
 
 	lea	$dff000,a6
 	move.w #$83c0,DMACON(a6)	; // blitter + copper + bitplane DMA
@@ -194,21 +195,22 @@ show:
 	moveq	#0,d0
 	move.b	npos,d0
 	move.l	d0,d1
-	asr	#3,d0
+	asr		#3,d0
 	muls	#96,d1
-	add	d1,d0
-	add	#14*96+2,d0
+	add		d1,d0
+	add		#20*96+2,d0
 	add.l	showplane,d0	;buf 2 = $58000
 
 	lea	planes,a0
-.lp:	move.w	d0,6(a0)
+.lp:	
+	move.w	d0,6(a0)
 	swap	d0
 	move.w	d0,2(a0)
 
 	moveq	#$f,d1
 	and.b	npos,d1
 	lea		sfttab,a0
-	move.b	(a0,d1.w),$102(a6)	;shift value
+	;move.b	(a0,d1.w),$102(a6)	;shift value
 	rts
 
 sfttab:	
@@ -335,10 +337,11 @@ showplane:
 	bss_c
 
 buffers:
-			ds.b	32*96
+	ds.b	32*96
 screen1:	
 	ds.b	LINES_COUNT*96
 screen2:	
 	ds.b	LINES_COUNT*96
 	ds.b	32*96
-
+endBuf:
+	ds.l	1
