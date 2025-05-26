@@ -1,6 +1,3 @@
-; ISSUES:
-; Need to fix label and instr/data on the same line, wtf seriously
-; implement blk.b/w/l
 
 	code_c
 	

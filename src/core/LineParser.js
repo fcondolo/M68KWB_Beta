@@ -92,11 +92,7 @@ class LineParser {
         len = comment;
     }
 
-    while ((len > 0) && (t.text[len - 1] == '\r'))
-      len--;
-    while ((len > 0) && (t.text[len - 1] == '\n'))
-      len--;
-    while ((len > 0) && (t.text[len - 1] == '\r'))
+    while ((len > 0) && ((t.text[len - 1] == '\r')||(t.text[len - 1] == '\n')||(t.text[len - 1] == '\t')))
       len--;
 
     if (len <= 0) {
@@ -151,6 +147,7 @@ class LineParser {
         case ' ':
         case '\n':
         case '\r':
+        case '\t':
           return ret;
       }
       ret++;
