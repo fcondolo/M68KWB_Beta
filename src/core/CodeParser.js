@@ -851,7 +851,9 @@ class CodeParser {
           }
           bufLen = amount * ln.instrSize;
         } else {
-          bufLen = ln.DxArgs.length * ln.instrSize;
+          if (ln.isDCB) {
+            bufLen = ln.instrSize * ln.DxArgs[0].v;
+          } else bufLen = ln.DxArgs.length * ln.instrSize;
         }
         if (!ln.attachedLabel.dcLen || isNaN(ln.attachedLabel.dcLen))
           ln.attachedLabel.dcLen = bufLen;
@@ -870,6 +872,8 @@ class CodeParser {
         let lblPrefix = "@DC.@";
         if (ln.isDS)
           lblPrefix = "@DS.@";
+        if (ln.isDCB)
+          lblPrefix = "@DCB.@";
         let align = 1;
         if (ln.instrSize > 1)
           align = 2;
@@ -905,9 +909,24 @@ class CodeParser {
           ln.attachedLabel.writtenDCBytes = 0;
         else
           adrs += ln.attachedLabel.writtenDCBytes;
-        for (let cpy = 0; cpy < ln.DxArgs.length; cpy++) {
+        let iter;
+        if (ln.isDCB)
+          iter = ln.DxArgs[0].v;
+        else
+          iter = ln.DxArgs.length;
+
+        for (let cpy = 0; cpy < iter; cpy++) {
           ln.dcAddress = adrs;
-          let val = ln.DxArgs[cpy].v;
+          let val;
+          if (ln.isDCB) {
+            ln.hideDxArgsDbg = true;
+            if (ln.DxArgs.length > 1)
+              val = ln.DxArgs[1].v;
+            else
+              val  = 0;
+          }
+          else
+            val = ln.DxArgs[cpy].v;
           if (val == null || isNaN(val))
             ln.Failed("can't evaluate DC.x arg #" + (cpy+1));
           else {

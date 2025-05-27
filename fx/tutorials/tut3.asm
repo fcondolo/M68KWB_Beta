@@ -26,7 +26,7 @@ drawSquare:
        ; >JS print("d7 value =" + d7.uw) 
        move.w        d0,(a0)
        add.l         #40,a0
-       ; >JS if (d7.uw == 12) debug() 
+       ; >JS if (d7.uw == 12) debug("d7 equals 12: " + d7.uw) 
        dbra          d7,.loopY
        rts
        

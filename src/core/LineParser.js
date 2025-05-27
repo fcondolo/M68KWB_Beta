@@ -751,7 +751,7 @@ class LineParser {
     let t = this;
     const instr = t.readNextWord(['.']);
     const filtLen = t.filtered.length;
-    if ((t.ofs + 2 < filtLen) && (t.filtered[t.ofs + 1] == '.') && ((instr == 'DC') || (instr == 'DS'))) {
+    if ((t.ofs + 2 < filtLen) && (t.filtered[t.ofs + 1] == '.') && ((instr == 'DC') || (instr == 'DS')|| (instr == 'DCB') || (instr == 'BLK'))) {
       t.instr = instr;
       switch (t.filtered[t.ofs + 2]) {
         case 'B': t.instrSize = 1; break;
@@ -762,9 +762,14 @@ class LineParser {
       t.isInstr = false;
       t.ofs += 3;
       t.isDS = false;
-      t.isDC = true;
-      if (t.instr == 'DS') 
-        t.isDS = true;  
+      t.isDC = false;
+      t.isDCB = false;
+      switch (t.instr) {
+        case 'DC' : t.isDC = true; break;
+        case 'DS' : t.isDS = true; break;
+        case 'DCB' : t.isDCB = true; break;
+        case 'BLK' : t.isDCB = true; break;
+      }
       return true;
     }
     return false;

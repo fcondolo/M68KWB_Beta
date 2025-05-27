@@ -1,3 +1,8 @@
+27/05/2025
+==========
+- Added support for DCB.x/BLK.x assembler directives
+
+
 25/05/2025
 ==========
 - Added Copper SKIP
