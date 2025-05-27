@@ -1,6 +1,8 @@
 
 init:
   lea       blip,a0
+  ;>JS WATCHES.add("test1", a0.ul, WATCH_WORD, WATCH_HEX);
+  ;>JS WATCHES.add("frame", label("frame"), WATCH_WORD, WATCH_HEX);
   move.w    #2,d0
 	lea	      (a0,d0),a3
   ;>JS if (a3.ul != a0.ul+2) debug();
@@ -69,6 +71,7 @@ blop:
   ENDR
   
 update:
+  add.w #1,frame
   rts
 
-
+frame: dc.w 0

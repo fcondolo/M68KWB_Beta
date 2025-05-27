@@ -101,6 +101,8 @@ class CodeParser {
     for (let ic = 0; ic < ASSEMBLER_CONFIG.defines.length; ic++) {
       t.constants.push({ name: ASSEMBLER_CONFIG.defines[ic].name, value: ASSEMBLER_CONFIG.defines[ic].value, path: "", line: "" });
     }
+    new M68K_Watches(); // important here to push the proper constants
+
 
     // includes are done first
     watchdog = 0;

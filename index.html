@@ -32,6 +32,7 @@
   <script src='src/core/debugPrimitives.js'></script>
   <script src='src/core/m68k.js'></script>
   <script src='src/core/TimeMachine.js'></script>
+  <script src='src/core/Watches.js'></script>
   <script src='src/core/LineParser.js'></script>
   <script src='src/core/StringParser.js'></script>
   <script src='src/core/CodeParser.js'></script>
@@ -208,6 +209,7 @@
         <tr><td>CPU cycles</td><td><input type="checkbox" onclick="DEBUGGER_ToggleCycles(this.checked);"></td></tr>
         <tr><td>Inline JS</td><td><input type="checkbox" checked onclick="DEBUGGER_AllowJS = this.checked;"></td></tr>
         <tr><td>Palette</td><td><input type="checkbox" onclick="if(this.checked) document.getElementById('tbox_palette').style.display = null; else document.getElementById('tbox_palette').style.display = 'none';"></td></tr>
+        <tr><td>Watches</td><td><input type="checkbox" onclick="if(this.checked) document.getElementById('tbox_watches').style.display = null; else document.getElementById('tbox_watches').style.display = 'none';"></td></tr>
         <tr id ="tbox_bpl0"><td>Bitplane 1</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[0] = 1; else bitplaneWeight[0] = 0;"></td></tr>
         <tr id ="tbox_bpl1"><td>Bitplane 2</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[1] = 1; else bitplaneWeight[1] = 0;"></td></tr>
         <tr id ="tbox_bpl2"><td>Bitplane 3</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[2] = 1; else bitplaneWeight[2] = 0;"></td></tr>
@@ -220,6 +222,7 @@
       </span>
       <br><button class="inset" onclick="DEBUGGER_memoryStats();"><i class="fa fa-bar-chart"></i>&nbsp Mem Stats</button>      
       <br><button class="inset" onclick="DEBUGGER_showContext();"><i class="fa fa-map-marker"></i>&nbsp Where am I?</button>
+      <br><span id ="tbox_watches" style = "display: none;">Watches:</span>
       <br><span id ="tbox_palette" style = "display: none;">Palette:
         <br><span id ="tbox_pal0"><div class='colorbox' id="tbox_c0"></div> COLOR0</span>
         <br><span id ="tbox_pal1"><div class='colorbox' id="tbox_c1"></div> COLOR1</span>

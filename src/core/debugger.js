@@ -305,6 +305,9 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     break;
   }
 
+  if (WATCHES.hasFocus)
+    return;
+
   if (PREV_KEYDOWN == event.keyCode) return;
   PREV_KEYDOWN = event.keyCode;
 
@@ -692,8 +695,7 @@ function DEBUGGER_toggleShowToolbox() {
       border: "1px solid #ccc",
       background: "rgba(130,130,150,0.9"
     });
-    // Make it draggable
-    $('body').scrollTo('#draggable');
+    //$('body').scrollTo('#draggable');
   }
   else {
     elm.style.display = "none";

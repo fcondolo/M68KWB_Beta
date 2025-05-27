@@ -8,6 +8,9 @@ STARSCOUNT EQU 128
 ;SLOW EQU 128
 
 init:
+       ;>JS WATCHES.add("frame", label("frame"), WATCH_WORD, WATCH_HEX);
+       ;>JS WATCHES.add("x", label("centerX"), WATCH_WORD, WATCH_DEC);
+       ;>JS WATCHES.add("color", 0xdff180, WATCH_WORD, WATCH_HEX);
        lea           sintable,a0
        bsr           lib_math_sin
        lea           stars,a0
@@ -40,7 +43,7 @@ init:
 ; [IN] D1.W :      y
 ; [IN] A0.L :      bitplane
 plot:
-       add.w         #160,d0
+       add.w         centerX,d0
        cmp.w         #320,d0
        bcc           .done
        add.w         #90,d1
@@ -143,12 +146,17 @@ drawStars:
        move.l        bplPtr,a0
        bsr           plot
        dbra          d7,.nextStar
+       add.w         #1,frame
        rts
 
 MATH_RandomSeed:	
        dc.l	$deffac1e
 
+frame:
+       dc.w   0
 
+centerX:
+       dc.w   160
 
 
        bss_any

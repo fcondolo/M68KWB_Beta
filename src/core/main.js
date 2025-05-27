@@ -113,8 +113,10 @@ function main_doInit() {
     try {
       MYFX.FX_Init();
     } catch (err) {
-      if (err.message == "WAITING_USERINPUT")
+      if (err.message == "WAITING_USERINPUT") {
+        WATCHES.update();
         return; // just waiting for the user to press the trace key, don't execute JS further
+      }
       let msg = "Exception occurred while initializing the FX:\n" + err.message;
       if (err.stack) msg += "\ncallstack:\n" + err.stack;
       main_Alert(msg, false, true);
@@ -124,6 +126,7 @@ function main_doInit() {
 
 function main_mainLoop() {
   if (PAUSED || WAITING_USERINPUT) {
+    WATCHES.update();
     return;
   }
 
@@ -138,11 +141,13 @@ function main_mainLoop() {
       }
     } catch (err) {
       if (err.message == "WAITING_USERINPUT")  {
+        WATCHES.update();
         //console.log("main_updateAsmOnly - waiting for the user to trace. don't execute further");
         return; // just waiting for the user to trace. don't execute further
       }
       alert("Exception occurred while tracing assembler: " + err.message);
     }
+    WATCHES.update();
     return;
   }
 
@@ -150,6 +155,7 @@ function main_mainLoop() {
     // Handle case when FX has not yet been initialized
     if (!MYFX.SYS_initialized) {
         main_doInit();
+      WATCHES.update();
         return;
     }
 
@@ -163,7 +169,8 @@ function main_mainLoop() {
         MYFX.updatedFramesCount++;
       } catch (err) {
         if (err.message == "WAITING_USERINPUT") {
-          console.log("MYFX.FX_Update() - waiting for the user to trace. don't execute JS further");
+          WATCHES.update();
+          //console.log("MYFX.FX_Update() - waiting for the user to trace. don't execute JS further");
           return; // just waiting for the user to press the trace key, don't execute JS further
         } {
           let msg = "Exception occurred while updating the FX:\n" + err.message;
@@ -186,6 +193,7 @@ function main_mainLoop() {
     if (MYFX.FX_DrawDebug)
       MYFX.FX_DrawDebug(ctx);
     ctx.restore();
+    WATCHES.update();
   }
 }
 
