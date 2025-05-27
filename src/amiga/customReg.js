@@ -157,14 +157,21 @@ Returns the current 16 bit value of a custom register
 @return     the register's 16 bit value
 */
 function AMIGA_getCustom(_index) {
-	if (_index%2 != 0) debug("reading CUSTOM register at an ODD address");
+	if (_index%2 != 0) 
+		debug("reading CUSTOM register at an ODD address");
 	if (_index == DMACONR)
 		AMIGA_NEED_WAIT_BLT = false; // very approximate way to test if blitter status has been checked
 	return AMIGA_customregs[_index/2];
 }
 
 function AMIGA_getCustom_B(_index) {
-	return (AMIGA_getCustom(_index)>>>8)&0xff;
+	let v = AMIGA_customregs[_index>>>1];
+	if (_index%2 == 0) {
+		if (_index == DMACONR)
+			AMIGA_NEED_WAIT_BLT = false; // very approximate way to test if blitter status has been checked
+		return (v>>>8)&0xff; // want the MSB
+	}
+	return v&0xff;		// want the LSB
 }
 
 /**
