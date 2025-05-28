@@ -258,6 +258,7 @@ function ST_bitplanes_update() {
 		pal = ST_BITPLANES_CTX.pal;
 	}
 
-	imgDataToScreen(imgdata);
+	BACKBUF_CTX.imageSmoothingEnabled = false;    
+	BACKBUF_CTX.putImageData(imgdata,0,0);
 }
 

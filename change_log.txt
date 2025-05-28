@@ -1,7 +1,12 @@
+28/05/2025
+==========
+- Fixed sub.w to address
+- Proper FX_DrawDebug coordinates
+
 27/05/2025
 ==========
 - Added support for DCB.x/BLK.x assembler directives
-
+- Added Watches
 
 25/05/2025
 ==========

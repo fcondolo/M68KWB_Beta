@@ -2200,15 +2200,17 @@ function SUB(_instr) {
   let dst = getArg(_dest, size, true);
   if (dst.err) return dst.err;
 
+  let srcVal = src.value;
+  // extend to 32 bits when destination is an address register
   if ((size == 2) && (_dest.tab == regs.a) && (_dest.type == 'reg')) {
     srcVal = extWord(srcVal);
     size = 4;
   }
 
   switch (size) {
-    case 1: setArg(_dest, I_SUB_8(src.value, dst.value), 1, true); break;
-    case 2: setArg(_dest, I_SUB_16(src.value, dst.value), 2, true); break;
-    case 4: setArg(_dest, I_SUB_32(src.value, dst.value), 4, true); break;
+    case 1: setArg(_dest, I_SUB_8(srcVal, dst.value), 1, true); break;
+    case 2: setArg(_dest, I_SUB_16(srcVal, dst.value), 2, true); break;
+    case 4: setArg(_dest, I_SUB_32(srcVal, dst.value), 4, true); break;
     default: return 'unknown instruction';
   }
   AllowPrePost();

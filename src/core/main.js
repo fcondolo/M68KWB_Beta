@@ -214,12 +214,17 @@ function main_mainLoop() {
 
     ctx.restore();
     MACHINE.customUpdate();
-    ctx.save();    
-    ctx.scale(CANVAS_SCALE,CANVAS_SCALE);
-    ctx.translate(PLATFORM_OFSX, PLATFORM_OFSY);
-    if (MYFX.FX_DrawDebug)
-      MYFX.FX_DrawDebug(ctx);
-    ctx.restore();
+
+    if (MYFX.FX_DrawDebug) {
+      BACKBUF_CTX.save();    
+      BACKBUF_CTX.translate(DEBUGPRIM.startScreenX, DEBUGPRIM.startScreenY);
+      MYFX.FX_DrawDebug(BACKBUF_CTX);
+      BACKBUF_CTX.restore();
+    }
+
+    DEBUGPRIM.draw(BACKBUF_CTX);
+    imgDataToScreen();
+
     WATCHES.update();
   }
 }
@@ -584,9 +589,6 @@ function onNewRunningSpeed(_forceVal) {
 
 
 function imgDataToScreen(imagedata) {
-  BACKBUF_CTX.imageSmoothingEnabled = false;    
-  BACKBUF_CTX.putImageData(imagedata,0,0);
-  DEBUGPRIM.draw(BACKBUF_CTX);
   ctx.imageSmoothingEnabled = false;
   if (CANVAS_SCALE == 100)
     ctx.drawImage(BACKBUF_CVS, 0, 0);

@@ -217,7 +217,8 @@ function bitplanes_update() {
 		AMIGA_setCustom_L(BPL1PTH + 4 * i, bplAdrs);
 	}
 
-	imgDataToScreen(imgdata);
+	BACKBUF_CTX.imageSmoothingEnabled = false;    
+	BACKBUF_CTX.putImageData(imgdata,0,0);
 }
 
 function AMIGA_Chunky8_update() {
@@ -251,6 +252,7 @@ function AMIGA_Chunky8_update() {
 		d += 4 * rptY;
 	}
 
-	imgDataToScreen(imgdata);
+	BACKBUF_CTX.imageSmoothingEnabled = false;    
+	BACKBUF_CTX.putImageData(imgdata,0,0);
 }
 
