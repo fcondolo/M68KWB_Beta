@@ -5,6 +5,33 @@ const LOCALSTORAGE_FX_PAUSED = "paused";
 const LOCALSTORAGE_FX_ZOOM = "zoom";
 
 
+var CHAIN_MODE = false;
+const chain_fx = [
+  {class: "Non_Regression_Tests", platform: "STE"},
+  {class: "FX_TestParser", platform: "ST"},
+  {class: "Draw2Buffer", platform: "OCS"},
+  {class: "Fairlight", platform: "OCS"},
+  {class: "RevisionLogo_v1", platform: "OCS"},
+  {class: "RevisionLogo_v2", platform: "OCS"},
+  {class: "FX_Spherev1", platform: "OCS"},
+  {class: "FX_Spherev2", platform: "OCS"},
+  {class: "FX_Spherev3", platform: "OCS"},
+  {class: "FX_Spherev4", platform: "OCS"},
+  {class: "FX_StarFieldv1", platform: "OCS"},
+  {class: "FX_StarFieldv2", platform: "OCS"},
+  {class: "FX_Heroes", platform: "OCS"},
+  {class: "TestCopper", platform: "OCS"},
+  {class: "AtariSTe_BlitterFill", platform: "STE"},
+  {class: "AtariVBL", platform: "STE"},
+  {class: "tut_Atari_HBL", platform: "STE"},
+  {class: "testAmigaBlitter", platform: "OCS"},
+  {class: "testSTEBlitter", platform: "STE"},
+  {class: "tut_Atari1", platform: "STE"},
+  {class: "tut4_automodified", platform: "STE"},
+  {class: "tut5_AmigaImage", platform: "OCS"},
+  {class: "tut6_STEImage", platform: "STE"},
+];
+
 var SIMU_DEFAULT_WIDTH, PAL_VIDEO_LINES_COUNT, PAL_PLAYFIELD_LINES_COUNT;
 var SIMU_START_BITPLANE, SIMU_END_BITPLANE;
 var PLAYFIELD_LINES_COUNT;
@@ -286,7 +313,6 @@ function main_startChosenFx(_className) {
 
   const prevFx = localStorage.getItem(LOCALSTORAGE_FX_NAME);
   if (prevFx != FXName) {
-    localStorage.clear();
     localStorage.setItem(LOCALSTORAGE_FX_NAME, FXName);
   }
 
@@ -376,7 +402,44 @@ function main_startChosenFx(_className) {
   return true;
 }
 
+function Check_Chain() {
+  let index = localStorage.getItem("chain_index");
+  if (!index)
+    return false;
+  index = parseInt(index);
+  if (!isNaN(index)) {
+    const arrayIndex = index - 1;
+    if (arrayIndex < chain_fx.length) {
+      const classname = chain_fx[arrayIndex].class;
+      if (!main_startChosenFx(classname)) {
+        alert("ERROR: Can't start FX " + classname);
+        return false;
+      }
+      CHAIN_MODE = true;
+      localStorage.setItem("chain_index", index + 1);
+      return true;
+    }
+  }
+  return false;
+}
+
+
+function findFxIndexFromName(_name) {
+  if (_name) {
+    for (let i = 0; i < REGISTERED_FX.length; i++) {
+      if (REGISTERED_FX[i].classname == _name) {
+        return i;
+      }
+    }
+  }
+  return -1;
+}
+
 function onFxChosen() {
+  if (document.getElementById("searchfx").value.toUpperCase() == "CHAIN") {
+    localStorage.setItem("chain_index", 1);
+    window.location.reload(true);
+  }
   hideModalBox();
   let sel = document.getElementById("fxListSelect");
   const name = sel.options[sel.selectedIndex].value;
@@ -421,6 +484,9 @@ function updateFxList() {
 
 function main_onload() {
   let fxList = "";
+
+  if (Check_Chain())
+    return;
 
   // First try to start the FX in URL params
   const queryString = window.location.search;
