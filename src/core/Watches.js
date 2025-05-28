@@ -1,8 +1,8 @@
 var WATCHES = null;
 
 class M68K_Watches {
-    constructor(
-    ) {
+    constructor(_jsOnly = false)
+    {
         let t               = this;
         t.entries           = [];
         t.format            = [];
@@ -22,13 +22,15 @@ class M68K_Watches {
         t.format[t.WATCH_WORD]  = {b:2,s:false};
         t.format[t.WATCH_LONG]  = {b:4,s:false};
         
-        if (!CODERPARSER_SINGLETON) alert("Create WATCHES singleton after CODERPARSER_SINGLETON");
-        CODERPARSER_SINGLETON.constants.push({ name: "WATCH_BYTE", value: t.WATCH_BYTE, path: "", line: "" });
-        CODERPARSER_SINGLETON.constants.push({ name: "WATCH_WORD", value: t.WATCH_WORD, path: "", line: "" });
-        CODERPARSER_SINGLETON.constants.push({ name: "WATCH_LONG", value: t.WATCH_LONG, path: "", line: "" });
-        CODERPARSER_SINGLETON.constants.push({ name: "WATCH_BIN", value: t.WATCH_BIN, path: "", line: "" });
-        CODERPARSER_SINGLETON.constants.push({ name: "WATCH_DEC", value: t.WATCH_DEC, path: "", line: "" });
-        CODERPARSER_SINGLETON.constants.push({ name: "WATCH_HEX", value: t.WATCH_HEX, path: "", line: "" });
+        if (!_jsOnly) {
+            if (!CODERPARSER_SINGLETON) alert("Create WATCHES singleton after CODERPARSER_SINGLETON");
+            CODERPARSER_SINGLETON.constants.push({ name: "WATCH_BYTE", value: t.WATCH_BYTE, path: "", line: "" });
+            CODERPARSER_SINGLETON.constants.push({ name: "WATCH_WORD", value: t.WATCH_WORD, path: "", line: "" });
+            CODERPARSER_SINGLETON.constants.push({ name: "WATCH_LONG", value: t.WATCH_LONG, path: "", line: "" });
+            CODERPARSER_SINGLETON.constants.push({ name: "WATCH_BIN", value: t.WATCH_BIN, path: "", line: "" });
+            CODERPARSER_SINGLETON.constants.push({ name: "WATCH_DEC", value: t.WATCH_DEC, path: "", line: "" });
+            CODERPARSER_SINGLETON.constants.push({ name: "WATCH_HEX", value: t.WATCH_HEX, path: "", line: "" });
+        }
     }
 
     add(_name, _adrs, _dataType, _base) {

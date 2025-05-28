@@ -231,6 +231,8 @@ function main_mainLoop() {
 
 
 function main_startAll() {
+  if (!WATCHES)
+    new M68K_Watches(true); // in case no asm files
   if (FX_INFO.zoom) {
     try {
       setZoom(FX_INFO.zoom);
@@ -384,8 +386,11 @@ function main_startChosenFx(_className) {
     finalPath += FX_INFO.source;
 
     let cp = new CodeParser();
-    if (!cp.ascii68k_loadfile(finalPath))
+    if (!cp.ascii68k_loadfile(finalPath)) {
       return;
+    }
+      
+
   //  ascii68k_loadfile(finalPath); // OLD PARSER  
   }
 
@@ -423,7 +428,7 @@ function Check_Chain() {
       CHAIN_MODE = true;
       localStorage.setItem("chain_index", index + 1);
       return true;
-    }
+    } else alert("CHAIN DONE!");
   }
   return false;
 }

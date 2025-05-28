@@ -123,6 +123,15 @@ class LineParser {
       }  
     }
 
+    let saveOfs = t.ofs;
+    const wrd1 = t.readNextWord();
+    const wrd2 = t.readNextWord();
+    t.ofs = saveOfs;
+    if (wrd2 == "EQU" || wrd2 == "=") {
+      t.isLabel = false;
+      return -1;
+    }
+
     if ((t.endLabelIndex > -100) && (!t.isLabel))
       return -1;
 
