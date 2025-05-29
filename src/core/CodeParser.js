@@ -2055,7 +2055,17 @@ class CodeParser {
     let t = this;
     if (!line.isInstr)
       return;
-    if (line.instr) {
+    if (line.instr) {      
+      if (line.instrSize == 1) { // do not allow .b instructions on address registers
+        if (line.arg1 && line.arg1.tab == regs.a && line.arg1.type == 'reg') {
+          line.Failed("can't use .b instructions when arg1 is an address register");
+          return;
+        }
+        if (line.arg2 && line.arg2.tab == regs.a && line.arg2.type == 'reg') {
+          line.Failed("can't use .b instructions when arg2 is an address register");
+          return;
+        }
+      }
       if (line.instrSize < 1 || line.instrSize > 4) line.instrSize = 2;
       line.cycles = 0;
       switch (line.instr) {

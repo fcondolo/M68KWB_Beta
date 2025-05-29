@@ -1,3 +1,6 @@
+; SCANDAL, SCANDAL!!!! STOLEN CODE!
+; This was originally coded by TSUNAMI (I believe)
+; Source code found in this archive : https://aminet.net/package/demo/intro/Gemanix
 
 	code_c
 	

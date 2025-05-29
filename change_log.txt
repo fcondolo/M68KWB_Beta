@@ -1,3 +1,7 @@
+29/05/2025
+==========
+- Forbid byte access to address registers
+
 28/05/2025
 ==========
 - Fixed sub.w to address

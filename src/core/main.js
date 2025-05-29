@@ -10,7 +10,7 @@ const chain_fx = [
   {class: "Non_Regression_Tests", platform: "STE"},
   {class: "FX_TestParser", platform: "ST"},
   {class: "Draw2Buffer", platform: "OCS"},
-  {class: "Fairlight", platform: "OCS"},
+  {class: "BlitterTornado", platform: "OCS"},
   {class: "RevisionLogo_v1", platform: "OCS"},
   {class: "RevisionLogo_v2", platform: "OCS"},
   {class: "FX_Spherev1", platform: "OCS"},
@@ -503,9 +503,12 @@ function main_onload() {
   const urlParams = new URLSearchParams(queryString);
   let FXName = urlParams.get('fx');
   if (!FXName)
-    FXName = urlParams.get('FX');
+    FXName = urlParams.get('FX');  
   if (FXName) {
-    if (FXName != "reset") {
+    if (FXName == "reset") {
+      localStorage.clear();
+    }
+    else {
       if (main_startChosenFx(FXName))
         return;
       fxList += "FX " + FXName + " from URL could not be started<br>";  
