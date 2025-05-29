@@ -16,8 +16,8 @@ class BlitterTornado {
 
   FX_DrawDebug(_ctx) {
     _ctx.fillStyle = "white";
-    _ctx.font = "bold 20px serif";
+    _ctx.font = "16px sans-serif";
     let y = Math.sin(performance.now()/100);
-    _ctx.fillText("Tsunami", 250, 240 + 10*y);
+    _ctx.fillText("butchered from Tsunami's code", 60, 240 + 10*y);
   }
 }

@@ -311,9 +311,15 @@ level3:
 ;-------------------------------------------
 copper:		
 		dc.w	$108,48+4,$10a,48+4
-		dc.w	$8e,$2271,$90,$35c1
+		dc.w	$8e,$2c81,$90,$2cc1
 		dc.w	$92,$0028,$94,$d0
 		dc.w	$120,0,$122,0
+
+;		dc.w   DIWSTRT,$2c81 ; PAL default window start
+;		dc.w   DIWSTOP,$2cc1 ; PAL default window stop
+;		dc.w   DDFSTRT,$0038
+;		dc.w   DDFSTOP,$00d0
+
 
 planes:		
 		dc.w	$e0,0,$e2,0
