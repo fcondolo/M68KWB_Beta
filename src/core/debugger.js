@@ -1044,7 +1044,7 @@ function focusOnLabel(_name) {
 }
 
 function DEBUGGER_onHWBreakpointReached(_index) {
-//  alert("Hit HW Breakpiont #" + _index);
+  main_Alert("Hit HW Breakpiont #" + _index);
   DEBUGGER_lastJSExecLog = "hardware breakpoint reached";
   DEBUGGER_AdditionalDbgMsg = "hardware Breakpoint reached";
   showHTMLError("hardware Breakpoint reached");
@@ -1056,7 +1056,8 @@ function DEBUGGER_onHWBreakpointReached(_index) {
 }
 
 function DEBUGGER_onValueBreakpointReached() {
-  DEBUGGER_lastJSExecLog = "value Breakpoint reached";
+  main_Alert("Hit Value Breakpiont");
+    DEBUGGER_lastJSExecLog = "value Breakpoint reached";
   DEBUGGER_AdditionalDbgMsg = "value Breakpoint reached";
   showHTMLError("value Breakpoint reached");
   DEBUGGER_traceTillRTS = false;
