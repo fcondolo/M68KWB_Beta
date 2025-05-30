@@ -1067,19 +1067,16 @@ function DEBUGGER_onValueBreakpointReached() {
 }
 
 
-function DEBUGGER_ValueBreakpoint(args) {
-  if (args.length !== 3) { alert("v command expects 3 params"); return; }
-  let adrs = parseInt(args[0], 16);
-  if (isNaN(adrs)) { alert("arg 1 : should be a hexadecimal number (address, without '$'). found: " + args[0]); return; }
-  let val = parseInt(args[1], 16);
-  if (isNaN(val)) { alert("arg 2 : should be a hexadecimal number (value, without '$'). found: " + args[1]); return; }
-  let size = parseInt(args[2], 16);
-  if (isNaN(size)) { alert("arg 3 : should be a hexadecimal number (size, without '$'). found: " + args[2]); return; }
-  if (size < 1 || size > 4) { alert("arg 3 : size should be 1,2 or 4. found: " + args[2]); return; }
+function DEBUGGER_ValueBreakpoint(adrs, val, size) {  
+  if (size < 1 || size > 4)
+  { 
+    alert("Can't set value breakpoint: size should be 1,2 or 4. found: " + size);
+    return false; 
+  }
   DEBUGGER_VBpt[0] = adrs;
   DEBUGGER_VBpt[1] = val;
   DEBUGGER_VBpt[2] = size;
-  alert("set hardware breakpoint if address $" + adrs.toString(16) + " reaches value $" + val.toString(16) + " size: " + size.toString() + " bytes.");
+  return true;
 }
 
 function DEBUGGER_SetMemBrkPt(adrs, size) {
@@ -1149,17 +1146,20 @@ function DEBUGGER_jump(args) {
   focusOnCodeLine(M68K_IP);
 }
 
-function DEBUGGER_HWBreakpoint(args) {
-  if (args.length !== 3) { alert("w command expects 3 params"); return; }
-  let index = parseInt(args[0], 16);
-  if (isNaN(index) || (index < 0) || (index >= DEBUGGER_CONFIG.MAX_HW_BPT)) { alert("arg 1 : should be a number between 0 and " + (DEBUGGER_CONFIG.MAX_HW_BPT-1) + ". found: " + args[0]); return; }
-  let adrs = parseInt(args[1], 16);
-  if (isNaN(adrs)) { alert("arg 2 : should be a number (address). found: " + args[1]); return; }
-  let size = parseInt(args[2], 16);
-  if (isNaN(size)) { alert("arg 3 : should be a number (size). found: " + args[2]); return; }
+function DEBUGGER_HWBreakpoint(index, adrs, size) {
+  if (index  >= DEBUGGER_CONFIG.MAX_HW_BPT) {
+    alert("can't set HW brealkpoint: index too high, expeted 0.." + (DEBUGGER_CONFIG.MAX_HW_BPT-1).toString());
+    return false;
+  }
+  if (size < 1 || size > 4)
+  { 
+    alert("can't set HW brealkpoint: size should be 1,2 or 4. found: " + size);
+    return false; 
+  }
+
   DEBUGGER_HWBpts[index * 2] = adrs;
   DEBUGGER_HWBpts[index * 2 + 1] = size;
-  alert("set hardware breakpoint #" + index + " at address $" + adrs.toString(16) + " and $" + size.toString(16) + " bytes.");
+  return true;
 }
 
 
@@ -1196,8 +1196,33 @@ function DEBUGGER_onNewCommand() {
 
   cmd.word = cmd.word.toUpperCase();
   switch (cmd.word) {
-    case "W": DEBUGGER_HWBreakpoint(args); break;
-    case "V": DEBUGGER_ValueBreakpoint(args); break;
+    case "W": {
+      if (args.length !== 3) { alert("w command expects 3 params"); return; }
+      let index = parseInt(args[0], 16);
+      if (isNaN(index) || (index < 0) || (index >= DEBUGGER_CONFIG.MAX_HW_BPT)) { alert("arg 1 : should be a number between 0 and " + (DEBUGGER_CONFIG.MAX_HW_BPT-1) + ". found: " + args[0]); return; }
+      let adrs = parseInt(args[1], 16);
+      if (isNaN(adrs)) { alert("arg 2 : should be a number (address). found: " + args[1]); return; }
+      let size = parseInt(args[2], 16);
+      if (isNaN(size)) { alert("arg 3 : should be a number (size). found: " + args[2]); return; }
+      if (DEBUGGER_HWBreakpoint(index, adrs, size))
+        alert("set hardware breakpoint #" + index + " at address $" + adrs.toString(16) + " and $" + size.toString(16) + " bytes.");
+    }
+    break;
+    case "V": {
+      if (args.length !== 3) {
+        alert("v command expects 3 params");
+        return;
+      } 
+      let adrs = parseInt(args[0], 16);
+      if (isNaN(adrs)) { alert("arg 1 : should be a hexadecimal number (address, without '$'). found: " + args[0]); return; }
+      let val = parseInt(args[1], 16);
+      if (isNaN(val)) { alert("arg 2 : should be a hexadecimal number (value, without '$'). found: " + args[1]); return; }
+      let size = parseInt(args[2], 16);
+      if (isNaN(size)) { alert("arg 3 : should be a hexadecimal number (size, without '$'). found: " + args[2]); return; }
+      if (DEBUGGER_ValueBreakpoint(adrs, val, size))
+          alert("set hardware breakpoint if address $" + adrs.toString(16) + " reaches value $" + val.toString(16) + " size: " + size.toString() + " bytes.");
+    }
+    break;
     case "M": DEBUGGER_viewMem(args); break;
     case "J": DEBUGGER_jump(args); break;
     default: DEBUGGER_JSCommand(cmd, args); break;

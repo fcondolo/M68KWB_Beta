@@ -1,6 +1,7 @@
 30/05/2025
 ==========
 - Avoid parsing all asm files in case of missing ENDM directive
+- HW breakpoints and value breakpoints can now be called from inline JS (see documentation, chapter "Breakpoints")
 
 29/05/2025
 ==========
