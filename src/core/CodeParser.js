@@ -653,12 +653,19 @@ class CodeParser {
         ln.isMacroDef = true;
         t.strings.lines[lnIt].isMacroDef = true;
         let m = { name: name, lines: [], labels: [] };
+        const macroFile = ln.path;
+        let endmfound = false;
         for (let mIt = lnIt + 1; mIt < lnCount; mIt++) {
           let newLn = t.strings.lines[mIt];
+          if (newLn.path != macroFile && ASSEMBLER_CONFIG.foce_same_file_macro) {
+            ln.Failed("Could not find matching ENDM in:\n" +  macroFile + "\nSee 'ASSEMBLER_CONFIG.foce_same_file_macro'");
+            return;
+          }
           t.strings.lines[mIt].isMacroDef = true;
           newLn.isMacroDef = true;
           const v = newLn.readNextWord();
           if (v == "ENDM") {
+            endmfound = true;
             newLn.isInstr = false;
             break;          
           }
@@ -670,7 +677,11 @@ class CodeParser {
           }
           m.lines.push(newLn);
         }
-        t.macros[name] = m;
+        if (!endmfound) {
+          ln.Failed("Could not find matching ENDM");
+          return;
+        }
+       t.macros[name] = m;
       }
     }
   }

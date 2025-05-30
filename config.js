@@ -51,7 +51,10 @@ const ASSEMBLER_CONFIG = {
     time_machine : 128,
 
     // Allow ds.x 0, e.g: "ds.l 0". Not allowed by default, avoids stupid mistakes when wanting to tyoe "dc.l 0" and typing "ds.l 0" instead 
-    allow_ds_0 : false
+    allow_ds_0 : false,
+
+    // if true (recommended), for a given macro, the MACRO and ENDM keywords will need to be in the same file. This avoids declaring MACRO and forgetting the ENDM
+    foce_same_file_macro : true
 };
 
 

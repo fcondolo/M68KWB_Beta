@@ -419,7 +419,7 @@ function Check_Chain() {
   index = parseInt(index);
   if (!isNaN(index)) {
     const arrayIndex = index - 1;
-    if (arrayIndex < chain_fx.length) {
+    if (arrayIndex >= 0 && arrayIndex < chain_fx.length) {
       const classname = chain_fx[arrayIndex].class;
       if (!main_startChosenFx(classname)) {
         alert("ERROR: Can't start FX " + classname);
@@ -428,7 +428,10 @@ function Check_Chain() {
       CHAIN_MODE = true;
       localStorage.setItem("chain_index", index + 1);
       return true;
-    } else alert("CHAIN DONE!");
+    } else  {
+      localStorage.setItem("chain_index", null);
+      alert("CHAIN DONE!");
+    }
   }
   return false;
 }

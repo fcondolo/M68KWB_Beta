@@ -1,6 +1,10 @@
+30/05/2025
+==========
+- Avoid parsing all asm files in case of missing ENDM directive
+
 29/05/2025
 ==========
-- Forbid byte access to address registers
+- Forbid byte access to address registers (in case someone writes move.b a0,d0 for example)
 
 28/05/2025
 ==========
