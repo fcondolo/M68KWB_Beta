@@ -1,6 +1,7 @@
 03/06/2025
 ==========
 - Clearer error messages
+- Avoid endless error messages loops
 
 30/05/2025
 ==========
