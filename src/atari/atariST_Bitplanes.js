@@ -189,6 +189,7 @@ function ST_bitplanes_update() {
 		const skp = ST_BITPLANES_CTX.skipStart;
 		for (let rasterX = 0; rasterX < 320; rasterX+=16)
 		{
+			if (MACHINE.stop) return;
 			ST_bitplanes_adrsToRegs(ST_BITPLANES_CTX.bpl, ST_SCREEN_COUNTER_HI, ST_SCREEN_COUNTER_MID, ST_SCREEN_COUNTER_LOW);
 			d = (PLATFORM_OFSY+y)*SIMU_DEFAULT_WIDTH*4 + 4*(PLATFORM_OFSX+rasterX);
 			// fetch data for the 16 next pixels (4 words)

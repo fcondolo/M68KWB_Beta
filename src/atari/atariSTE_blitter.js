@@ -62,7 +62,7 @@ struct _BLITTER_STRUCT{
         },
         setHop(_v) {
           if (_v<0 || _v>3)
-            main_Alert("blitter: bad HOP");
+            debug("blitter: bad HOP");
           this.U8Buf[0] = _v;
         },
         getOp() {
@@ -70,7 +70,7 @@ struct _BLITTER_STRUCT{
         },
         setOp(_v) {
           if (_v<0 || _v>15)
-            main_Alert("blitter: bad Op");
+            debug("blitter: bad Op");
           this.U8Buf[1] = _v;
         },
         getSkew() {
@@ -197,13 +197,13 @@ function Blitter_ReadSource(SrcAdr)
 function Blitter_Notify_Start(_debugMsg)
 {
   MACHINE.lastBlitContext = _debugMsg;
-  MACHINE.errorContext = _debugMsg;
+  MACHINE.errorContext.blitter = _debugMsg;
 	TIME_MACHINE.paused = true;
 }
 //---------------------------------------------------------------------------
 function Blitter_Notify_Stop()
 {
-    MACHINE.errorContext = null;
+    MACHINE.errorContext.blitter = null;
 	TIME_MACHINE.paused = false;
 }
 //---------------------------------------------------------------------------
@@ -366,7 +366,7 @@ function Blitter_Draw()
     }
 
 
-    let dbgStr = "Blitter op, draw. SrcAdr=$"+Blit.SrcAdr.toString(16);
+    let dbgStr = "Blitter op, draw. SrcAdr=$" + Blit.SrcAdr.toString(16);
     dbgStr += "\nSrcXInc="+Blit.SrcXInc+", SrcYInc="+Blit.SrcYInc;
     dbgStr += "\nDestAdr=$"+Blit.DestAdr.toString(16);
     dbgStr += "\nDestXInc="+Blit.DestXInc+", DestYInc="+Blit.DestYInc;
@@ -375,11 +375,13 @@ function Blitter_Draw()
     dbgStr += "\nHog="+Blit.Hog;
     dbgStr += "\nOp="+Blit.getOp() +": " + Blit.getOpString();
     dbgStr += "\nHop="+Blit.getHop()+": " + Blit.getHopString() + "\n";
-    if (DEBUGGER_tracing && Blit.getXCount()>0) alert(dbgStr);
+    if (DEBUGGER_tracing && Blit.getXCount()>0) alert("This is NOT an error, this is info as you are tracing:\n" + dbgStr);
     dbgStr = dbgStr.replaceAll("\n", "<br>");
     Blitter_Notify_Start(dbgStr);
 
     while(true) {
+        if (MACHINE.stop)
+          break;
         Blit.HasBus=true;
         Blitter_Blit_Word();
         Blit.HasBus=false;
@@ -492,6 +494,8 @@ function ATARI_bltStart() {
 
   
   Blitter_Start_Now();
+
+  MACHINE.errorContext.blitter = null; // finished
 
 //    ATARI_bltReset();
 

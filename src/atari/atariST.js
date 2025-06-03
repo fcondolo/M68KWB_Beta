@@ -422,8 +422,10 @@ function ST_isCustomAdrs(_p) {
 
 function ST_CheckBlitterStart(_index, _value) {
     if (_index == BLT_MISC_1-ST_CUSTOM_START) {
-        if ((_value & 128) == 128) 
+        if ((_value & 128) == 128) {
             ATARI_bltStart();//Blitter_Start();
+            MACHINE.errorContext.blitter = null; // finished
+        }
     }
 }
 

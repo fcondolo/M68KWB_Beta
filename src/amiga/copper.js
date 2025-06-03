@@ -26,7 +26,8 @@ function copper_toHTML() {
 	while (true) {
 		const word1 = MACHINE.getRAMValue(ptr,2,false);
 		const word2 = MACHINE.getRAMValue(ptr+2,2,false);
-	
+		if (MACHINE.stop) return;
+
 		let w1s = CPER_4digitHex(word1);
 		while (w1s.length<4) w1s = "0"+w1s;
 		let w2s = CPER_4digitHex(word2);

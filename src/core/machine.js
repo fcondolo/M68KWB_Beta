@@ -42,7 +42,8 @@ class M68K_Machine {
         t.constants     = _constants;
         t.super         = false;
         t.userIP        = 0;
-        t.errorContext  = null; // debug info to document a blit error. Gets erased when blit is done
+        t.stop          = false;
+        t.errorContext  = {cpu:null, ram:null, blitter:null, custom:null, file:null, line:null, script:null, user:null};
         t.lastBlitContext = null;   // debug info that persists after vlit is over
 
         DEBUGGER_AllocsList.push({ label: "Total RAM size", adrs: 0, size: _ramSize });
@@ -139,11 +140,11 @@ class M68K_Machine {
 
     getOutsideBoundaryDebugString(_v, _s, _f, _min, _max) {
         let t = this;
-        let s = "Out of bounds error<br>";
+        let s = "";
         if (_v < _min) {
-            s += "memory access below limit $" + _min.toString(16) + " ($" + (_min-_v).toString(16) + " bytes underflow)<br>";
+            s += "memory access below limit $" + _min.toString(16) + " ($" + (_min-_v).toString(16) + " bytes underflow)\n";
         } else if (_v + _s > _max) {
-            s += "memory access beyond limit $" + _max.toString(16) + " ($" + (_v + _s - _max).toString(16) + " bytes overflow)<br>";
+            s += "memory access beyond limit $" + _max.toString(16) + " ($" + (_v + _s - _max).toString(16) + " bytes overflow)\n";
         }
         s += t.getchkMemDebugString(_v, _s, _f);
         return s;
@@ -165,17 +166,51 @@ class M68K_Machine {
 
     getchkMemDebugString(_v,_s,_f) {
         let t = this;
-        let s;
-        if (DEBUGGER_insideInvoke)
-            s = M68K_CURLINE.getFailString();
-        else {
-            const err = new Error();
-            s = filterStack(err.stack);
-        }
+        let s = "";
         if (_f == ALLOW_READ) s += "<br>reading ";
         else if (_f == ALLOW_WRITE) s += "<br>writing ";
         s += "$" + _s.toString(16) + " bytes at address $" + _v.toString(16);
         return s;
+    }
+
+
+    getErrorContexts(_reset = false) {
+        let t = this;
+        let r = "";
+        if (t.errorContext.cpu) r += "CPU: " + t.errorContext.cpu + "\n";
+        if (t.errorContext.ram) r += "RAM: " + t.errorContext.ram + "\n";
+        if (t.errorContext.blitter) r += "Blitter: " + t.errorContext.blitter + "\n";
+        if (t.errorContext.custom) r += "custom: " + t.errorContext.custom + "\n";
+        if (t.errorContext.script) r += "script: " + t.errorContext.script + "\n";
+        if (t.errorContext.user) r += "user: " + t.errorContext.user + "\n";
+
+        if (_reset)
+            t.resetErrorContexts();
+
+        return r;
+    }
+
+    resetErrorContexts() {
+        let t = this;
+        t.errorContext.cpu = null;
+        t.errorContext.ram = null;
+        t.errorContext.blitter = null;
+        t.errorContext.custom = null;
+        t.errorContext.file = null;
+        t.errorContext.line = null;
+        t.errorContext.script = null;
+        t.errorContext.user = null;
+    }
+
+    setFileLineContext() {
+        let t = this;
+        if (M68K_CURLINE) {
+            t.errorContext.file = M68K_CURLINE.path;
+            t.errorContext.line = M68K_CURLINE.line;
+        } else {
+            t.errorContext.file = null;
+            t.errorContext.line = null;
+        }
     }
 
     // _v : address
@@ -183,22 +218,19 @@ class M68K_Machine {
     // _f : mode (read /write)
     // _w : written value
     // _o : allow write to odd address (for movep)
+    // returns true if everything ok, false otherwise
     chkMem(_v, _s, _f, _w, _o = false) {
-        if (!DEBUGGER_paranoid) return;
+        if (!DEBUGGER_paranoid) return true;
         _v &= 0xffffff; // 24 bit addressing
         let t = this;
-        if (_s > 1 && _v & 1) {
+        if (_s > 1 && _v & 1) { // word or long size on an odd address
             if (!_o) {
                 let mess = "ODD address error<br>";
                 mess += t.getchkMemDebugString(_v,_s,_f);
-                if (DEBUGGER_insideInvoke) {
-                    debug(mess);
-                }
-                else {
-                    mess = mess.replaceAll("<br>","\n");
-                    alert("Javascript memory access error:\n" + mess);
-                }
-                return;    
+                t.errorContext.ram = mess;
+                debug(null,true);
+                MACHINE.stop = true;
+                return false;
             }
         }
         if (_f == ALLOW_WRITE) {
@@ -209,25 +241,21 @@ class M68K_Machine {
                     msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_WRITE_FORBID_START, CPU_DBG_WRITE_FORBID_END);                    
                 }
                 if (_v < ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES && _v >= M68K_VECTORS_ZONE_SIZE) {
-                    msg = "writing underflow, overwriting code section at $" + _v.toString(16) + "<br>" + t.getOutsideBoundaryDebugString(_v, _s, _f, t.startSuperStack, t.endSuperStack);
+                    msg = "Overwriting code section at $" + _v.toString(16);
                 }
                 if (t.super) {
                     if (_v >= t.endSuperStack) {
-                        msg = "writing beyond supervisor stack<br>";
-                        msg += t.getOutsideBoundaryDebugString(_v, _s, _f, t.startSuperStack, t.endSuperStack);
+                        msg = "writing beyond allocated memory (from interrupt) at $" + _v.toString(16); + "\n";
                     }
                     else if (_v > t.ramIndex && _v < t.startSuperStack) {
-                        msg = "writing below supervisor stack<br>";
-                        msg += t.getOutsideBoundaryDebugString(_v, _s, _f, t.startSuperStack, t.endSuperStack);
+                        msg = "writing beyond allocated memory (from interrupt) at $" + _v.toString(16); + "\n";
                     }
                 } else {
                     if (_v >= t.endUserStack) {
-                        msg = "writing beyond stack<br>";
-                        msg += t.getOutsideBoundaryDebugString(_v, _s, _f, t.startUserStack, t.endUserStack);
+                        msg = "writing beyond allocated memory at $" + _v.toString(16); + "\n";
                     }
                     else if (_v > t.ramIndex && _v < t.startUserStack) {
-                        msg = "writing below stack<br>";
-                        msg += t.getOutsideBoundaryDebugString(_v, _s, _f, t.startUserStack, t.endUserStack);
+                        msg = "writing beyond allocated memory at $" + _v.toString(16); + "\n";
                     }
                 }
                 if (_v < CPU_DBG_WRITE_ALLOW_START || (_v + _s) > CPU_DBG_WRITE_ALLOW_END) {
@@ -243,14 +271,9 @@ class M68K_Machine {
                     }
                 }
                 if (msg != null) {
-                    if (t.errorContext) msg = "\nError Context: " + t.errorContext + "\n" + msg;
-                    if (DEBUGGER_insideInvoke) {
-                        debug(msg);    
-                    }
-                    else {
-                        msg = msg.replaceAll("<br>","\n");
-                        alert(msg);
-                    }
+                    debug(msg, true);
+                    MACHINE.stop = true;
+                    return false;
                 }
             }
 
@@ -287,17 +310,14 @@ class M68K_Machine {
                     } else if (_v != regs.a[7]) { // movem to stack
                         let msg = "reading  outside of CPU_DBG_READ_ALLOW_START and CPU_DBG_READ_ALLOW_END ";
                         msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_READ_ALLOW_START, CPU_DBG_READ_ALLOW_END);
-                        if (DEBUGGER_insideInvoke) {
-                            debug(msg);    
-                        }
-                        else {
-                            msg = msg.replaceAll("<br>","\n");
-                            alert(msg);
-                        }
+                        debug(msg, true);
+                        t.stop = true;
+                        return false;
                     }
                 }    
             }
         }
+        return true;
     }   
 
     /**

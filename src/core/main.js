@@ -164,7 +164,7 @@ function main_mainLoop() {
     ctx.save();
     ctx.translate(SIMU_START_BITPLANE, DisplayWindowStart_y);   
     if (DEBUGGER_SHOWCPUCYCLES) M68K_CYCLES = 0;
-    if (MYFX.FX_Update) {
+    if (MYFX.FX_Update && ((!MACHINE) || (!MACHINE.stop))) {
       try {
         MYFX.FX_Update();
         MYFX.updatedFramesCount++;
@@ -735,7 +735,11 @@ function SCRIPT_LOG(_msg) {
       str += "<br>--> " + SCRIPT_LOG_MSG[i]; // content
     }
     ShowDebugLog(str);
-  } else ShowDebugLog(_msg);
+    MACHINE.errorContext.script = str;
+  } else {
+    ShowDebugLog(_msg);
+    MACHINE.errorContext.script = _msg;
+  }
 }
 
 function SCRIPT_LOG_STARTLIST(_msg) {

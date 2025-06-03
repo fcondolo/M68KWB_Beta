@@ -82,7 +82,7 @@ function DebugCtx_exit(_count = 1) {
     DBGCTX_INDENT = 0;
 }
 
-function showHTMLError(_err) {
+function showHTMLError(_err, _showFileLine = true) {
   if (!_err) return;
   if (_err.indexOf("TypeError: Cannot read properties of undefined") >= 0)
     debugger;
@@ -91,7 +91,7 @@ function showHTMLError(_err) {
       const idx = ASMBL_ADRSTOLINE[M68K_IP];
       if (idx >= 0 && idx < PARSER_lines.length) {
         const curLine = PARSER_lines[idx];
-        if (curLine) {
+        if (curLine && _showFileLine) {
           _err += "<br> in file: " + curLine.path + "<br>at line: " + curLine.line;
         }
       }
@@ -1840,23 +1840,41 @@ function breakpoint(_alertMessage) {
   return debug(_alertMessage);
 }
 
-function debug(_alertMessage) {
-  if (MACHINE.errorContext)
-      _alertMessage += "<br>CONTEXT:" + MACHINE.errorContext;
-  let beg = "code OFS = $" + M68K_IP.toString(16) + ", paused: ";
-  if (_alertMessage) {
-    DEBUGGER_AdditionalDbgMsg = _alertMessage;
-    showHTMLError(_alertMessage);
-    main_Alert(beg + _alertMessage, true);   
-  } else main_Alert(beg, true);   
-
-  setTraceMode(true);
-  DEBUGGER_traceTillRTS = false;
-  DEBUGGER_runTillIP = null;
-  DEBUGGER_update();
-  DEBUGGER_dumpRegistersValues();
-  DEBUGGER_HitBp(M68K_IP);
-  focusOnCodeLine(M68K_PREVIP);
+function debug(_alertMessage = null, _useContext = false) {
+  let msg = "";
+  
+  if (DEBUGGER_insideInvoke) {
+    MACHINE.setFileLineContext();
+    if (MACHINE.errorContext.file) {
+      msg += "\n file: " + MACHINE.errorContext.file;
+      msg += "\n line: " + MACHINE.errorContext.line;
+    } else {
+      msg += "\n no asm file/line found";
+    }
+  } else {
+      const err = new Error();
+      msg = filterStack(err.stack);
+  }
+  if (_alertMessage)
+    msg += "\n" + _alertMessage;
+  if (_useContext) {
+      msg += "\n" + MACHINE.getErrorContexts(true);
+  }
+//  if (_alertMessage) {
+//    DEBUGGER_AdditionalDbgMsg = _alertMessage;
+//  }
+  main_Alert(msg, false, true);
+  msg = msg.replaceAll("\n","<br>");
+  showHTMLError(msg, false);
+  if (DEBUGGER_insideInvoke) {
+    setTraceMode(true);
+    DEBUGGER_traceTillRTS = false;
+    DEBUGGER_runTillIP = null;
+    DEBUGGER_update();
+    DEBUGGER_dumpRegistersValues();
+    DEBUGGER_HitBp(M68K_IP);
+    focusOnCodeLine(M68K_PREVIP);
+  }
 }
 
 function onCodeRow(_r, _IP) {

@@ -1,7 +1,7 @@
 /*-------------------------------------------------------------------------
 | Don't get me wrong, this file is filled with egregious plagiarism.
 | Taken from Scripted Amiga Emulator (SAE) by Rupert Hausberger
-| Also note that SAE was ported from WinUAE 3.2.x
+| Also note that SAE was ported from WinUAE 3.2.x by the glorious Toni Wilen
 -------------------------------------------------------------------------*/
 
 /* global references */
@@ -411,6 +411,8 @@ function SAEO_Blitter() {
 			for (j = 0; j < blt_info.vblitsize; j++) {
 				blitfc = !!(bltcon1 & 0x4);
 				for (i = 0; i < blt_info.hblitsize; i++) {
+					if (MACHINE.stop) break;
+
 					var bltadat, blitahold;
 					var bltbdat;
 					if (bltadatptr) {
@@ -512,6 +514,7 @@ function SAEO_Blitter() {
 			for (j = 0; j < blt_info.vblitsize; j++) {
 				blitfc = !!(bltcon1 & 0x4);
 				for (i = 0; i < blt_info.hblitsize; i++) {
+					if (MACHINE.stop) break;
 					var bltadat, blitahold;
 					var bltbdat;
 					if (bltadatptr) {
@@ -720,9 +723,11 @@ function SAEO_Blitter() {
 		if (blit_final && blt_info.vblitsize)
 			blit_final = 0;
 		while (last_blitter_hpos < hpos) {
+			if (MACHINE.stop) break;
 			var c = channel_state(blit_cyclecounter);
 
 			for (;;) {
+				if (MACHINE.stop) break;
 				var v = canblit(last_blitter_hpos);
 
 				if (blit_waitcyclecounter) {
@@ -801,6 +806,7 @@ function SAEO_Blitter() {
 	function actually_do_blit() {
 		if (blitline) {
 			do {
+				if (MACHINE.stop) break;
 				blitter_read();
 				if (ddat1use)
 					bltdpt = bltcpt;
@@ -1014,6 +1020,7 @@ function SAEO_Blitter() {
 	function do_startcycles(hpos) {
 		var vhpos = last_blitter_hpos;
 		while (vhpos < hpos) {
+			if (MACHINE.stop) break;
 			var v = canblit(vhpos);
 			vhpos++;
 			if (v > 0) {
@@ -1076,9 +1083,11 @@ function SAEO_Blitter() {
 		}
 
 		while (last_blitter_hpos < hpos) {
+			if (MACHINE.stop) break;
 			var c = channel_state(blit_cyclecounter);
 
 			for (;;) {
+				if (MACHINE.stop) break;
 				var v = canblit(last_blitter_hpos);
 
 				// copper bltsize write needs one cycle (any cycle) delay

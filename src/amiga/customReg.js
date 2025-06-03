@@ -236,6 +236,7 @@ function AMIGA_onCustomWrite(_index, _value) {
 			AMIGA_BLITTER.blitter_fillStruct();
 			AMIGA_customregs[DMACONR/2] = saveDMACON; // clear blitter busy bit
 			TIME_MACHINE.paused = false;
+            MACHINE.errorContext.blitter = null; // finished
 		break;
 		case DMACON: {
 			if (_value & 0x8000) 

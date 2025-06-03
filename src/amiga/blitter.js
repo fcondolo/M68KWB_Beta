@@ -44,7 +44,7 @@ function AMIGA_bltStart() {
 
 	if (CON0 == 0x100) { // clear
 		for (let y = 0; y < height; y++) {
-			MACHINE.errorContext = "Blitter Clear, line " + (y+1) + "/" + height;
+			MACHINE.errorContext.blitter = "Blitter Clear, line " + (y+1) + "/" + height;
 			MACHINE.lastBlitContext = "Blitter Clear, line " + (y+1) + "/" + height;
 			for (let x = 0; x < wordCount; x++) {
 				MACHINE.setRAMValue(0, ofsD, 2);
@@ -54,14 +54,14 @@ function AMIGA_bltStart() {
 		
 		}
 		AMIGA_customregs[DMACONR/2] = old_dmacon;
-		MACHINE.errorContext = null;
+		MACHINE.errorContext.blitter = null;
 		TIME_MACHINE.paused = false;
 		return;
 	}
 
 	if (useD) {
 		for (let y = 0; y < height; y++) {
-			MACHINE.errorContext = "Blitter copy, line " + (y+1) + "/" + height;
+			MACHINE.errorContext.blitter = "Blitter copy, line " + (y+1) + "/" + height;
 			MACHINE.lastBlitContext = "Blitter copy, line " + (y+1) + "/" + height;
 			for (let x = 0; x < wordCount; x++) {
 				let word = 0;
@@ -118,7 +118,7 @@ function AMIGA_bltStart() {
 		}
 	}
 	AMIGA_customregs[DMACONR/2] = old_dmacon;
-	MACHINE.errorContext = null;
+	MACHINE.errorContext.blitter = null;
 	TIME_MACHINE.paused = false;
 }
 

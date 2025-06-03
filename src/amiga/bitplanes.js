@@ -146,6 +146,7 @@ function bitplanes_update() {
 	for (;bplY < PLAYFIELD_LINES_COUNT; bplY++, rasterY++, remainingLines--) {
 		let bplReadX = 0;
 		for (let rasterX = 0; rasterX < SIMU_DEFAULT_WIDTH; rasterX++, copperExecMove--) {
+			if (MACHINE.stop) return;
 			if (DMA_Copper && (copperExecMove <= 0)) {
 				if (copper_processOneInstr(rasterX, rasterY))
 					bitplanes_updateAllValues(); // in case the just executed copper instruction modified some HW register
@@ -234,6 +235,7 @@ function AMIGA_Chunky8_update() {
 		let d = SIMU_DEFAULT_WIDTH * 4 * y * rptY;
 		for (let x = 0; x < AMIGA_Chunky8.sw; x++) {
 			const color = MACHINE.getRAMValue(read, 1, false);
+			if (MACHINE.stop) return;
 			read++;
 			const blue = color;
 			const green = color;

@@ -89,7 +89,7 @@ function ATARI_bltStart() {
 	let dstAdrs = DSTADRS;
 	let prefetch = 0;
 	for (let y = 0; y < COUNTY; y++) {
-		MACHINE.errorContext = "Blitter op, line " + (y+1) + "/" + COUNTY;
+		MACHINE.errorContext.blitter = "Blitter op, line " + (y+1) + "/" + COUNTY;
 		for (let x = 0; x < COUNTX; x++) {
 			let src = 0;
 			let dst = 0;
@@ -198,7 +198,7 @@ function ATARI_bltStart() {
 	}
 	ST_setCustomFromPtr_B(BLT_MISC_1, MISC_1 &(~128)); // clear blitter busy bit
 	TIME_MACHINE.paused = false;
-	MACHINE.errorContext = null;
+	MACHINE.errorContext.blitter = null; // finished
 }
 
 
