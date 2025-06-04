@@ -211,12 +211,12 @@
         <tr><td>Inline JS</td><td><input type="checkbox" checked onclick="DEBUGGER_AllowJS = this.checked;"></td></tr>
         <tr><td>Palette</td><td><input type="checkbox" onclick="if(this.checked) document.getElementById('tbox_palette').style.display = null; else document.getElementById('tbox_palette').style.display = 'none';"></td></tr>
         <tr><td>Watches</td><td><input type="checkbox" onclick="if(this.checked) document.getElementById('tbox_watches').style.display = null; else document.getElementById('tbox_watches').style.display = 'none';"></td></tr>
-        <tr id ="tbox_bpl0"><td>Bitplane 1</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[0] = 1; else bitplaneWeight[0] = 0;"></td></tr>
-        <tr id ="tbox_bpl1"><td>Bitplane 2</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[1] = 1; else bitplaneWeight[1] = 0;"></td></tr>
-        <tr id ="tbox_bpl2"><td>Bitplane 3</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[2] = 1; else bitplaneWeight[2] = 0;"></td></tr>
-        <tr id ="tbox_bpl3"><td>Bitplane 4</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[3] = 1; else bitplaneWeight[3] = 0;"></td></tr>
-        <tr id ="tbox_bpl4"><td>Bitplane 5</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[4] = 1; else bitplaneWeight[4] = 0;"></td></tr>
-        <tr id ="tbox_bpl5"><td>Bitplane 6</td><td><input type="checkbox" checked onclick="if (this.checked) bitplaneWeight[5] = 1; else bitplaneWeight[5] = 0;"></td></tr>
+        <tr id ="tbox_bpl0"><td>Bitplane 1</td><td><input type="checkbox" checked onclick="MACHINE.setBitplaneWeight(0,this.checked);"></td></tr>
+        <tr id ="tbox_bpl1"><td>Bitplane 2</td><td><input type="checkbox" checked onclick="MACHINE.setBitplaneWeight(1,this.checked);"></td></tr>
+        <tr id ="tbox_bpl2"><td>Bitplane 3</td><td><input type="checkbox" checked onclick="MACHINE.setBitplaneWeight(2,this.checked);"></td></tr>
+        <tr id ="tbox_bpl3"><td>Bitplane 4</td><td><input type="checkbox" checked onclick="MACHINE.setBitplaneWeight(3,this.checked);"></td></tr>
+        <tr id ="tbox_bpl4"><td>Bitplane 5</td><td><input type="checkbox" checked onclick="MACHINE.setBitplaneWeight(4,this.checked);"></td></tr>
+        <tr id ="tbox_bpl5"><td>Bitplane 6</td><td><input type="checkbox" checked onclick="MACHINE.setBitplaneWeight(5,this.checked);"></td></tr>
       </table>
       <span id = "amigaonly">
         <br><button class="inset" onclick="DEBUGGER_DumpCopperList = 1;"><i class="fa fa-bars"></i>&nbsp Copperlist</button>

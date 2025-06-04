@@ -184,6 +184,8 @@ function ST_bitplanes_update() {
 	DEBUGPRIM.startScreenX = PLATFORM_OFSX;
 	DEBUGPRIM.startScreenY = PLATFORM_OFSY;
 
+	const bplW = MACHINE.bitplaneWeight;
+
 	for (let y = 0; y < 200; y++)
 	{
 		const skp = ST_BITPLANES_CTX.skipStart;
@@ -217,10 +219,10 @@ function ST_bitplanes_update() {
 				p4 |= p4n >> sft;
 			}
 			for (let bit = 15; bit >= 0; bit--) {
-				const msk1 = bitplaneWeight[0]<<bit;
-				const msk2 = bitplaneWeight[1]<<bit;
-				const msk3 = bitplaneWeight[2]<<bit;
-				const msk4 = bitplaneWeight[3]<<bit;
+				const msk1 = bplW[0]<<bit;
+				const msk2 = bplW[1]<<bit;
+				const msk3 = bplW[2]<<bit;
+				const msk4 = bplW[3]<<bit;
 				let v = 0;
 				if ((p4 & msk4)!==0) v |= 1<<3;
 				if ((p3 & msk3)!==0) v |= 1<<2;

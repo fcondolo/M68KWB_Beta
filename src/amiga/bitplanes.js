@@ -5,7 +5,6 @@ let bitplaneAdrs = new Uint32Array(6);
 let bitplaneMod = new Int16Array(6);
 let bitplaneHScroll = new Uint16Array(6);
 let bplHorizByteCount = 40;
-let bitplaneWeight = [1, 1, 1, 1, 1, 1]; // for debug purposes only. Used to switch on/off bitplanes
 let BPL_R, BPL_G, BPL_B;
 // DMA enable through DMACON
 let DMA_Bitplane = false;
@@ -106,7 +105,7 @@ function bitplanes_update() {
 	BACKBUF_CTX.drawImage(monitor, 0, 0, monitor_w, monitor_h, 0, 0, monitor_w, monitor_h);
 	BACKBUF_CTX.imageSmoothingEnabled = false;
 	let imgdata = BACKBUF_CTX.getImageData(0, 0, monitor_w, monitor_h);
-
+	const bplW = MACHINE.bitplaneWeight;
 	PLATFORM_OFSX = (SIMU_DEFAULT_WIDTH - 320) / 2;
 	PLATFORM_OFSY = (PAL_VIDEO_LINES_COUNT - 180) / 2;
 	let data = imgdata.data;
@@ -176,7 +175,7 @@ function bitplanes_update() {
 							//if (pixindex >= 0 && pixindex < bplHorizByteCount*PLAYFIELD_LINES_COUNT) {
 							let data = MACHINE.ram[bitplane + pixindex] & mask;
 							if (data != 0) data = 1;
-							colorIndex |= bitplaneWeight[curBpl] * (data << curBpl);
+							colorIndex |= bplW[curBpl] * (data << curBpl);
 							//} else 
 							//	debugger;
 						}

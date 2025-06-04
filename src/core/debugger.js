@@ -539,8 +539,7 @@ function changeBitplaneVisibility() {
     bplCount = 4;
   for (let i = 0; i < bplCount; i++) {
     let v = document.getElementById("bplvis"+i);
-    if (v.checked) bitplaneWeight[i] = 1; 
-    else bitplaneWeight[i] = 0;  
+    MACHINE.setBitplaneWeight(i,v.checked);
   }
 }
 
@@ -554,7 +553,7 @@ function DEBUGGER_BitplanesVisibility() {
   for (let i = 0; i < bplCount; i++) {
     msg += "<tr><td>"+i+"</td><td><input type='checkbox' id=bplvis"+i;
     msg += " onClick=changeBitplaneVisibility()";
-    if (bitplaneWeight[i] == 1)  msg += " checked/>";
+    if (MACHINE.bitplaneWeight[i] == 1)  msg += " checked/>";
     msg += "</td></tr>";
   }
   msg += "</table>";

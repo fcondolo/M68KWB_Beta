@@ -45,7 +45,7 @@ class M68K_Machine {
         t.stop          = false;
         t.errorContext  = {cpu:null, ram:null, blitter:null, custom:null, file:null, line:null, script:null, user:null};
         t.lastBlitContext = null;   // debug info that persists after vlit is over
-
+        t.bitplaneWeight = [1, 1, 1, 1, 1, 1]; // for debug purposes only. Used to switch on/off bitplanes
         DEBUGGER_AllocsList.push({ label: "Total RAM size", adrs: 0, size: _ramSize });
         t.ramIndex          = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES; // current alloc pointer (below = already allocated mem, above = free ram)
         CPU_CODE_SECTION    = t.ram;
@@ -67,6 +67,15 @@ class M68K_Machine {
         // set default stack pointer
         regs.a[7] = t.endUserStack;
         t.superStack = t.endSuperStack;
+    }
+
+
+    setBitplaneWeight(_index, _value = 0) {
+        let t = this;
+        if (_value) _value = 1; else _value = 0;
+        t.bitplaneWeight[_index] = _value;
+        t.customUpdate();
+        imgDataToScreen();
     }
 
     enterSuper(_callback, _return) {

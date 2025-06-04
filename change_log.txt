@@ -1,3 +1,7 @@
+04/06/2025
+==========
+- Show/Hide bitplanes now have real-time feedback (don0t need to close toolbox tosee effect)
+
 03/06/2025
 ==========
 - Clearer error messages
