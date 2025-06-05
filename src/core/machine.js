@@ -246,7 +246,7 @@ class M68K_Machine {
             if (!CPU_isCustomAdrs(_v)) {
                 let msg = null;
                 if ((_v + _s) > CPU_DBG_WRITE_FORBID_START && _v < CPU_DBG_WRITE_FORBID_END) {
-                    msg = "Writing outside of CPU_DBG_WRITE_FORBID_START && CPU_DBG_WRITE_FORBID_END boundaries<br>";
+                    msg = "Writing in forbidden zone [CPU_DBG_WRITE_FORBID_START..CPU_DBG_WRITE_FORBID_END]\n";
                     msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_WRITE_FORBID_START, CPU_DBG_WRITE_FORBID_END);                    
                 }
                 if (_v < ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES && _v >= M68K_VECTORS_ZONE_SIZE) {
@@ -275,7 +275,7 @@ class M68K_Machine {
                         else if (M68K_CURLINE.intentionallyWritingToStack) allowed = true;
                     }
                     if (!allowed) {
-                        msg = "writing outside of CPU_DBG_WRITE_ALLOW_START and CPU_DBG_WRITE_ALLOW_END";
+                        msg = "writing outside of [CPU_DBG_WRITE_ALLOW_START..CPU_DBG_WRITE_ALLOW_END]\n";
                         msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_WRITE_ALLOW_START, CPU_DBG_WRITE_ALLOW_END);
                     }
                 }

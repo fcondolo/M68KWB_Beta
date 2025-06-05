@@ -1043,10 +1043,9 @@ function focusOnLabel(_name) {
 }
 
 function DEBUGGER_onHWBreakpointReached(_index) {
-  main_Alert("Hit HW Breakpiont #" + _index);
+  alert("Hit HW Breakpiont #" + _index); // don't use main_Alert() here, otherwise a fatal error will be raised after too many breakpint hits
   DEBUGGER_lastJSExecLog = "hardware breakpoint reached";
   DEBUGGER_AdditionalDbgMsg = "hardware Breakpoint reached";
-  showHTMLError("hardware Breakpoint reached");
   DEBUGGER_traceTillRTS = false;
   DEBUGGER_runTillIP = null;
   setTraceMode(true);
