@@ -427,9 +427,9 @@ function ATARI_bltStart() {
 	containing increment per word being copied (X), per line (Y) 
 	and the target address to start with.
 	*/
-  Blit.DestXInc 		  = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_DST_XINCR) & 0xfffe); // Destination X Increment (15 Bit - Bit 0 is unused) - signed
-  Blit.DestYInc 		  = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_DST_YINCR) & 0xfffe); // Destination Y Increment (15 Bit - Bit 0 is unused) - signed
-  Blit.DestAdr		    = ST_getCustomFromPtr_L(BLT_DST_ADRS) & 0x7ffffe; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
+  Blit.DestXInc 		  = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_TGT_XINCR) & 0xfffe); // Destination X Increment (15 Bit - Bit 0 is unused) - signed
+  Blit.DestYInc 		  = TOOLS.toInt16(ST_getCustomFromPtr_W(BLT_TGT_YINCR) & 0xfffe); // Destination Y Increment (15 Bit - Bit 0 is unused) - signed
+  Blit.DestAdr		    = ST_getCustomFromPtr_L(BLT_TGT_ADRS) & 0x7ffffe; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
 
 	/*
 	These two registers configure how many words (!) to copy per line (X) 

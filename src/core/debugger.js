@@ -905,6 +905,10 @@ function DEBUGGER_BeforeInstr() {
         else {
           DEBUGGER_lastBreakPointProcessed = M68K_IP;
           DEBUGGER_update(true);
+          MACHINE.customUpdate();
+          imgDataToScreen();
+          WATCHES.update();
+
           let bptCtx = "breakpoint reached at ofs: $" + curLine.codeSectionOfs.toString(16) + ":\n" + curLine.filtered;
           if (curLine.arg1) {
             bptCtx += "\narg1: '"+ curLine.arg1.str + "' = $" + getArg(curLine.arg1, curLine.instrSize, false).value.toString(16);

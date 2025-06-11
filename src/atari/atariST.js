@@ -67,9 +67,9 @@ const BLT_ENDMASK_1         =   0xFF8A28; // ENDMASK 1 (16 Bits)
 const BLT_ENDMASK_2         =   0xFF8A2A; // ENDMASK 2 (16 Bits)
 const BLT_ENDMASK_3         =   0xFF8A2C; // ENDMASK 3 (16 Bits)
 // BLITTER DESTINATION
-const BLT_DST_XINCR         =   0xFF8A2E; // Destination X Increment (15 Bit - Bit 0 is unused)
-const BLT_DST_YINCR         =   0xFF8A30; // Destination Y Increment (15 Bit - Bit 0 is unused)
-const BLT_DST_ADRS          =   0xFF8A32; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
+const BLT_TGT_XINCR         =   0xFF8A2E; // Destination X Increment (15 Bit - Bit 0 is unused)
+const BLT_TGT_YINCR         =   0xFF8A30; // Destination Y Increment (15 Bit - Bit 0 is unused)
+const BLT_TGT_ADRS          =   0xFF8A32; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
 // BLITTER COUNTS
 const BLT_COUNT_X           =   0xFF8A36; // X Count (16 Bits)
 const BLT_COUNT_Y           =   0xFF8A38; // Y Count (16 Bits)

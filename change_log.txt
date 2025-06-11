@@ -1,3 +1,7 @@
+11/06/2025
+==========
+- Better update of rendering when tracing code
+
 04/06/2025
 ==========
 - Show/Hide bitplanes now have real-time feedback (don0t need to close toolbox tosee effect)
