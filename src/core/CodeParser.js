@@ -99,8 +99,12 @@ class CodeParser {
 
     // set default constants from config
     for (let ic = 0; ic < ASSEMBLER_CONFIG.defines.length; ic++) {
-      t.constants.push({ name: ASSEMBLER_CONFIG.defines[ic].name, value: ASSEMBLER_CONFIG.defines[ic].value, path: "", line: "" });
+      t.constants.push({ name: ASSEMBLER_CONFIG.defines[ic].name, value: ASSEMBLER_CONFIG.defines[ic].value, path: "ASSEMBLER_CONFIG", line: "" });
     }
+    // set default constants from MACHINE
+    for (let ic = 0; ic < MACHINE.constants.length; ic++) {
+      t.constants.push({ name: MACHINE.constants[ic].name, value: MACHINE.constants[ic].value, path: "MACHINE", line: "" });
+    }    
     new M68K_Watches(); // important here to push the proper constants
 
 
@@ -804,7 +808,12 @@ class CodeParser {
       const wrd = ln.readNextWord();
       if (wrd == "INCBIN") {
         ln.isInstr = false;
+        const prevOfs = ln.ofs;
         let path = ln.readNextWordBetweenQuotes();
+        if (!path || path.length == 0) {
+          ln.ofs = prevOfs;
+          path = ln.readNextWord();
+        }
         ln.attachedLabel = t.getNearestLabelUp(lnIt);
         if (!ln.attachedLabel) {
           ln.Failed("The system needs 1 label before incbin, otherwise, it does not know to which address it should load it.");
@@ -1081,6 +1090,10 @@ class CodeParser {
           c[i].value = _value;
           continue; // same entry, due to multi-pass EQU solving
         }
+        if (c[i].path == "MACHINE" || c[i].path == "ASSEMBLER_CONFIG") {
+          c[i].value = _value; // override default value
+          continue;
+        }
         _ln.Failed("constant '" + _name + "' already defined in '" + c[i].path + "' at line " + c[i].line);
         return;
       }
@@ -1097,6 +1110,17 @@ class CodeParser {
     for (let i = 0; i < lnCount; i++) {
       let ln = t.strings.lines[i];
       const wrd1 = ln.readNextWord();
+      switch (wrd1) {
+        case 'IFEQ':
+        case 'IFNE':
+        case 'IFD':
+        case 'IFND':
+          lst.push({cond:i});
+          ln.ofs = 0;
+        continue;
+        default:
+        break;
+      }
       const wrd2 = ln.readNextWord();
       if (wrd2 == "EQU" || wrd2 == "=") {
         if (ASSEMBLER_CONFIG.no_space_before_EQU) {
@@ -1106,7 +1130,7 @@ class CodeParser {
           }
         }
         ln.isInstr = false;
-        lst.push({w:wrd1, v:i});
+        lst.push({w:wrd1, v:i, ofs:ln.ofs, cond:-1});
       }
     }
     return lst;
@@ -1117,13 +1141,20 @@ class CodeParser {
     let allDone = true;
     const lnCount = _equlst.length;
     for (let i = 0; i < lnCount; i++) {
+      if (_equlst[i].cond >= 0) {
+        t.process_conditionalComp(_equlst[i].cond);
+        continue;
+      }
       let ln = t.strings.lines[_equlst[i].v];
-      let errBhv = PARSE_FAIL_OK;
-      if (t.lastPass) errBhv = PARSE_FAIL_ERROR;
-      const value = ln.readNextNumber(errBhv);
-      if (!isNaN(value)) {
-        t.addConstant(ln, _equlst[i].w, value);
-      } else allDone = false;
+      if (ln.text[0] != ';') { // line may have been discarded by process_conditionalComp just above
+        let errBhv = PARSE_FAIL_OK;
+        if (t.lastPass) errBhv = PARSE_FAIL_ERROR;
+        ln.ofs = _equlst[i].ofs;
+        const value = ln.readNextNumber(errBhv);
+        if (!isNaN(value)) {
+          t.addConstant(ln, _equlst[i].w, value);
+        } else allDone = false;
+      }
     }
     return allDone;
   }
@@ -1265,14 +1296,18 @@ class CodeParser {
     }
   }
 
-  process_conditionalComp() {
+  process_conditionalComp(_jutThisLineIndex = -1) {
     let t = this;
     const lnCount = t.strings.lines.length;
     let contitionCode = 0; // 0 : outside block. 1: inside accepted block, 2: inside discarded block
     const setTrue = ' ==> true';
     const setFalse = ' ==> false';
-    for (let i = 0; i < lnCount; i++) {
+    let startIndex = 0;
+    if (_jutThisLineIndex >= 0)
+      startIndex = _jutThisLineIndex;
+    for (let i = startIndex; i < lnCount; i++) {
       let ln = t.strings.lines[i];
+      ln.ofs = 0;
       let w = ln.readNextWord();
       let v = null;
       if (contitionCode > 0) {
@@ -1284,6 +1319,8 @@ class CodeParser {
         if ((w == 'ENDC') || (w == 'ENDIF')) {
           ln.isInstr = false;
           contitionCode = 0;
+          if (_jutThisLineIndex >= 0) 
+            return;
         }
         else {
           if (contitionCode == 2) {

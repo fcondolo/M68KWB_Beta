@@ -1,3 +1,10 @@
+INTERLEAVED = 0         ; Interleaved bitplanes?
+
+        ifne    INTERLEAVED
+SCREEN_MOD = 12 ; modulo (interleaved)
+        else
+SCREEN_MOD = 0          ; modulo (non-interleaved)
+        endc
 
 init:
   lea       blip,a0

@@ -71,22 +71,16 @@ class LineParser {
     // get rid of comments
     if (!keepComments) {
       // hack for comments using '*' instead of ';'
+      const comment1 = t.text.indexOf('/*'); 
+      if (comment1 >= 0) {
+        t.text = t.text.replace("/*", ";;");
+      }
       const comment2 = t.text.indexOf('*');
-      if (comment2 >= 0) {
-      //  debugger;
-        let keepLine = false;
-        for (let i = 0; i <comment2; i++) {
-          if (t.text[i] != ' ' && t.text[i] != '\t' && t.text[i] != '*') {
-            keepLine = true; // there's something before '*' so it's a multiply, not a comment
-            break;
-          }
-        }
-        if (!keepLine) {
-          t.filtered = "";
-          t.isInstr = false;
-          return;      
-        }
-    }
+      if (comment2 >= 0 && ((t.text[comment2+1] == ' ') || (t.text[comment2+1] == '\t'))) {
+        t.text = t.text.replace("*", ";");
+      } else if (comment2 == 0) {
+        t.text = t.text.replace("*", ";");
+      }
       const comment = t.text.indexOf(';');
       if (comment >= 0)
         len = comment;
@@ -410,6 +404,7 @@ class LineParser {
     exprStr = exprStr.replace('$', '0x');
     exprStr = exprStr.replace('%', '0b');
     exprStr = exprStr.replace('#', ' ');
+    exprStr = exprStr.replaceAll('!', '|');
     if (exprStr[exprStr.length-1] == 'W' && exprStr[exprStr.length-2] == '.') { // handle move.l a0,$70.w
       exprStr = exprStr.substring(0, exprStr.length-2);
     }

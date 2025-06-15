@@ -453,7 +453,9 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         TIME_MACHINE.restorePresent();
       }
       DEBUGGER_justHitRun = true;
-      DEBUGGER_traceOneInstr();
+      DEBUGGER_tracing = false;
+      DEBUGGER_traceTillRTS = false;
+      DEBUGGER_runTillIP = null;
     break;
     case 83: // s
     break;
@@ -853,6 +855,11 @@ function  DEBUGGER_traceOneInstr() {
     setTraceMode(true);
     DEBUGGER_canStep = false;
   }
+}
+
+function ProtectBuffer(_start, _size) {
+  CPU_DBG_WRITE_FORBID_START = _start;
+  CPU_DBG_WRITE_FORBID_END = _start + _size;
 }
 
 function DEBUGGER_makeInstrString(_line) {

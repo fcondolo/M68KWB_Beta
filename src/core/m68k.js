@@ -2724,8 +2724,9 @@ function CPU_EvaluateVBL(_nextInstr) {
   let doInterrupt = M68K_FORCENEXTVBL;
 
   if (DEBUGGER_tracing) { // do not trust clock when tracing, use cycle counter instead
+    return;/*
     if (M68K_INTERRUPT_COUNTER >= M68K_TICKS_PER_FRAME)
-      doInterrupt = true;
+      doInterrupt = true;*/
   } else { // use clock when not tracing, way more accurate
     const ctime = new Date().getTime();
     if (ctime - CPU_LAST_INTERRUPT_TIME >= 16) {
