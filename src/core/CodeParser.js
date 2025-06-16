@@ -111,6 +111,7 @@ class CodeParser {
     // includes are done first
     watchdog = 0;
     const max_include_files = 100;
+    t.incdir = "";
     do {
       while (t.strings.waitingOnFile != null) {
         t.showCompilMsg("loading file: " + t.strings.waitingOnFile);
@@ -220,6 +221,8 @@ class CodeParser {
       t.process_dx();
     }
 */
+  
+
     if (!t.startPass()) return false;
     t.showCompilMsg("processing js instructions...");
     t.process_JS();
@@ -301,7 +304,47 @@ class CodeParser {
     return true;
   }
 
-  showParsingErrors() {
+  solveNullAddressLabels() {
+    let t = this;
+    for (let i = 0; i < t.labels.length; i++) {
+      if (t.labels[i].dcData == null) {
+        let ilineIndex = t.labels[i].index;
+        for (let j = i + 1; j < t.labels.length; j++) {
+          if (t.labels[j].dcData != null) {
+            let jlineIndex = t.labels[j].index;
+            let allow = true;
+            for (let chk = ilineIndex; chk <  jlineIndex; chk++) {
+              if (t.strings.lines[chk].isInstr) {
+                allow = false;
+                break;
+              }
+            }
+            if (allow)
+              t.labels[i].dcData = t.labels[j].dcData;
+            break;
+          }
+        }
+      }        
+    }
+  }
+
+  getConditionalComp(_instr) {
+    switch (_instr) {
+        case 'IFEQ': return {f:eval_ifeq};
+        case 'IFNE': return {f:eval_ifne};
+        case 'IFD': return {f:eval_ifd};
+        case 'IFND': return {f:eval_ifnd};
+        case 'IFNC': return {f:eval_ifnc};
+        case 'IFGE': return {f:eval_ifge};
+        case 'IFGT': return {f:eval_ifgt};
+        case 'IFLE': return {f:eval_ifle};
+        case 'IFLT': return {f:eval_iflt};
+        default: return null;
+    }
+  }
+
+
+    showParsingErrors() {
     let t = this;
     // dump parsing errors
     let errDump = "";
@@ -406,7 +449,9 @@ class CodeParser {
 
   process_lateArgs() {
     let t = this;
+    t.solveNullAddressLabels();
     for (let i = 0; i < t.lateArgs.length; i++) {
+      if (t.lateArgs[i].ofs) t.lateArgs[i].line.ofs = t.lateArgs[i].ofs;
       t.decodeArg(t.lateArgs[i].arg, t.lateArgs[i].line, true);
       if (t.stopGlobalCompilation) return;
     }
@@ -476,12 +521,19 @@ class CodeParser {
     for (let i = 0; i < lnCount; i++) {
       const ln = t.strings.lines[i];
       const wrd = ln.readNextWord();
+      if (wrd == "INCDIR") {
+        t.incdir  = ln.readNextWordBetweenQuotes();
+        if ((t.incdir[t.incdir.length-1] != '/')&&(t.incdir[t.incdir.length-1] != '\\'))
+          t.incdir += "/";
+        ln.isInstr = false;
+        ln.makeComment();
+      }
       if (wrd == "INCLUDE") {
         ln.isInstr = false;
         let path = ln.readNextWordBetweenQuotes();        
         ln.makeComment();
 
-        let pth = t.get_incxx_path(path, FX_INFO.rootPath);
+        let pth = t.get_incxx_path(t.incdir+path, FX_INFO.rootPath);
         if (pth.err) {
           ln.Failed(pth.err);
           return false;
@@ -633,6 +685,12 @@ class CodeParser {
               return ln.Failed("sorry, label " + name + " already exists in file " + t.labels[k].fromFile + " at line " + (t.labels[k].fromLine + 1).toString());
             }
           }
+          let uprName = name.toUpperCase();
+          for (let k = 0; k < t.constants.length; k++) {
+            if (t.constants[k].name == uprName) {
+              return ln.Failed("sorry, constant " + name + " already exists in " + t.constants[k].path + " at line " + t.constants[k].line + ", can't declare a label with the same name: " + ln.path + " at line " + ln.line.toString());
+            }
+          }
         }
         t.labels.push({ label: name, index: lnIt, fromFile: ln.path, fromLine: ln.line, dcData: null });
       }
@@ -650,8 +708,16 @@ class CodeParser {
     const lnCount = t.strings.lines.length;
     for (let lnIt = 0; lnIt < lnCount; lnIt++) {
       let ln = t.strings.lines[lnIt];
-      let name = t.removeSemiColumn(ln.readNextWord());
-      const wrd = ln.readNextWord();
+      const w1 = t.removeSemiColumn(ln.readNextWord());
+      const w2 = t.removeSemiColumn(ln.readNextWord());
+      let name, wrd;
+      if (w1 == "MACRO") {
+        name = w2;
+        wrd = w1;
+      } else if (w2 == "MACRO") {
+        name = w1;
+        wrd = w2;
+      }
       if (wrd == "MACRO") {
         ln.isInstr = false;
         ln.isMacroDef = true;
@@ -733,6 +799,7 @@ class CodeParser {
         for (let i = 0; i < m.lines.length; i++) {
           let l = m.lines[i].clone();
             l.isMacroDef = false;
+          l.fromMacro = {name: wrd, fileLine: ln.getFileLineStr()};
           for (let j = 0; j < args.length; j++) {
             l.text = l.text.replaceAll('\\' + (j + 1).toString(), args[j]);
             l.filtered = l.filtered.replaceAll('\\' + (j + 1).toString(), args[j]);
@@ -1110,16 +1177,10 @@ class CodeParser {
     for (let i = 0; i < lnCount; i++) {
       let ln = t.strings.lines[i];
       const wrd1 = ln.readNextWord();
-      switch (wrd1) {
-        case 'IFEQ':
-        case 'IFNE':
-        case 'IFD':
-        case 'IFND':
+      if (t.getConditionalComp(wrd1)) {
           lst.push({cond:i});
           ln.ofs = 0;
-        continue;
-        default:
-        break;
+          continue;
       }
       const wrd2 = ln.readNextWord();
       if (wrd2 == "EQU" || wrd2 == "=") {
@@ -1309,7 +1370,6 @@ class CodeParser {
       let ln = t.strings.lines[i];
       ln.ofs = 0;
       let w = ln.readNextWord();
-      let v = null;
       if (contitionCode > 0) {
         if ((contitionCode > 0 ) && (w == 'ELSE')) {
           if (contitionCode == 1) contitionCode = 2;
@@ -1333,51 +1393,14 @@ class CodeParser {
         }
         continue;
       }
-      switch (w) {
-        case 'IFEQ':
-        case 'IFNE':
-        case 'IFD':
-        case 'IFND':
-          v = ln.readNextWord();
+      const cond = t.getConditionalComp(w);
+      if (cond) {
           ln.isInstr = false;
-        break;
-        default:
-        break;
-      }
-      if (v) {
-        let r = ln.parseJSNumber(v, 0, true);
-        switch (w) {
-          case 'IFEQ':
-            if (r == 0)
-              contitionCode = 1;
-            else
-              contitionCode = 2;
-            break;
-          case 'IFNE':
-            if (r != 0)
-              contitionCode = 1;
-            else
-              contitionCode = 2;
-            break;
-          case 'IFD':
-            if (!isNaN(r))
-              contitionCode = 1;
-            else
-              contitionCode = 2;
-            break;
-          case 'IFND':
-            if (isNaN(r))
-              contitionCode = 1;
-            else
-              contitionCode = 2;
-            break;
-          default:
-            break;
-        }
-        if (contitionCode == 1)
-          ln.text += setTrue;
-        else
-          ln.text += setFalse;
+          contitionCode = cond.f(ln);
+          if (contitionCode == 1)
+            ln.text += setTrue;
+          else
+            ln.text += setFalse;
       }
     }
   }
@@ -1430,7 +1453,7 @@ class CodeParser {
         if (_arg.disp > 0)
           _arg.disp = castWord(_arg.disp);
         if (_arg.disp > 32767 || _arg.disp < -32767) {
-          return _l.Failed("displacement is limited to signed 16 bits");
+          return _l.Failed("displacement is limited to signed 16 bits, value: " + _arg.disp);
         }
         processed = true;
       }
@@ -1445,8 +1468,13 @@ class CodeParser {
         else
           _arg.cycles = 6;
       }
-      if (_arg.str[r] != '(')
+      if (_arg.str[r] != '(') {
+        if (!_lastChance) {
+          this.lateArgs.push({arg:_arg, line:_l, ofs:_l.ofs});
+          return;
+        }
         return _l.Failed("can't evaluate expression: " + _arg.str);
+      }
       // read inside the parenthesis
       r++;
       let reg = readNextRegister(_arg.str, r, true, isMovem, _l);
@@ -1462,7 +1490,7 @@ class CodeParser {
         let reg = readNextRegister(_arg.str, r, true, isMovem, _l);
         if (reg) {
           r = reg.index;
-          if ((_l.instr == 'LEA') || ((_arg.str.charAt(r) == '.') && (_arg.str.charAt(r + 1) == 'W'))) {
+        //  if ((_l.instr == 'LEA') || ((_arg.str.charAt(r) == '.') && (_arg.str.charAt(r + 1) == 'W'))) {
             _arg.indReg = reg.reg;
             _arg.indTab = reg.tab;
             _arg.indInd = reg.ind;
@@ -1472,8 +1500,8 @@ class CodeParser {
               _arg.cycles = 14; // address register indirect with index
             else
               _arg.cycles = 10;
-            }
-          else return _l.Failed("expected '.w' after register name");
+          //  }
+         // else return _l.Failed("expected '.w' after register name");
         } else return _l.Failed("expected register name after ','");
       }
       if (_arg.str[r] == ')') {
@@ -1859,9 +1887,22 @@ class CodeParser {
           }
         }
         line.branchAx = NaN;
+        line.branchAnRn = null;
         if (isNaN(nearIndex)) {
           if (_label[0] == '(' && line.isRegisterName(_label, 1) && _label[3] == ')') {
             line.branchAx = parseInt(_label[2]);
+          }
+          else if (
+            _label[0] == '(' && 
+            line.isRegisterName(_label, 1) && 
+            _label[3] == ',' && 
+            line.isRegisterName(_label, 4) && 
+            _label[6] == ')'
+          ) {
+            let rTab, rInd;
+            if (_label[4] == 'A') rTab = regs.a; else rTab = regs.d;
+            rInd = parseInt(_label[5]);
+            line.branchAnRn = {An:parseInt(_label[2]), rTab: rTab, rInd : rInd};
           }
           else {
             let allLabels = "\n\nKnown labels:\n";
@@ -1889,7 +1930,7 @@ class CodeParser {
             }  
           }
         }
-        if (_final && line.branchIP == -1 && isNaN(line.branchAx)) {
+        if (_final && line.branchIP == -1 && isNaN(line.branchAx) && (line.branchAnRn == null)) {
           line.Failed("can't find jump destination label");
           return;
         }
@@ -2062,7 +2103,7 @@ class CodeParser {
     for (let lnIt = 0; lnIt < lnCount; lnIt++) {
       let line = t.strings.lines[lnIt];
       if (line.isBranchInstr) {
-        if ((line.branchLineIndex == null) && (line.branchAx == null)) {
+        if ((line.branchLineIndex == null) && (line.branchAx == null) && (line.branchAnRn == null)) {
           line.Failed("can't solve branch label");
           return -1;
         }

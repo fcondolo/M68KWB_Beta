@@ -1,8 +1,15 @@
 16/06/2025
 ==========
+- added "incdir" (relative to the rootPath of the fx)
+- added empty data labels (remaps to the address of the next non-empty label)
+- added "ifnc", "ifge", "ifgt", "ifle", "iflt" conditional compilation commands
+- forbid constants and labels with same name (irrespective of case)
+- allow macro declaration in both ways: "macro <name>" or "<name> macro"
+- Proper file/line displayed when errors found in macros
+- added support for lea(An,Rn)
+- don't force ".w" syntax when doing (an,dn) addressing
 - Added support for ;>JS ProtectBuffer(label("myBuffer"), const("bufferSize")) ; <adrs>,<size>
 - Avoid interrupting traced code with vbl interrupt
-- Better support of conditional assembly instructions
 - Allow incbin without quotes for path
 - Support '*' and '/*' as a comment
 - Support '!' as a bitwise OR
@@ -10,6 +17,7 @@
 ==> Bitwise AND: '&'
 ==> Bitwise OR: '!'
 ==> Bitwise XOR: '^'
+
 
 11/06/2025
 ==========

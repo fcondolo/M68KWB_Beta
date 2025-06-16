@@ -1,4 +1,4 @@
-        ifnd    MACROS_I
+;        ifnd    MACROS_I
 MACROS_I set    1
 
 ********************************************************************************
@@ -159,11 +159,6 @@ BLTCON  macro
 
 BLTCONL macro
         ifnc    "\3",""
-        ifnc    "\4",""
-        move.l  #(BLTEN_\1!(\2)&$ff!(\3<<12))<<16!(\4),bltcon0-C(a6)
-        else
-        move.l  #(BLTEN_\1!(\2)&$ff!(\3<<12))<<16,bltcon0-C(a6)
-        endc
         else
         move.l  #(BLTEN_\1!(\2)&$ff)<<16,bltcon0-C(a6)
         endc
@@ -264,7 +259,7 @@ FPMULU8 macro
         lsr.l   #8,\2
         endm
 
-        endc
+;        endc
 
 ********************************************************************************
 ; Copper

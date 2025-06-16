@@ -2509,12 +2509,28 @@ function BGE(_line) { BCCExec(_line, ((regs.n && regs.v) || (!regs.n && !regs.v)
 function BLT(_line) { BCCExec(_line, ((regs.n && !regs.v) || (!regs.n && regs.v)));}			// (N && !V) || (!N && V)
 function BGT(_line) { BCCExec(_line, ((regs.n && regs.v && !regs.z) || (!regs.n && !regs.v && !regs.z)));} // (N && V && !Z) || (!N && !V && !Z)
 function BLE(_line) { BCCExec(_line, ((regs.z) || (regs.n && !regs.v) || (!regs.n && regs.v)));} // Z || (N && !V) || (!N && V)
-function BSR(_line) { reportBranch(M68K_IP); STACK_PUSH(M68K_NEXTIP, 4); if (!isNaN(_line.branchAx)) M68K_NEXTIP = regs.a[_line.branchAx]; else M68K_NEXTIP = _line.branchIP;}
+function BSR(_line) { 
+  reportBranch(M68K_IP);
+  STACK_PUSH(M68K_NEXTIP, 4);
+  if (!isNaN(_line.branchAx)) 
+    M68K_NEXTIP = regs.a[_line.branchAx]; 
+  else if (_line.branchAnRn != null)
+    M68K_NEXTIP = regs.a[_line.branchAnRn.An] + TOOLS.toInt16(_line.branchAnRn.rTab[_line.branchAnRn.rInd]);
+  else 
+    M68K_NEXTIP = _line.branchIP;
+}
 function BRA(_line) { 
   reportBranch(M68K_IP); 
   if (!isNaN(_line.branchAx)) {
     M68K_NEXTIP = regs.a[_line.branchAx]; 
-    if (DEBUGGER_paranoid) {
+    if (!_line.isErrorImmune && DEBUGGER_paranoid) {
+      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the right address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+    }  
+  }
+  else if (_line.branchAnRn != null) {
+    M68K_NEXTIP = regs.a[_line.branchAnRn.An] + TOOLS.toInt16(_line.branchAnRn.rTab[_line.branchAnRn.rInd]);
+    if (!_line.isErrorImmune && DEBUGGER_paranoid) {
       if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
       if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the right address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
     }  

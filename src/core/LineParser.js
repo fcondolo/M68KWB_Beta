@@ -107,6 +107,7 @@ class LineParser {
     t.filtered = t.filtered.trim();
   }
 
+
   // update this.isLabel and return the index of the last character of the label's name
   updateLabelStatus(_allowMacros = false) {
     let t = this;
@@ -160,6 +161,8 @@ class LineParser {
 
   getFileLineStr() {
     let t = this;
+    if (t.fromMacro)
+      return "from macro: " + t.fromMacro.name + ", inferred from " + t.fromMacro.fileLine;
     return "file: " + t.path + ", line " + (t.line + 1).toString();
   }
 
@@ -399,11 +402,11 @@ class LineParser {
     t.lastFoundNumberIndex = exprStr.length;
 
       // convert from asm to js conventions
-    exprStr = exprStr.replace('$-', '-0x');
-    exprStr = exprStr.replace('%-', '-0b');
-    exprStr = exprStr.replace('$', '0x');
-    exprStr = exprStr.replace('%', '0b');
-    exprStr = exprStr.replace('#', ' ');
+    exprStr = exprStr.replaceAll('$-', '-0x');
+    exprStr = exprStr.replaceAll('%-', '-0b');
+    exprStr = exprStr.replaceAll('$', '0x');
+    exprStr = exprStr.replaceAll('%', '0b');
+    exprStr = exprStr.replaceAll('#', ' ');
     exprStr = exprStr.replaceAll('!', '|');
     if (exprStr[exprStr.length-1] == 'W' && exprStr[exprStr.length-2] == '.') { // handle move.l a0,$70.w
       exprStr = exprStr.substring(0, exprStr.length-2);
@@ -514,7 +517,9 @@ class LineParser {
     let expr = NaN;
     try {
       expr = eval(exprStr);
+      console.log("parseJSNumber succeeded parsing: " + fromStr + ", resolved to: " + exprStr + ", obtained: " + expr);
     } catch (error) {
+      console.log("parseJSNumber failed parsing: " + fromStr + ", resolved to: " + exprStr);
       expr = NaN;
     }
     return expr;
@@ -1374,3 +1379,66 @@ class LineParser {
 }  
   
 }
+
+  function eval_ifeq(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (r == 0) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_ifne(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (r != 0) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_ifd(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (!isNaN(r)) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_ifnd(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (isNaN(r)) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_ifnc(ln) {
+    const v1 = ln.readNextWord();
+    const v2 = ln.readNextWord();
+    if (v1 != v2) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_ifge(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (r >= 0) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_ifgt(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (r > 0) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_ifle(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (r <= 0) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
+
+  function eval_iflt(ln) {
+    const v = ln.readNextWord();
+    const r = ln.parseJSNumber(v, 0, true);
+    if (r < 0) contitionCode = 1; else contitionCode = 2;
+    return contitionCode;
+  }
