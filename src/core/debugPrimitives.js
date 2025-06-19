@@ -3,11 +3,6 @@ var DEBUGPRIM = null;
 class DebugPrimitives {
     constructor(
     ) {
-        if (DEBUGPRIM != null) {
-            alert("Error: DebugPrimitives already created");
-            debugger;
-            return;
-        }
         let t           = this;        
         DEBUGPRIM       = t;      
         t.points        = [];

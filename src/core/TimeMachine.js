@@ -14,13 +14,6 @@ class M68K_TimeMachine {
             return;
         }
 
-        // check for singleton uniqueness
-        if (TIME_MACHINE != null) {
-            alert("Error: Time Machine already created");
-            debugger;
-            return;
-        }
-
         t.len               = ASSEMBLER_CONFIG.time_machine;
         t.entries           = new Array(t.len);
         t.paused            = false;

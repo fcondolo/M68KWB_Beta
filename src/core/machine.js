@@ -22,11 +22,6 @@ class M68K_Machine {
         _customUpdate   = null,         // callback to a platform-specific function to update chipset
         _constants      = null          // array of platform specific constants
     ) {
-        if (MACHINE != null) {
-            alert("Error: Machine already created");
-            debugger;
-            return;
-        }
         let t           = this;        
         MACHINE         = t;      
         t.ramIndex      = 0;    // max data address allocated when assembling code (data and bss sections).

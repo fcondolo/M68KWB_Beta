@@ -132,7 +132,7 @@ function main_mainLoop() {
   }
 
   // Handle case when user is tracing asm code
-  if (DEBUGGER_insideInvoke) {
+  if (DEBUGGER_insideInvoke && !MACHINE.stop) {
     console.log("inside invoke: " + DEBUGGER_insideInvoke);
     try {
       main_updateAsmOnly(); // tracing code

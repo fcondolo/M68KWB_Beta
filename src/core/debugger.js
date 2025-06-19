@@ -1872,6 +1872,7 @@ function debug(_alertMessage = null, _useContext = false) {
 //  if (_alertMessage) {
 //    DEBUGGER_AdditionalDbgMsg = _alertMessage;
 //  }
+  MAIN_ALERTS_LIST = []; // empty main alert list to avoid "too many errors" message wneh hitting a breakpoint frame after frame
   main_Alert(msg, false, true);
   msg = msg.replaceAll("\n","<br>");
   showHTMLError(msg, false);

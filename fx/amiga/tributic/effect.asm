@@ -49,7 +49,6 @@ INTSET = INTF_SETCLR!INTF_INTEN!INTF_BLIT
 
 ;-------------------------------------------------------------------------------
 
-COLORS = 1<<BPLS        ; Number of palette colours
 SCREEN_BW = SCREEN_W/16*2 ; byte-width of 1 bitplane line
         ifne    INTERLEAVED
 SCREEN_MOD = SCREEN_BW*(BPLS-1) ; modulo (interleaved)
@@ -87,13 +86,11 @@ V_BRB   rs.l    1
 ********************************************************************************
 Entrypoint:
 ********************************************************************************
+        move.w  #0,BlitOffset   ; M68KWB_NOERROR
         lea     Vars(pc),a5
         lea     custom+C,a6
 
         ; sys backup
- ;       move.w  intenar-C(a6),-(sp)
- ;       move.l  $6c.w,-(sp)
-
         move.w  #$7fff,intena-C(a6)
 
 ********************************************************************************
@@ -149,8 +146,6 @@ InitSin:
 
 ********************************************************************************
 ; Install interrupt and copper
-        lea     BlitInt(pc),a0
-        move.l  a0,$6c.w
         move.w  #INTSET,intena-C(a6)
         lea     Cop(pc),a0
         move.l  a0,cop1lc-C(a6)
@@ -158,7 +153,7 @@ InitSin:
 
 ********************************************************************************
 ; Init palette
-        lea     Colors_var(pc),a2
+        lea     Colors(pc),a2
         lea     color01-C(a6),a0
         rept    8
         move.l  (a2)+,(a0)+
@@ -168,11 +163,18 @@ InitSin:
 ********************************************************************************
 MainLoop:
 ********************************************************************************
+        lea     Vars(pc),a5
         ; move.w  #$f00,color00-C(a6)
+        bsr     BlitInt
+        cmp.w   #14,BlitOffset
+        beq     .cont
+        rts
+.cont:
+        addq.w  #8,Frame-Vars(a5) ; always shifted by at least 2
 
         ; swap buffers
         lea     ScreenBuffers(pc),a2
-        movem.l (a2),d0-a1
+        movem.l (a2),d0-d7/a0-a1
         exg     d0,d1
         exg     d1,d2
         exg     d2,d3
@@ -180,7 +182,7 @@ MainLoop:
         exg     d4,d5
         exg     d6,d7
         exg     a0,a1
-        movem.l d0-a1,(a2)
+        movem.l d0-d7/a0-a1,(a2)
 
         ; set bpl ptrs
         lea     bplpt-C(a6),a0
@@ -189,12 +191,12 @@ MainLoop:
         endr
 
         ; reset blit 'queue'
-        clr.w   BlitOffset-Vars(a5)
+        move.w  #0,BlitOffset     ; M68KWB_NOERROR
 
         ; clear screen
         clr.w   bltdmod-C(a6)
         move.l  #$01000000,bltcon0-C(a6)
-        move.l  ClearScreen(pc),bltdpt-C(a6) 
+        move.l  ClearScreen(pc),bltdpt-C(a6)
         move.w  #SCREEN_H*64+SCREEN_BW/2,bltsize-C(a6) ; M68KWB_NOERROR
 
         move.l  #$7fe07fe,d7 ; sin mask
@@ -212,7 +214,7 @@ MainLoop:
         move.w  (a0,d0),d1
         asr.w   #8,d1
         add.w   #DIST,d1
-        move.w  d1,Dist_var-Vars(a5)
+        move.w  d1,DistVar-Vars(a5)
 
         ; twist angle
         add.w   d0,d0
@@ -276,7 +278,7 @@ Rotate:
         asl.l   #8,d1
         ext.l   d0
         asl.l   #8,d0
-        add.w   Dist_var(pc),d3
+        add.w   DistVar(pc),d3
         divs    d3,d1
         divs    d3,d0
 
@@ -326,7 +328,6 @@ LerpPoints:
         bra     .zStart
 .z:
         ; apply deltas (z)
-        ;>JS debug();
         lea     V_FLT(a0),a2
         movem.l V_BLT(a0),d0-d3
         add.l   d0,(a2)+
@@ -392,63 +393,71 @@ Draw:
         adda.w  #SCREEN_BW,a0
         endr
         move.l  (a2)+,(a0)+
-        addq.w  #8,Frame-Vars(a5) ; always shifted by at least 2
+
         rts
 
 ********************************************************************************
+Exit:
+        rts
+
 
 ********************************************************************************
 BlitInt:
 ********************************************************************************
-        movem.l d0-a6,-(sp)
+        movem.l d0-d7/a0-a6,-(sp)
         lea     custom+C,a6
         move.w  #INTF_BLIT,intreq-C(a6)
         lea     BlitOffset(pc),a0
         move.w  (a0),d0
-        addq.w  #2,(a0)
-        lea     BlitJmp,a0
+        addq.w  #2,(a0)+        ; M68KWB_NOERROR
         move.l  TransformPoints(pc),a1 ; A = x
         move.l  DrawSmc(pc),a2
-        jmp     (a0,d0)
+        ;>JS if (d0.iw < 0) debug();
+        ;>JS if (d0.iw >= label("MaxBltjmp") - label("BlitJmp")) debug();
+;        jmp     (a0,d0)
+        add.w   d0,a0
+        jmp     (a0)
 
 BlitOffset: 
-        dc.w    0
+        nop
 BlitJmp:
-        bra.s   .blitBit
-        bra.s   .blitFull
-        bra.s   .blitRemainder
-        bra.s   .blitOffset
-        bra.s   .blitFull
-        bra.s   .blitRemainder
-        movem.l (sp)+,d0-a6
-        rte
+        bra.s   _blitBit
+        bra.s   _blitFull
+        bra.s   _blitRemainder
+        bra.s   _blitOffset
+        bra.s   _blitFull
+        bra.s   _blitRemainder
+        move.w  #0,BlitOffset           ; M68KWB_NOERROR
+        movem.l (sp)+,d0-d7/a0-a6
+MaxBltjmp:        
+        rts
 
 ; x to source bit
-.blitBit:
+_blitBit:
         addq    #2,a2   ; D
         BLTCONL AD,~BLT_A,5
         move.l  #(2<<16)!4,bltamod-C(a6)
         move.l  d7,bltafwm-C(a6) ; hopefully -1!
         movem.l a1-a2,bltapt-C(a6)
         move.w  #1,bltsize-C(a6) ; M68KWB_NOERROR
-        movem.l (sp)+,d0-a6
-        rte
+        movem.l (sp)+,d0-d7/a0-a6
+        rts
 ; x,y to offset
-.blitOffset:
+_blitOffset:
         lea     2(a1),a0 ; B = y
         addq    #4,a2   ; D
         BLTCON  ABD,(BLT_B&~BLT_C)!(BLT_A&BLT_C),(5+3)
         move.w  #2,bltbmod-C(a6)
         move.w  #$1f,bltcdat-C(a6)
         movem.l a0-a2,bltbpt-C(a6)
-.blitFull:
+_blitFull:
         move.w  #1,bltsize-C(a6) ; M68KWB_NOERROR
-        movem.l (sp)+,d0-a6
-        rte
-.blitRemainder:
+        movem.l (sp)+,d0-d7/a0-a6
+        rts
+_blitRemainder:
         move.w  #(DOT_COUNT-2048)*64+1,bltsize-C(a6) ; M68KWB_NOERROR
-        movem.l (sp)+,d0-a6
-        rte
+        movem.l (sp)+,d0-d7/a0-a6
+        rts
 
 
 ********************************************************************************
@@ -501,7 +510,7 @@ COLOR_2 = $c00
 COLOR_3 = $f72
 COLOR_4 = $fb8
 
-Colors_var:
+Colors:
         dc.w    COLOR_1
         dc.w    COLOR_2
         dc.w    COLOR_3
@@ -542,7 +551,7 @@ RunSmc: dc.l    0
 Frame:  ds.w    1
 Angles: ds.w    2
 Angle2: ds.w    1
-Dist_var:   ds.w    1
+DistVar:   ds.w    1
 
 
 Transformed:

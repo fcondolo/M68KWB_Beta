@@ -2800,6 +2800,7 @@ async function execCPU() {
   }
   let WATCHDOG = 0;
   while (M68K_IP < MACHINE.ram.length) {
+    if (MACHINE.stop) return;
     regs.PC = M68K_IP;
     let line = null;
     let lineIndex = ASMBL_ADRSTOLINE[M68K_IP];
@@ -2817,6 +2818,7 @@ async function execCPU() {
           errStr += "<br> opcode size: " + M68K_CURLINE.instrBytes;
         }
         runtimeError68k(errStr);
+        MACHINE.stop = true;
         return;
       }
     } else {
@@ -2933,7 +2935,7 @@ async function execCPU() {
     M68K_PREVIP = M68K_IP;
     M68K_IP = M68K_NEXTIP;
 
-  CPU_EvaluateVBL(M68K_IP);
+    CPU_EvaluateVBL(M68K_IP);
 
     if (DEBUGGER_traceTillRTS)
       DEBUGGER_canStep = true;
