@@ -2,6 +2,7 @@
 ==========
 - Support for movem.l d0-a6 like syntax. Had to type movem.l d0-d7/a0-a6 before.
 - Fixed debugger, tracing post.incr instructions could execute pointer increment twice (only when tracing)
+- Show labels in alphabetic order in the debugger
 
 16/06/2025
 ==========

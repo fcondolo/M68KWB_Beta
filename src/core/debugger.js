@@ -1373,6 +1373,11 @@ function syntaxColoring(_s, _ln) {
 
 
 function DEBUGGER_initFile(_refreshCyclesOnly = false) {
+  CODERPARSER_SINGLETON.sortedlabels = [...CODERPARSER_SINGLETON.labels].sort((a, b) =>
+  a.label.localeCompare(b.label)
+);  
+
+
   DEBUGGER_origlines = [];
   DEBUGGER_disamlines = [];
   DEBUGGER_lastUpdLine = -1;
@@ -1759,8 +1764,8 @@ function DEBUGGER_update(_force, _showNextIntr = true) {
     str += '>a' + i + '</option>';
   }
 
-  for (let i = 0; i < CODERPARSER_SINGLETON.labels.length; i++) {
-    let lab = CODERPARSER_SINGLETON.labels[i];
+  for (let i = 0; i < CODERPARSER_SINGLETON.sortedlabels.length; i++) {
+    let lab = CODERPARSER_SINGLETON.sortedlabels[i];
     if (lab.dcData) {
       str += '<option value="' + lab.label + '"';
       if (DEBUGGER_dumpReg == lab.label)
