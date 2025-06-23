@@ -22,9 +22,32 @@ testMovem_init:
   ;>JS if (d0.uw != 4) debug("movem wrong value")
   ;>JS if (d1.uw != 5) debug("movem wrong value")
   ;>JS if (d2.uw != 6) debug("movem wrong value")
+
+  move.l  a7,testMovem_sp
+  lea     testMovem_all,a7
+  movem.l (a7),d0-a6
+  lea     testMovem_all2,a7
+  movem.l d0-a6,(a7)
+  lea     testMovem_all,a0
+  move.w  #14,d7
+.testNext:
+  move.l  (a0)+,d0
+  move.l  (a7)+,d1
+  ;>JS if (d0.ul != d1.ul) debug("value differ");
+  dbra    d7,.testNext
+  move.l  testMovem_sp,a7
   rts
 
 testMovem_blop:
   dc.w 1,2,3
 
 
+testMovem_all:
+  dc.l  1,2,3,4,5,6,7,8
+  dc.l  1<<16,2<<16,3<<16,4<<16,5<<16,6<<16,7<<16,8<<16
+
+testMovem_sp:
+  dc.l  0
+
+testMovem_all2:
+  dcb.l 15,0

@@ -7,6 +7,11 @@ var TOOLS = null;
  */
 class JS_ASM_Tools {
   constructor() {
+    if (TOOLS != null) {
+        alert("Error: TOOLS already created");
+        debugger;
+        return;
+    }
     TOOLS = this;
   }
 

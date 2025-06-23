@@ -34,6 +34,8 @@ var M68K_PREVIP = 0;
 var M68K_CURLINE = null;
 var M68K_lastBranches = new Uint32Array(1024);
 var M68K_lastBranchIndex = 0;
+var M68K_lastBranchesInterrupt = new Uint32Array(1024);
+var M68K_lastBranchIndexInterrupt = 0;
 var M68K_TRACINGERR = 'M68KWB_Tracing';
 var M68K_INSIDETRYCATCH = false;
 var M68K_CYCLES = 0;
@@ -80,8 +82,13 @@ function AREG(index,bits=32) {
 
 // _fromIp = -1 ==> from interrupt, not from branching instruciton
 function reportBranch(_fromIp) {
-  M68K_lastBranches[M68K_lastBranchIndex] = M68K_IP;
-  M68K_lastBranchIndex = (M68K_lastBranchIndex + 1) & 1023;
+  if (M68K_INTERRUPT_STATE == null) {
+    M68K_lastBranches[M68K_lastBranchIndex] = M68K_IP;
+    M68K_lastBranchIndex = (M68K_lastBranchIndex + 1) & 1023;
+  } else {
+    M68K_lastBranchesInterrupt[M68K_lastBranchIndexInterrupt] = M68K_IP;
+    M68K_lastBranchIndexInterrupt = (M68K_lastBranchIndexInterrupt + 1) & 1023;
+  }
 }
 
 function castByte(v) {
@@ -2664,6 +2671,9 @@ function RTS(_line) {
     M68K_IP = 0;
     M68K_NEXTIP = 0;
     M68K_lastBranches = new Uint32Array(1024);    
+    M68K_lastBranchIndex = 0;
+    M68K_lastBranchesInterrupt = new Uint32Array(1024);    
+    M68K_lastBranchIndexInterrupt = 0;
     return 'exit';
   }
   else M68K_NEXTIP = STACK_POP(4);
@@ -2863,8 +2873,7 @@ async function execCPU() {
     M68K_CURLINE = line;
     M68K_NEXTIP = M68K_IP + line.instrBytes;
 
-    if (DEBUGGER_paranoid)
-      DEBUGGER_BeforeInstr();
+    DEBUGGER_BeforeInstr();
 
     if (DEBUGGER_tracing && !DEBUGGER_canStep && !DEBUGGER_traceTillRTS && !DEBUGGER_runTillIP) {
       await canExecuteNextInstr();

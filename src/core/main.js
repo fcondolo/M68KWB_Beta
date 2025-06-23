@@ -383,6 +383,9 @@ function main_startChosenFx(_className) {
   if (FX_INFO.clickToStart || FX_INFO.hasAudio)
     showModalBox("close (or click outside) to start", main_startAll);
   else main_startAll();
+  
+  window.scrollTo(0,0);
+
   return true;
 }
 
@@ -473,8 +476,10 @@ function main_onload() {
   {
     FXName = localStorage.getItem(LOCALSTORAGE_FX_NAME);
     if (FXName) {
-      if (main_startChosenFx(FXName))
+      if (main_startChosenFx(FXName)) {
+        window.scrollTo(0,0);
         return;
+      }
       if (CODERPARSER_SINGLETON && CODERPARSER_SINGLETON.stopGlobalCompilation) {
         hideModalBox();
         return;

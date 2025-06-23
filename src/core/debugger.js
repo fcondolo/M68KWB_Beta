@@ -799,22 +799,32 @@ function DEBUGGER_showContext() {
 
   regs.a[7] = a7;
 
-  msg += "<br><center><b style='color:white'>Last taken branches</b></center><br>";
   if (M68K_INTERRUPT_STATE != null) {
-    msg += "NOTE: CURRENTLY IN " + M68K_INTERRUPT_STATE + " INTERRUPT.<br>"; 
+    msg += "<br><center><b style='color:white'>Last taken branches in INTERRUPT mode</b></center><br>";
+    msg += "<table><tr><th>ofs</th><th>instr</th><th>file/line</th></tr>";
+    DEBUGGER_reportBranches(M68K_lastBranchIndex - 1, M68K_lastBranches);
+    msg += "</table>";
   }
+
+  msg += "<br><center><b style='color:white'>Last taken branches outside interrupts</b></center><br>";
   msg += "<table><tr><th>ofs</th><th>instr</th><th>file/line</th></tr>";
-  let index = M68K_lastBranchIndex - 1;
+  DEBUGGER_reportBranches(M68K_lastBranchIndexInterrupt - 1, M68K_lastBranchesInterrupt);
+  msg += "</table>";
+
+  showModalBox(msg,focusOnCodeLine(M68K_PREVIP));
+}
+
+function DEBUGGER_reportBranches(index, tab) {
   for (let i = 0; i < 1024; i++) {
     if (index < 0) index = 1023;
-    const adrs = M68K_lastBranches[index];
+    const adrs = tab[index];
     let count = 1;
     if (adrs > 0) {
       let next = i + 1;
       let nextIndex = index - 1;
       while (next < 1024) {
         if (nextIndex < 0) nextIndex = 1023;
-        const nextAdrs = M68K_lastBranches[nextIndex];
+        const nextAdrs = tab[nextIndex];
         if (nextAdrs == adrs) {
           next++;
           nextIndex--;  
@@ -841,9 +851,6 @@ function DEBUGGER_showContext() {
     }
     index--;
   }
-  msg += "</table>";
-
-  showModalBox(msg,focusOnCodeLine(M68K_PREVIP));
 }
 
 function  DEBUGGER_traceOneInstr() {
@@ -916,13 +923,15 @@ function DEBUGGER_BeforeInstr() {
           imgDataToScreen();
           WATCHES.update();
 
+          /*
+          DON'T FUCKING USE getArg, IT WILL CHANGE ADDRESS REGISTERS VALUES IN CASE OF (a0)+ FOR EXAMPLE
           let bptCtx = "breakpoint reached at ofs: $" + curLine.codeSectionOfs.toString(16) + ":\n" + curLine.filtered;
           if (curLine.arg1) {
             bptCtx += "\narg1: '"+ curLine.arg1.str + "' = $" + getArg(curLine.arg1, curLine.instrSize, false).value.toString(16);
           }
           if (curLine.arg2) {
             bptCtx += "\narg2: '"+ curLine.arg2.str + "' = $" + getArg(curLine.arg2, curLine.instrSize, false).value.toString(16);
-          }
+          }*/
           focusOnCodeLine(M68K_IP);
           //DEBUGGER_AdditionalDbgMsg = bptCtx;
         }
@@ -963,7 +972,7 @@ function DEBUGGER_BeforeInstr() {
 function DEBUGGER_AfterInstr() {
   if (DEBUGGER_tracing && (DEBUGGER_lastAfterInstr != M68K_IP)) {
     DEBUGGER_lastAfterInstr = M68K_IP;
-    DEBUGGER_update(true);
+    DEBUGGER_update(true, false);
     DEBUGGER_dumpRegistersValues();
     for (let i = 0; i < 8; i++) {
       DEBUGGER_saveReg[i] = regs.d[i];
@@ -1676,7 +1685,7 @@ function onRegDataClicked(_index) {
 }
 
 var DEBUGGER_lastUpdLine = -1;
-function DEBUGGER_update(_force) {
+function DEBUGGER_update(_force, _showNextIntr = true) {
   if (!CODERPARSER_SINGLETON || !MYFX)
     return; // in case keys are pressed beore the fx is loaded
 
@@ -1708,7 +1717,7 @@ function DEBUGGER_update(_force) {
         }
       }    
       let curLine = PARSER_lines[lnIndex];
-      if (curLine) {
+      if (curLine && _showNextIntr) {
         if ((DEBUGGER_lastJSExecLog != null) && (curLine.filtered == 'ILLEGAL')) {
           str += DEBUGGER_lastJSExecLog + '<br><hr>';  
         }

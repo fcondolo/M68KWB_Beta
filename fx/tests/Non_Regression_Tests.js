@@ -9,7 +9,6 @@ class Non_Regression_Tests {
   constructor() {
     let t = this;
     t.curTestIndex = 0;
-    t.executedUpdates = 0;
     t.msg = "Running non-regression tests...<br>";
     /*
     tests table entries format:
@@ -28,6 +27,31 @@ class Non_Regression_Tests {
       {asmInit:"testMovem_init", msg:"Test movem"},
       {asmInit:"testLabels_init", msg:"Test Labels"},
     ];
+
+    for (let i = 0; i < t.tests.length; i++) {
+      let tst = t.tests[i];
+      tst.jsInitDone = false;
+      tst.asmInitDone = false;
+      if (!tst.updatesToExecute) {
+        tst.updatesToExecute = 0;
+        if (tst.asmUpdate) tst.updatesToExecute = 1;
+      }
+    }
+    t.SetNewTestIndex(0);
+  }
+
+
+  SetNewTestIndex(_index) {
+    let t = this;
+    t.curTestIndex      = _index;
+    if (t.curTestIndex >= 0 && t.curTestIndex < t.tests.length) {
+    } else {
+      alert("all non-regression tests executed, that's over");
+      t.curTestIndex = -1;
+      t.msg += "<br>OVER!";
+      ShowDebugLog(t.msg);
+      return;
+    }
   }
 
   FX_Update()
@@ -36,18 +60,18 @@ class Non_Regression_Tests {
     if (t.curTestIndex == -1)
       return;
     if (t.curTestIndex >= t.tests.length) {
-      alert("all non-regression tests executed, that's over");
-      t.curTestIndex = -1;
-      t.msg += "<br>OVER!";
-      ShowDebugLog(t.msg);
       return;
     }
     const curTest = t.tests[t.curTestIndex];
     if (curTest.msg) t.msg += "<br>" + curTest.msg + " ... ";
     ShowDebugLog(t.msg);
-    if (t.executedUpdates == 0) {
-      if (curTest.jsInit) eval("t." + curTest.jsInit + "()");
-      if (curTest.asmInit) invoke68K(curTest.asmInit);
+    if (curTest.jsInit && !curTest.jsInitDone) {
+      curTest.jsInitDone = true;
+      eval("t." + curTest.jsInit + "()");
+    } 
+    if (curTest.asmInit && !curTest.asmInitDone) {
+      curTest.asmInitDone = true;
+      invoke68K(curTest.asmInit);
     }
     if (curTest.updatesToExecute > 0) {
       if (curTest.jsUpdate) eval("t." + curTest.jsUpdate + "()");
@@ -57,8 +81,7 @@ class Non_Regression_Tests {
     } else {
       if (curTest.msg) t.msg += "DONE";
       ShowDebugLog(t.msg);
-      t.executedUpdates = 0;
-      t.curTestIndex++;
+      t.SetNewTestIndex(t.curTestIndex + 1);
     }
   }
 

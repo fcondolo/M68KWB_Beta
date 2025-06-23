@@ -1539,17 +1539,32 @@ class CodeParser {
               default: return _l.Failed("could not parse movem arg, expected '-' or '/' after register"); break;
             }
             reg = readNextRegister(_arg.str, r, false, isMovem, _l);
-            r = reg.index;
             if (!reg)
               return _l.Failed("could not parse movem arg, expected register after '-' or '/'");
+            r = reg.index;
             switch (op) {
               case 1: { // add all registers between _arg.movem[_arg.movem.length-1] and reg
+                if (_arg.movem.length <= 0) {
+                  return _l.Failed("movem syntax error");
+                }
                 let prev = _arg.movem[_arg.movem.length - 1];
                 let rname = prev.reg[0];
-                for (let ri = prev.ind + 1; ri <= reg.ind; ri++) {
-                  _arg.movem.push({ reg: rname + ri, tab: prev.tab, ind: ri });
+                if (rname == 'D' && reg.reg[0] == 'A') { // movem.l d0-a6
+                  // finish all D
+                  for (let ri = prev.ind + 1; ri <= 7; ri++) {
+                    _arg.movem.push({ reg: 'D' + ri, tab: regs.d, ind: ri });
+                  }
+                  // add A until index reached
+                  for (let ri = 0; ri <= reg.ind; ri++) {
+                    _arg.movem.push({ reg: 'A' + ri, tab: regs.a, ind: ri });
+                  }
+                } else {
+                  for (let ri = prev.ind + 1; ri <= reg.ind; ri++) {
+                    _arg.movem.push({ reg: rname + ri, tab: prev.tab, ind: ri });
+                  }
                 }
-              } break;
+              } 
+              break;
               case 2: { // add reg
                 _arg.movem.push({ reg: reg.reg, tab: reg.tab, ind: reg.ind });
               } break;
@@ -1563,6 +1578,11 @@ class CodeParser {
         _arg.ind = reg.ind;
         r = reg.index;
         processed = true;
+/*        if (_arg.movem) {
+          let msg = "arg:" + _arg.str + ", regs: ";
+          for (let i = 0; i < _arg.movem.length; i++) msg += _arg.movem[i].reg + ", "; 
+          alert(msg);
+        } */
         return;
       }
       if (_arg.str[r] == '#') {
