@@ -1,3 +1,7 @@
+24/06/2025
+==========
+- "Where am I?" feature now separated interrupt call stack vs "main" call stack
+
 23/06/2025
 ==========
 - Support for movem.l d0-a6 like syntax. Had to type movem.l d0-d7/a0-a6 before.

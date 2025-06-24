@@ -802,19 +802,20 @@ function DEBUGGER_showContext() {
   if (M68K_INTERRUPT_STATE != null) {
     msg += "<br><center><b style='color:white'>Last taken branches in INTERRUPT mode</b></center><br>";
     msg += "<table><tr><th>ofs</th><th>instr</th><th>file/line</th></tr>";
-    DEBUGGER_reportBranches(M68K_lastBranchIndex - 1, M68K_lastBranches);
+    msg += DEBUGGER_reportBranches(M68K_lastBranchIndexInterrupt - 1, M68K_lastBranchesInterrupt);
     msg += "</table>";
   }
 
   msg += "<br><center><b style='color:white'>Last taken branches outside interrupts</b></center><br>";
   msg += "<table><tr><th>ofs</th><th>instr</th><th>file/line</th></tr>";
-  DEBUGGER_reportBranches(M68K_lastBranchIndexInterrupt - 1, M68K_lastBranchesInterrupt);
+  msg += DEBUGGER_reportBranches(M68K_lastBranchIndex - 1, M68K_lastBranches);
   msg += "</table>";
 
   showModalBox(msg,focusOnCodeLine(M68K_PREVIP));
 }
 
 function DEBUGGER_reportBranches(index, tab) {
+  let msg  = "";
   for (let i = 0; i < 1024; i++) {
     if (index < 0) index = 1023;
     const adrs = tab[index];
@@ -851,6 +852,7 @@ function DEBUGGER_reportBranches(index, tab) {
     }
     index--;
   }
+  return msg;
 }
 
 function  DEBUGGER_traceOneInstr() {
