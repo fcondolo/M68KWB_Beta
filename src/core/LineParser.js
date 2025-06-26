@@ -517,9 +517,9 @@ class LineParser {
     let expr = NaN;
     try {
       expr = eval(exprStr);
-      console.log("parseJSNumber succeeded parsing: " + fromStr + ", resolved to: " + exprStr + ", obtained: " + expr);
+    //  console.log("parseJSNumber succeeded parsing: " + fromStr + ", resolved to: " + exprStr + ", obtained: " + expr);
     } catch (error) {
-      console.log("parseJSNumber failed parsing: " + fromStr + ", resolved to: " + exprStr);
+    //  console.log("parseJSNumber failed parsing: " + fromStr + ", resolved to: " + exprStr);
       expr = NaN;
     }
     return expr;
