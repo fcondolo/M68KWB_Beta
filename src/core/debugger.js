@@ -946,7 +946,7 @@ function DEBUGGER_BeforeInstr() {
   } else debugger;
 
   if (DEBUGGER_traceTillRTS) {
-    if (curLine.instr == 'RTS' || curLine.instr == 'RTE') {
+    if (curLine.instr == 'RTS' /*|| curLine.instr == 'RTE'*/) { // RTE always hits, which is annoying
       DEBUGGER_traceTillRTS = false;
       setTraceMode(true);
       DEBUGGER_update(true);
