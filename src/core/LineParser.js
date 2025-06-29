@@ -393,7 +393,7 @@ class LineParser {
       exprStr = exprStr.substring(0, coma);
 
     // if a ( followed by a register is found, stop right before it
-    const parenthesis = exprStr.indexOf('(');
+    const parenthesis = exprStr.lastIndexOf('(');
     if (parenthesis >= 0) {
       if (t.isRegisterName(exprStr, parenthesis+1))
         exprStr = exprStr.substring(0, parenthesis);

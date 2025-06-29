@@ -1414,7 +1414,7 @@ class CodeParser {
       isMovem = true;
     }
 
-    let parenthesis = _arg.str.indexOf('(');
+    let parenthesis = _arg.str.lastIndexOf('(');
     let r = 0;
     let processed = false;
     _arg.predecrement = false;
