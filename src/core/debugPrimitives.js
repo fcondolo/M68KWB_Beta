@@ -1,3 +1,19 @@
+/*
+DEBUGPRIM.addPoint(
+    _x,
+    _y,
+    _color,     / HTML format, e.g. 0xffffff for white
+    _rad,       // radius / thickness in pixels
+    _lifeTime  // number of frames to show the point
+    )
+
+DEBUGPRIM.addLine(
+    _x1, _y1, _x, _y2,
+    _color,     / HTML format, e.g. 0xffffff for white
+    _lifeTime  // number of frames to show the point
+    )
+*/
+
 var DEBUGPRIM = null;
 
 class DebugPrimitives {
@@ -6,6 +22,7 @@ class DebugPrimitives {
         let t           = this;        
         DEBUGPRIM       = t;      
         t.points        = [];
+        t.lines         = [];
         t.lines         = [];
         t.startScreenX  = 0;
         t.startScreenY  = 0;
@@ -16,17 +33,17 @@ class DebugPrimitives {
         t.screenH       = 200;
     }
 
-    addPoint(_x = 0, _y = 0, _color = 0xffffff, _rad = 1) {
+    addPoint(_x = 0, _y = 0, _color = 0xffffff, _rad = 1, _lifeTime = 1) {
         let t = this;
-        t.points.push({x:_x, y:_y, col:_color, rad: _rad});
+        t.points.push({x:_x, y:_y, col:_color, rad: _rad, life:_lifeTime});
     }
 
-    addLine(_x1 = 0, _y1 = 0, _x2 = 0, _y2 = 0, _color = 0xffffff) {
+    addLine(_x1 = 0, _y1 = 0, _x2 = 0, _y2 = 0, _color = 0xffffff, _lifeTime = 1) {
         let t = this;
         if (_x1 == _x2 && _y1 == _y2) {
-            return t.addPoint(_x1,_y1,_r,_g,_b,1);
+            return t.addPoint(_x1,_y1,_color,1,_lifeTime);
         }
-        t.lines.push({x1:_x1, y1:_y1, x2:_x2, y2:_y2, col:_color});
+        t.lines.push({x1:_x1, y1:_y1, x2:_x2, y2:_y2, col:_color, life:_lifeTime});
     }
     
     draw(_ctx) {
@@ -38,11 +55,21 @@ class DebugPrimitives {
             s = '#'+s;
             _ctx.strokeStyle = s;
             _ctx.beginPath();
+            _ctx.imageSmoothingQuality = "low";
+            _ctx.imageSmoothingEnabled = false; 
+            _ctx.webkitImageSmoothingEnabled = false;
+            _ctx.mozImageSmoothingEnabled = false;
+            _ctx.msImageSmoothingEnabled = false;
             _ctx.moveTo(t.startScreenX + v.x1, t.startScreenY + v.y1);
             _ctx.lineTo(t.startScreenX + v.x2, t.startScreenY + v.y2);
             _ctx.stroke();
+            t.lines[i].life--;
+            if (t.lines[i].life <= 0) {
+                t.lines.splice(i, 1);
+                i--;
+            }
         }
-        t.lines = [];
+
 
         for (let i = 0; i < t.points.length; i++) {
             const v = t.points[i];
@@ -52,10 +79,19 @@ class DebugPrimitives {
             s = '#'+s;
             _ctx.beginPath();
             _ctx.fillStyle = s;
+            _ctx.imageSmoothingQuality = "low";
+            _ctx.imageSmoothingEnabled = false; 
+            _ctx.webkitImageSmoothingEnabled = false;
+            _ctx.mozImageSmoothingEnabled = false;
+            _ctx.msImageSmoothingEnabled = false;
             _ctx.arc(t.startScreenX + v.x-h, t.startScreenY + v.y-h, v.rad, 0, Math.PI*2, false);
             _ctx.fill();
-        }
-        t.points = [];
+             t.points[i].life--;
+            if (t.points[i].life <= 0) {
+                t.points.splice(i, 1);
+                i--;
+            }
+       }
 
         if (t.showCard) {
             _ctx.strokeStyle = "#ff00ff";

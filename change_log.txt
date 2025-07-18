@@ -1,3 +1,13 @@
+18/07/2025
+==========
+- TOOLBOX:
+==> Added foldable tabs, and toolbox code is now in a dedicated .js file
+==> Added "Screenshot" button. Takes a screenshot of the frame-buffer
+==> Toolbox can now enable / disable blitter
+- DebugPrimitives (DEBUGPRIM.addPoint, DEBUGPRIM.addLine) now have lifetime (in frames). See src/core/debugPrimitives.js
+- Avoid multiple error message boxes for a same error
+
+
 29/06/2025
 ==========
 - Fixed parsing of offsets using parenthesis ,e.g. move.l #0,(2+3)*(5*7)(a0)

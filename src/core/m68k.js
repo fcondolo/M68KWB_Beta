@@ -1,5 +1,7 @@
 // timings: https://gist.github.com/cbmeeks/e759c7061d61ec4ac354a7df44a4a8f1
 
+const ERRORIMMUNE_COMMENT = "\nIf this behavior was intended, just add the following comment: '; M68KWB_NOERROR' at the end of the line.\n";
+
 const MAX_32 = (1 << 30);
 const MAX_16 = (1 << 16);
 const SIGN_BIT_8 = 0x80;
@@ -184,6 +186,7 @@ var regs = new regstruct();
 var lockDataD = [null,null,null,null,null,null,null,null];
 var lockDataA = [null,null,null,null,null,null,null,null];
 
+
 function runtimeError68k(_e) {
   const lineIndex = ASMBL_ADRSTOLINE[M68K_IP];
   let lineStr = null;
@@ -200,9 +203,10 @@ function runtimeError68k(_e) {
   showHTMLError(_e);
   if (lineStr) {
     document.getElementById("errors").innerHTML += "<br>executing:\t" + lineStr;
-    _e += "<br>executing: " + lineStr;
+    _e = "<br>executing: " + lineStr + "\n" + _e;
     _e += "<br>" + M68K_CURLINE.getFailString();
   }
+  /* now that we have time machine and "where am I", this is not necessary
   _e += "<br>last executed lines (most recent first):";
   for (let i = 1; i <= 16; i++) {
     const l = M68K_LASTEXEC[(M68K_EXECUTED-i)%16];
@@ -212,11 +216,12 @@ function runtimeError68k(_e) {
       else
         _e += "<br>" + l.filtered + " - " + l.getFileLineStr();
     }
-  }
+  }*/
   _e += "<br>";
 
-  main_Alert(_e);
+  main_Alert(_e, true);
   debug(_e);
+  MACHINE.stop = true;
   //DEBUGGER_showContext();
   debugger;
 }
@@ -1081,7 +1086,7 @@ function I_DIVS(_source, _dest, _e) {
     if ((quo < -32768) || (quo > 32767)) {
       regs.v = true;
       if (CPU_CONFIG.check_div_overflow && _e) {
-        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ".\nIf this behavior was intended, just add comment '; M68KWB_NOERROR' at the end of the line.\n");
+        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ERRORIMMUNE_COMMENT);
       }
     }
     var rem = Math.abs(Math.floor(d % s));
@@ -1111,7 +1116,7 @@ function I_DIVU(_source, _dest, _e = true) {
     if (quo > 0xffff) {
       regs.v = true;
       if (CPU_CONFIG.check_div_overflow && _e) {
-        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ".\nIf this behavior was intended, just add comment '; M68KWB_NOERROR' at the end of the line.\n");
+        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ERRORIMMUNE_COMMENT);
       }
     } else {
       var rem = d % s;
@@ -2531,19 +2536,20 @@ function BRA(_line) {
   if (!isNaN(_line.branchAx)) {
     M68K_NEXTIP = regs.a[_line.branchAx]; 
     if (!_line.isErrorImmune && DEBUGGER_paranoid) {
-      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
-      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the right address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
+      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
     }  
   }
   else if (_line.branchAnRn != null) {
     M68K_NEXTIP = regs.a[_line.branchAnRn.An] + TOOLS.toInt16(_line.branchAnRn.rTab[_line.branchAnRn.rInd]);
     if (!_line.isErrorImmune && DEBUGGER_paranoid) {
-      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
-      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the right address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
+      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
     }  
   }
   else M68K_NEXTIP = _line.branchIP;
 }
+
 function DBF(_line) {
   let v = _line.arg1.tab[_line.arg1.ind] & 0xffff;
   v -= 1;

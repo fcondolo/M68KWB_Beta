@@ -308,6 +308,13 @@ class CodeParser {
     let t = this;
     for (let i = 0; i < t.labels.length; i++) {
       if (t.labels[i].dcData == null) {
+
+        let code = t.getLabelCodeSectionOffset(t.labels[i].label, true);
+        if (code >= 0) {
+          t.labels[i].dcData = code;
+          continue;
+        }
+
         let ilineIndex = t.labels[i].index;
         for (let j = i + 1; j < t.labels.length; j++) {
           if (t.labels[j].dcData != null) {
@@ -1406,6 +1413,7 @@ class CodeParser {
   }
 
   decodeArg(_arg, _l, _lastChance = false, _isArg1 = false) {
+    if (_l.text.includes("COMPILER_DEBUG_ARGS")) debugger;
     _arg.cycles = 0;        // default (register)
     _arg.isLabelIndex = NaN;
 
@@ -1596,6 +1604,10 @@ class CodeParser {
           _arg.value = Math.floor(found)
           processed = true;
         } else {
+          if (_arg.type == 'imm' && !_lastChance) {
+            this.lateArgs.push({arg:_arg, line:_l, ofs:_l.ofs});
+            return;
+          }
           if (_l.instrSize == 4)
             _arg.cycles = 16; // absolute long
          else
@@ -1748,12 +1760,14 @@ class CodeParser {
 
       if (arg1.length > 0) {
         ln.ofs = ofsBeforeArg1;
+        if (ln.text.includes("COMPILER_DEBUG_ARG1")) debugger;
         t.decodeArg(ln.arg1, ln, false, true);
         if (t.stopGlobalCompilation) return;
       }
 
       if (arg2.length > 0) {
         ln.ofs = ofsBeforeArg2;
+        if (ln.text.includes("COMPILER_DEBUG_ARG2")) debugger;
         t.decodeArg(ln.arg2, ln);
         if (ln.arg2.reg == "A7") {
             ln.intentionallyWritingToStack = true;  
@@ -1959,7 +1973,7 @@ class CodeParser {
   }
 
   
-  getLabelCodeSectionOffset(_name) {
+  getLabelCodeSectionOffset(_name, canFail = false) {
     let t = this;
     _name = _name.toUpperCase();
     const len = t.labels.length;
@@ -1969,11 +1983,12 @@ class CodeParser {
         const ln = t.strings.lines[lb.index];
         if (ln)
           return ln.codeSectionOfs;
-        else
+        else if (!canFail)
           debugger;
       }
     }
-    debugger;
+    if (!canFail)
+      debugger;
     return -1;
   }
 

@@ -207,6 +207,7 @@ function main_mainLoop() {
 function main_startAll() {
   if (!WATCHES)
     new M68K_Watches(true); // in case no asm files
+  if (!TOOLBOX) new Toolbox();
   if (FX_INFO.zoom) {
     try {
       setZoom(FX_INFO.zoom);

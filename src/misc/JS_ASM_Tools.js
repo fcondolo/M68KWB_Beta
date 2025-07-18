@@ -241,6 +241,16 @@ class JS_ASM_Tools {
       return MACHINE.getRAMValue(TOOLS.getLabelAdrs(_name),_size,_signed);
     }
 
+  /**
+   * Sets the value at a given label
+   * @param   {string} _name  - Label's name
+   * @param   {number} _value - The value to set
+   * @param   {number} _size  - Bytes to write (1, 2 or 4)
+  */
+   setVariable(_name, _value, _size) {
+      MACHINE.setRAMValue(_value, TOOLS.getLabelAdrs(_name), _size);
+    }
+
         
   /**
    * Retrieves a value (field) in a rs.x structure
@@ -644,13 +654,79 @@ class JS_ASM_Tools {
       else
       _fileName = "M68kWB_screenshot";
     }
-    const strData = cvs.toDataURL("image/octet-stream");
+
+    const resolution = MACHINE.getResolution();
+    const scanvas = document.createElement("canvas");
+    scanvas.width = resolution.w;
+    scanvas.height = resolution.h;
+    const sctx = scanvas.getContext("2d");
+    sctx.drawImage(BACKBUF_CVS, PLATFORM_OFSX, PLATFORM_OFSY, resolution.w, resolution.h, 0, 0, resolution.w, resolution.h);    
+    const strData = scanvas.toDataURL("image/octet-stream");
     let saveLink = document.createElement("a");
     saveLink.download = _fileName + ".png";
     saveLink.href = strData;
     saveLink.click();  
   }
+
+  
+  /**
+   * Loads a file and returs its contents as a string
+   * @param {string} _path  - The file's path
+   */
+  LoadStringFiles(_paths, _onLoaded) {
+    let t = this;
+    if (!t.filesToload) t.filesToload = [];
+
+    let startIndex = t.filesToload.length;
+    for (let i = 0; i < _paths.length; i++) {
+      let rootPath = "";
+      if (FX_INFO && FX_INFO.rootPath)
+        rootPath= FX_INFO.rootPath;
+      if (rootPath.length > 0 && rootPath[rootPath.length-1] != '/')
+          rootPath += "/";    
+      let path = rootPath + _paths[i];
+      t.filesToload.push({path: path, onLoaded: _onLoaded});
+    }
+
+    for (let i = startIndex; i < t.filesToload.length; i++) {
+      let data = t.filesToload[i];
+      let path = data.path;
+      const d = new Date();
+      let ms = d.getMilliseconds();
+      const file = path + "?v="+ms; // avoid cache sending an old version of the file
+      let rawFile = new XMLHttpRequest();
+      rawFile.open("GET", file, false);
+      rawFile.userPath = path;
+      rawFile.onreadystatechange = function () {
+        if (rawFile.readyState === 4) {
+          if (rawFile.status === 200 || rawFile.status == 0) {
+            MYFX.onFileLoaded(rawFile.responseText, rawFile.userPath);
+          }
+        }
+        else switch (rawFile.status) {
+              case 403: main_Alert("can't load file: " + path + " : error 403 (forbidden)");
+                this.waitingOnFile = null;
+              return false;
+              case 404:
+                main_Alert("can't load file: " + path + " : error 404 (not found)");
+                this.waitingOnFile = null;
+              return false;
+              default:
+                if (rawFile.status >= 400) main_Alert("can't load " + path + " : error #" + rawFile.status);
+                  this.waitingOnFile = null;
+                return false;
+        }
+      }
+      try {
+        rawFile.send(null);
+      } catch (e) {
+        main_Alert(e);
+        t.waitingOnFile = null;
+      }
+    }
+  }
 }
+
 
   /*
    How to create arrays in javascript:
@@ -681,4 +757,3 @@ class JS_ASM_Tools {
     ...
     
     */
-

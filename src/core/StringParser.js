@@ -11,7 +11,7 @@ class StringParser {
     let t = this;
     const d = new Date();
     let ms = d.getMilliseconds();
-    const file = _path + "?v="+ms;
+    const file = _path + "?v="+ms; // avoid cache sending an old version of the file
     let rawFile = new XMLHttpRequest();
     rawFile.open("GET", file, false);
     t.waitingOnFile = _path;

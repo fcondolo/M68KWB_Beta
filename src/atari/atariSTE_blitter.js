@@ -395,6 +395,12 @@ function Blitter_Draw()
 
 
 function ATARI_bltStart() {
+  if (!MACHINE.allowBlitter) {
+    MACHINE.errorContext.blitter = null;
+    ST_setCustomFromPtr_B(BLT_MISC_1, 0);
+    return;
+  }
+
   /* Half Tone Patterns 0..15 */
   for (let i = 0; i < 16; i++) {
       Blit.HalfToneRAM[i] = ST_getCustomFromPtr_W(BLT_HALFTONE_0 + 2 * i);
@@ -467,7 +473,13 @@ function ATARI_bltStart() {
 	14 = Target Bits are NOT Source OR NOT Target
 	15 = Target Bits are all “1”
 	*/
-	Blit.setOp(ST_getCustomFromPtr_B(BLT_OP));
+  let op = ST_getCustomFromPtr_B(BLT_OP);
+  if (MACHINE.allowBlitterClearOnly && op != 0) {
+    MACHINE.errorContext.blitter = null;
+    ST_setCustomFromPtr_B(BLT_MISC_1, 0);
+    return;
+  }
+  Blit.setOp(op);
  
 	/*
 	This register is a bit structure of the following content:

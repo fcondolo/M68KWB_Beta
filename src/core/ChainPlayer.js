@@ -1,7 +1,6 @@
 const LOCALSTORAGE_CHAININDEX = "chain_index";
 
 var CHAIN_MODE = false;
-
 const chain_fx = [
   {class: "Non_Regression_Tests", platform: "STE"},
   {class: "FX_TestParser", platform: "ST"},
@@ -28,7 +27,6 @@ const chain_fx = [
   {class: "tut6_STEImage", platform: "STE"},
 ];
 
-
 function Check_Chain() {
   let index = localStorage.getItem(LOCALSTORAGE_CHAININDEX);
   if (!index)
@@ -47,7 +45,9 @@ function Check_Chain() {
       return true;
     } else  {
       localStorage.setItem(LOCALSTORAGE_CHAININDEX, null);
+      localStorage.clear();
       alert("CHAIN DONE!");
+      window.location.reload(true);
     }
   }
   return false;

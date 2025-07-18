@@ -217,6 +217,9 @@ function SAEO_Blitter() {
 
 
     this.blitter_fillStruct = function() {
+		if (!MACHINE.allowBlitter)
+			return;
+
         let t = this;
         const hpos = 0;
         

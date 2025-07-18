@@ -333,6 +333,27 @@ function ST_getYScreenOfs(_y) {
 }
 
 /**
+ST_getXYFromOfs(_msk, _ofs)
+@param      _msk :   word mask used to display the pix within the 16 bits block
+@param      _ofs :   ofs of the 16 bits block in screen
+@return     {x:x, y:y}
+*/
+function ST_getXYFromOfs(_msk, _ofs) {
+	let y = Math.floor(_ofs/160);
+    let blockOfs = _ofs % 160;
+    if (blockOfs % 8 != 0) main_Alert("ST_getXYFromOfs: wrong ofs");
+    let x = (blockOfs / 8) * 16;
+    for (let j = 0; j < 16; j++) {
+        if (_msk == 1<<j) {
+            x += 15-j;
+            break;
+        }
+    }
+    return {x:x, y:y};
+}
+
+
+/**
 ST_drawPix(_x, _y, _colorIndex, _destScreen)
 @param      _x          :   x coord
 @param      _y          :   y coord

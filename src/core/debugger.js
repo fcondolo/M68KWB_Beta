@@ -461,7 +461,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     break;
     case 84: // t
       if (DEBUGGER_SHIFT_PRESSED)
-        DEBUGGER_toggleShowToolbox();
+        TOOLBOX.toggleShow();
       else
         DEBUGGER_traceOneInstr();
     break;
@@ -610,98 +610,10 @@ function DEBUGGER_2digitHex(_s) {
   return r;
 }
 
-function DEBUGGER_toggleShowToolbox() {
-  let bplCount = bitpane_bplCount;
-  let amigaonly = document.getElementById("amigaonly");
-  switch (FX_INFO.platform) {
-    case "OCS" : 
-      bplCount = bitpane_bplCount;
-      amigaonly.style.display = null;
-    break;
-    case "ST" :
-    case "STE" : 
-      bplCount = 4;
-      amigaonly.style.display = "none";
-    break;
-    default: alert("DEBUGGER_toggleShowToolbox : 'platform' field must be 'OCS', 'ST', or 'STE'"); break;
-  }
-
-  let elm = document.getElementById("draggable");
-  if (elm.style.display == "none") {
-    for (let i = 0; i < 6; i++) {
-      let e = document.getElementById("tbox_bpl"+i);
-      if (bplCount > i) e.style.display = null; else e.style.display = "none";
-    }
-
-    const colCount = 1 << bplCount;
-    for (let i = 0; i < 32; i++) {
-      let e = document.getElementById("tbox_pal"+i);
-      if (colCount > i) {
-        let htmlCol = "#";
-        switch (FX_INFO.platform) {
-          case 'OCS': 
-          {
-            const color = AMIGA_customregs[0x180/2 + i];
-            htmlCol += DEBUGGER_2digitHex(((color >>> 8) & 15) * 16);
-            htmlCol += DEBUGGER_2digitHex(((color >>> 4) & 15) * 16);
-            htmlCol += DEBUGGER_2digitHex((color & 15) * 16);
-          }
-          break;
-          case 'ST':
-          {
-            const stCol = ST_getCustomFromPtr_W(ST_COLOR0 + 2 * i, 2, false);
-            const red = (stCol>>8)&7;
-            const green = (stCol>>4)&7;
-            const blue = stCol&7;
-            htmlCol += DEBUGGER_2digitHex(ST_To_HTML[red]);
-            htmlCol += DEBUGGER_2digitHex(ST_To_HTML[green]);
-            htmlCol += DEBUGGER_2digitHex(ST_To_HTML[blue]);
-          }
-          break;
-          case 'STE':
-          {
-            const stCol = ST_getCustomFromPtr_W(ST_COLOR0 + 2 * i, 2, false);
-            const red = (stCol>>8)&15;
-            const green = (stCol>>4)&15;
-            const blue = stCol&15;
-            htmlCol += DEBUGGER_2digitHex(STE_To_HTML[red]);
-            htmlCol += DEBUGGER_2digitHex(STE_To_HTML[green]);
-            htmlCol += DEBUGGER_2digitHex(STE_To_HTML[blue]);
-          }
-          break;
-          default:
-            htmlCol += "000000";
-          break;
-        }
-        let c = document.getElementById("tbox_c"+i);
-        c.style.backgroundColor = htmlCol;
-        e.style.display = null; 
-      }
-      else {
-        e.style.display = "none";
-      }
-    }
-
-    elm.style.display = null;
-    $("#draggable").draggable();   
-    $("#draggable").css({
-      position: "absolute",
-      top: GLOBAL_MOUSEY.toString()+"px",
-      left: GLOBAL_MOUSEX.toString()+"px",
-      width: "30%",
-      height: "50%",
-      overflowY: "auto",   // Scrollbar when needed
-      overflowX: "hidden", // Optional
-      padding: "10px",
-      border: "1px solid #ccc",
-      background: "rgba(130,130,150,0.9"
-    });
-    //$('body').scrollTo('#draggable');
-  }
-  else {
-    elm.style.display = "none";
-  }
+function DEBUGGER_AllowJSCommands(_s) {
+  DEBUGGER_AllowJS = _s;
 }
+
 
 
 function DEBUGGER_help() {

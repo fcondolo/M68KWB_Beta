@@ -125,7 +125,7 @@ function downloadView(view, _outputFileName) {
 }
 
 function RAMToFile_bytes(_adrs, _count, _outputFileName, _showDoneMsg = false) {
-  API_CHANGED("TOOLS.RAMToFile_bytes");
+  API_CHANGED("RAMToFile_bytes");
 }
 
 function RAMToFile_longs(_adrs, _count, _outputFileName, breakOn=null) {

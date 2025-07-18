@@ -42,8 +42,10 @@ class M68K_Machine {
         t.lastBlitContext = null;   // debug info that persists after vlit is over
         t.bitplaneWeight = [1, 1, 1, 1, 1, 1]; // for debug purposes only. Used to switch on/off bitplanes
         DEBUGGER_AllocsList.push({ label: "Total RAM size", adrs: 0, size: _ramSize });
-        t.ramIndex          = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES; // current alloc pointer (below = already allocated mem, above = free ram)
-        CPU_CODE_SECTION    = t.ram;
+        t.ramIndex      = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES; // current alloc pointer (below = already allocated mem, above = free ram)
+        CPU_CODE_SECTION= t.ram;
+        t.allowBlitter = true;
+        t.allowBlitterClearOnly = false;
     
     
         // put garbage in registers, having them all cleared is too easy...
@@ -64,6 +66,11 @@ class M68K_Machine {
         t.superStack = t.endSuperStack;
     }
 
+
+    getBitplaneWeight(_index) {
+        let t = this;
+        return t.bitplaneWeight[_index]
+    }
 
     setBitplaneWeight(_index, _value = 0) {
         let t = this;
@@ -428,6 +435,26 @@ class M68K_Machine {
             if (_includeStart) return regs.a[7] > t.endUserStack;
             return regs.a[7] >= t.endUserStack;
         }
-    }   
+    }
+    
+    getResolution() {
+        let w,h;
+        switch (FX_INFO.platform) {
+            case "OCS" : w=320; h=PLAYFIELD_LINES_COUNT; break;
+            case "ST" : w=320; h=200; break;
+            case "STE" : w=320; h=200; break;
+        }
+        return {w:w, h:h};
+    }
+
+    allowBlt(_blitter) {
+        let t = this;
+        t.allowBlitter = _blitter;
+    }
+
+    allowBltClr(_blitter) {
+        let t = this;
+        t.allowBlitterClearOnly = _blitter;
+    }
 }
   

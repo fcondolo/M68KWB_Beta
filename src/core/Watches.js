@@ -57,7 +57,7 @@ class M68K_Watches {
         if (t.elm.style.display == "none")
             return;
 
-        let s = "<hr><center><b>WATCHES</b></center><br><table>";
+        let s = "<table>";
         for (let i = 0; i < t.entries.length; i++) {
             const e = t.entries[i];
             const f = t.format[e.type];
