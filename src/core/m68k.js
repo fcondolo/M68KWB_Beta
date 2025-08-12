@@ -52,6 +52,8 @@ var M68K_VECTORS_ZONE_SIZE = 0x500; // 0x466 needed for ST VBL counter
 var M68K_TICKS_PER_FRAME = Math.floor(M68K_TICKS_PER_SECOND/50);
 var M68K_FORCENEXTVBL = false;
 var M68K_DEBUGNEXTLINE = false;
+var M68K_DIVS_STAT = null;
+var M68K_COLLECT_DIVS_STATS = false;
 
 var M68K_EXECUTED = 0;
 var M68K_LASTEXEC = new Array(16);
@@ -1066,6 +1068,22 @@ function I_MULU(_instr) {
   return null;
 }
 
+function onDivision(_dividend, _divisor) {
+  if (!M68K_DIVS_STAT) {
+    M68K_DIVS_STAT = {
+    minDividend : _dividend,
+    maxDividend : _dividend,
+    minDivisor : _divisor,
+    maxDivisor : _divisor,
+    };
+  } else {
+    M68K_DIVS_STAT.minDividend = Math.min(M68K_DIVS_STAT.minDividend, _dividend);
+    M68K_DIVS_STAT.maxDividend = Math.max(M68K_DIVS_STAT.maxDividend, _dividend);
+    M68K_DIVS_STAT.minDivisor = Math.min(M68K_DIVS_STAT.minDivisor, _divisor);
+    M68K_DIVS_STAT.maxDivisor = Math.max(M68K_DIVS_STAT.maxDivisor, _divisor);
+  }
+}
+
 // _dest.l / _source.w
 // must check if result fits in a word or raise error
 // _e : non-blocking errors are allowed
@@ -1080,8 +1098,12 @@ function I_DIVS(_source, _dest, _e) {
     runtimeError68k("DIVISION BY 0");
     return 0;
   } else {   
-    var d = Math.floor(_dest);   
-    var quo = Math.floor(d / s);
+    var d = Math.floor(_dest);
+    if (M68K_COLLECT_DIVS_STATS) onDivision(d, s);
+    let quo = d / s;
+    if (quo < 0) quo = Math.ceil(quo);
+    else quo = Math.floor(quo);
+
     regs.v = false;
     if ((quo < -32768) || (quo > 32767)) {
       regs.v = true;
@@ -1111,6 +1133,7 @@ function I_DIVU(_source, _dest, _e = true) {
     return 0;
   } else {
     var d = Math.floor(_dest);
+    if (M68K_COLLECT_DIVS_STATS) onDivision(d, s);
     var quo = (d / s) >>> 0;
     regs.v = false;
     if (quo > 0xffff) {
@@ -2814,6 +2837,7 @@ async function execCPU() {
     debugger;
     return;
   }
+  MYFX.updateInvokedAsm = true;
   let WATCHDOG = 0;
   while (M68K_IP < MACHINE.ram.length) {
     if (MACHINE.stop) return;

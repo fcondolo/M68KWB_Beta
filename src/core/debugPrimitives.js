@@ -1,19 +1,3 @@
-/*
-DEBUGPRIM.addPoint(
-    _x,
-    _y,
-    _color,     / HTML format, e.g. 0xffffff for white
-    _rad,       // radius / thickness in pixels
-    _lifeTime  // number of frames to show the point
-    )
-
-DEBUGPRIM.addLine(
-    _x1, _y1, _x, _y2,
-    _color,     / HTML format, e.g. 0xffffff for white
-    _lifeTime  // number of frames to show the point
-    )
-*/
-
 var DEBUGPRIM = null;
 
 class DebugPrimitives {

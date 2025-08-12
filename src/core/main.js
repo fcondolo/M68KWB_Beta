@@ -166,7 +166,10 @@ function main_mainLoop() {
     if (DEBUGGER_SHOWCPUCYCLES) M68K_CYCLES = 0;
     if (MYFX.FX_Update && ((!MACHINE) || (!MACHINE.stop))) {
       try {
+        MYFX.updateInvokedAsm = false;
         MYFX.FX_Update();
+        if (!MYFX.updateInvokedAsm) 
+          invoke68K("M68KWB_defaultMainLoop"); // need to update something with the CPU at every frame, otherwise interrupts won' trigger (especially vbl)
         MYFX.updatedFramesCount++;
       } catch (err) {
         if (err.message == "WAITING_USERINPUT") {
