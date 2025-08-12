@@ -16,3 +16,12 @@ M68KWB_TargetPlatformInit:
 M68KWB_defaultRTE:
     nop
     rte
+
+M68KWB_defaultMainLoop:
+    nop
+    rts
+
+    IFD M68KWB
+fx_canExit:
+    dc.w    0
+    ENDC

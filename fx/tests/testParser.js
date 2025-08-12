@@ -99,12 +99,4 @@ class FX_TestParser {
     }
 }
 
-  FX_Update() {
-    let t = this;
-   // invoke68K("swapScreens", false);
-  }
-
-  FX_DrawDebug(_ctx) {
-  }
-
 }

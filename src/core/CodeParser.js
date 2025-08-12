@@ -128,6 +128,8 @@ class CodeParser {
         t.process_oneInclude("./src/amiga/Amiga_Default.asm", null, t.strings.lines.length);
       break;
       case "ST" :
+        t.process_oneInclude("./src/atari/atariST_Default.asm", null, t.strings.lines.length);
+      break;
       case "STE" :
         t.process_oneInclude("./src/atari/atariST_Default.asm", null, t.strings.lines.length);
       break;
