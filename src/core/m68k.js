@@ -2701,7 +2701,6 @@ function DBLE(_line) {
 
 
 function RTS(_line) {
-  reportBranch(M68K_IP);
   if (MACHINE.isStackOver()) {
     M68K_IP = 0;
     M68K_NEXTIP = 0;
@@ -2711,11 +2710,19 @@ function RTS(_line) {
     M68K_lastBranchIndexInterrupt = 0;
     return 'exit';
   }
-  else M68K_NEXTIP = STACK_POP(4);
+  let candidateIP = STACK_POP(4);
   if (DEBUGGER_paranoid) {
-    if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Corrupted stack? RTS instruction popped invalid address from stack: Address below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
-    if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Corrupted stack? RTS instruction popped invalid address from stack: Address above code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+    if (candidateIP < M68K_VECTORS_ZONE_SIZE) {
+      runtimeError68k("Corrupted stack? RTS instruction popped invalid address from stack: Address below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+      return;
+    }
+    if (candidateIP > MACHINE.maxCodeAdrs) {
+      runtimeError68k("Corrupted stack? RTS instruction popped invalid address from stack: Address above code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+      return;
+    }
   }
+  reportBranch(M68K_IP);
+  M68K_NEXTIP = candidateIP;
 }
 
 

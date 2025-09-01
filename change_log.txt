@@ -1,6 +1,7 @@
 01/09/2025
 ==========
 - Show latest CPU read & write when tracing
+- Better handling of stack errors when RTS pops an invalid address
 
 12/08/2025
 ==========
