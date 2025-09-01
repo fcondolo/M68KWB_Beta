@@ -254,47 +254,71 @@ function xbios_setcolor() {
     return null;
 }
 
-function ST_Trap(_arg) {
+function ST_Trap_LDOS() {
+    let ptr = regs.a[0];
+    let str = "";
+    let len = 0;
+    while(true) {
+        let v = MACHINE.getRAMValue(ptr, 1, false);
+        if (v == 0) break;
+        str += String.fromCharCode(v);
+        len++;
+        ptr++;
+        if (len > 100) break;
+    }
+    debug("TRAP #0, LDOS ERROR: " + str);
+}
+
+
+function ST_Trap_Gemdos() {
+    let r = MACHINE.getRAMValue(regs.a[7], 2, false); // fetch argument
+    switch (r) {
+        case 6 : return gemdos_rawconio();
+        case 32 : return null;  // set supervisor
+        case 68 : return gemdos_mxalloc();
+        case 72 : return gemdos_malloc();
+        default: console.error("gemdos call: function #" + r + " is not supported, sorry!"); break; 
+    }
+}
+
+function ST_Trap_Xbios() {
     // see: https://st-news.com/issues/st-news-volume-1-compendium/features/xbios-functions-i/
-    if (_arg == 14) { // xbios call
-        let r = MACHINE.getRAMValue(regs.a[7], 2, false); // fetch argument
-        switch (r) {
-            case 0 : return null; // "initmous" ==> mouse is not emulated
-            case 1 : return xbios_ssbrk();
-            case 2 : return xbios_physbase();
-            case 3 : return xbios_logbase();
-            case 4 : return xbios_getrez();
-            case 5 : return xbios_setscreen();
-            case 6 : return xbios_setpalette();
-            case 7 : return xbios_setcolor();
-            case 8 :
-            case 9 :
-            case 10 :
-            case 11 :
-                regs.d[0] = -1; // all floppy calls will return "floppy general error"
-            return null;
-            case 37: {
-                let com = "xbios call #37 (wait vbl). Sorry, this one is not yet supported. As a work around, you can install a vbl routine using vector $70.w";
-                debug(com);
-                console.error(com);
-            }
-            return null;
-            default: console.error("xbios call: function #" + r + " is not supported, sorry!"); break; 
-        }    
-    } else if (_arg == 1) { // gemdos call
-        let r = MACHINE.getRAMValue(regs.a[7], 2, false); // fetch argument
-        switch (r) {
-            case 6 : return gemdos_rawconio();
-            case 32 : return null;  // set supervisor
-            case 68 : return gemdos_mxalloc();
-            case 72 : return gemdos_malloc();
-            default: console.error("gemdos call: function #" + r + " is not supported, sorry!"); break; 
-        }    
+    let r = MACHINE.getRAMValue(regs.a[7], 2, false); // fetch argument
+    switch (r) {
+        case 0 : return null; // "initmous" ==> mouse is not emulated
+        case 1 : return xbios_ssbrk();
+        case 2 : return xbios_physbase();
+        case 3 : return xbios_logbase();
+        case 4 : return xbios_getrez();
+        case 5 : return xbios_setscreen();
+        case 6 : return xbios_setpalette();
+        case 7 : return xbios_setcolor();
+        case 8 :
+        case 9 :
+        case 10 :
+        case 11 :
+            regs.d[0] = -1; // all floppy calls will return "floppy general error"
+        return null;
+        case 37: {
+            let com = "xbios call #37 (wait vbl). Sorry, this one is not yet supported. As a work around, you can install a vbl routine using vector $70.w";
+            debug(com);
+            console.error(com);
+        }
+        return null;
+        default: console.error("xbios call: function #" + r + " is not supported, sorry!"); break; 
     }
-    else {
-        console.error("TRAP: argument #" + _arg + " is not supported, sorry! Only xbios and gemdos calls (TRAP #1 and #14) are supported.");
+}
+
+function ST_Trap(_arg) {
+    switch(_arg) {
+        case 0 : ST_Trap_LDOS(); break;
+        case 1 : ST_Trap_Gemdos(); break;
+        case 14: ST_Trap_Xbios(); break;
+        default:
+            console.error("TRAP #" + _arg + " is not supported, sorry!");
+        break;
     }
-    return null; 
+    return null;
 }
 
 

@@ -897,7 +897,7 @@ function DEBUGGER_AfterInstr() {
     DEBUGGER_saveReg[18] = regs.z;
     DEBUGGER_saveReg[19] = regs.v;
     DEBUGGER_saveReg[20] = regs.c;
-    }
+  }
 }
 
 function DEBUGGER_strToByte(_b) {
@@ -1604,6 +1604,8 @@ function onRegDataClicked(_index) {
 }
 
 var DEBUGGER_lastUpdLine = -1;
+
+
 function DEBUGGER_update(_force, _showNextIntr = true) {
   if (!CODERPARSER_SINGLETON || !MYFX)
     return; // in case keys are pressed beore the fx is loaded
@@ -1640,16 +1642,39 @@ function DEBUGGER_update(_force, _showNextIntr = true) {
         if ((DEBUGGER_lastJSExecLog != null) && (curLine.filtered == 'ILLEGAL')) {
           str += DEBUGGER_lastJSExecLog + '<br><hr>';  
         }
-        str += 'tracing, next: ' + curLine.filtered;
+        if (LAST_GETARG.length > 0) {
+          str += "last reads: ";
+          for (let rv = 0; rv < LAST_GETARG.length; rv++) {
+            str += LAST_GETARG[rv];
+            if (rv < LAST_GETARG.length - 1)
+              str += ", ";
+          }
+          str += "<br>";
+        }
+        if (LAST_SETARG.length > 0) {
+          str += "last writes: ";
+          for (let rv = 0; rv < LAST_SETARG.length; rv++) {
+            str += LAST_SETARG[rv];
+            if (rv < LAST_SETARG.length - 1)
+              str += ", ";
+          }
+          str += "<br>";
+        }
+        str += 'Next: ' + curLine.filtered;
         if (DEBUGGER_AdditionalDbgMsg.length > 0) {
           str += "<br>" + DEBUGGER_AdditionalDbgMsg;
         }
+
         ShowTracingLog(str);
         str += '<br><hr>';
+        LAST_GETARG = [];
+        LAST_SETARG = [];
       }
         
     }  
   } else {
+    LAST_GETARG = [];
+    LAST_SETARG = [];
     str += 'running<hr>';
     HideTracingLog();
     elm.innerHTML = str;

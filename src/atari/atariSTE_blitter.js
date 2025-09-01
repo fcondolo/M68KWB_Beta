@@ -62,7 +62,7 @@ struct _BLITTER_STRUCT{
         },
         setHop(_v) {
           if (_v<0 || _v>3)
-            debug("blitter: bad HOP");
+            debug("blitter: bad HOP. Should be 0,1,2 or 3 but given: " + _v);
           this.U8Buf[0] = _v;
         },
         getOp() {

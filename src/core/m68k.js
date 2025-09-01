@@ -30,6 +30,8 @@ var CPU_DBG_WRITE_ALLOW_END = 9999999;
 var CPU_DBG_WRITE_FORBID_START = -1;
 var CPU_DBG_WRITE_FORBID_END = -1;
 var CPU_LAST_INTERRUPT_TIME = 0;
+var LAST_GETARG = [];
+var LAST_SETARG = [];
 var M68K_IP = 0;
 var M68K_NEXTIP = 0;
 var M68K_PREVIP = 0;
@@ -1556,6 +1558,7 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
       ret.value = label.codeSectionOfs & mask;
     }
     else runtimeError68k("could not solve arg address (label not found?)");
+    if (DEBUGGER_tracing) LAST_GETARG.push("error");
     return ret;
   }
   switch (_arg.type) {
@@ -1588,6 +1591,7 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
     default:
       if (!isNaN(_arg.isLabelIndex)) {
         ret.value = MACHINE.getRAMValue(CODERPARSER_SINGLETON.labels[_arg.isLabelIndex].dcData + _memOfs, _size, false);
+    if (DEBUGGER_tracing) LAST_GETARG.push(_arg.str + "= $" + ret.value.toString(16));
         return ret;
       }
       debugger;
@@ -1595,12 +1599,14 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
       break;
   }
 
+  if (DEBUGGER_tracing) LAST_GETARG.push(_arg.str + "= $" + ret.value.toString(16));
   return ret;
 }
 
 function setArg(_arg, _value, _size, _signed, _ofs) {
   // if (_signed)
    // debugger; // at this stage, everything should be unsigned. decoding of signed/unsigned should be in calling instruction
+  if (DEBUGGER_tracing) LAST_SETARG.push(_arg.str + "= $" + _value.toString(16));
   let ret = {};
   let mask = 0;
   switch (_size) {
@@ -2840,7 +2846,11 @@ async function execCPU() {
   MYFX.updateInvokedAsm = true;
   let WATCHDOG = 0;
   while (M68K_IP < MACHINE.ram.length) {
-    if (MACHINE.stop) return;
+    if (MACHINE.stop) {
+      LAST_GETARG = [];
+      LAST_SETARG = [];
+      return;
+    }
     regs.PC = M68K_IP;
     let line = null;
     let lineIndex = ASMBL_ADRSTOLINE[M68K_IP];
@@ -2859,6 +2869,8 @@ async function execCPU() {
         }
         runtimeError68k(errStr);
         MACHINE.stop = true;
+        LAST_GETARG = [];
+        LAST_SETARG = [];
         return;
       }
     } else {
@@ -2918,6 +2930,8 @@ async function execCPU() {
       const out = line.call(line);
       if (MACHINE.forceExitAsm) {
         MACHINE.forceExitAsm = false;
+        LAST_GETARG = [];
+        LAST_SETARG = [];
         return;
       }
 
@@ -2954,12 +2968,16 @@ async function execCPU() {
               console.error(line.getFailString("interrupt state but not in super mode"));
               debugger;
             }
+            LAST_GETARG = [];
+            LAST_SETARG = [];
             return;
           }
           else if (DEBUGGER_tracing && !DEBUGGER_canStep && !DEBUGGER_runTillIP) {
             await canExecuteNextInstr();
           }
           alert("RTS + out = " + out);
+          LAST_GETARG = [];
+          LAST_SETARG = [];
           return;
         }
         runtimeError68k(out);
@@ -2967,6 +2985,10 @@ async function execCPU() {
     } 
     if (DEBUGGER_tracing)
       DEBUGGER_AfterInstr();
+    else {
+      LAST_GETARG = [];
+      LAST_SETARG = [];
+    }
     
     if (DEBUGGER_paranoid)
       checklocks(line);
