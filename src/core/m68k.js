@@ -1769,7 +1769,9 @@ function MOVE_B(_instr) {
   let res = setArg(_dest, getArg(_source, 1, false).value, 1, false);
   if (res.err) return res.err;
 
-  flgLogical(res.val, SIGN_BIT_8)
+  const isAdReg = (_dest.type == 'reg') && (_dest.tab == regs.a);
+  if (!isAdReg) // flags not updated when writing to address register
+    flgLogical(res.val, SIGN_BIT_8)
   return ret;
 }
 
@@ -1781,7 +1783,9 @@ function MOVE_W(_instr) {
   let res = setArg(_dest, getArg(_source, 2, false).value, 2, false);
   if (res.err) return res.err;
 
-  flgLogical(res.val, SIGN_BIT_16)
+  const isAdReg = (_dest.type == 'reg') && (_dest.tab == regs.a);
+  if (!isAdReg) // flags not updated when writing to address register
+    flgLogical(res.val, SIGN_BIT_16)
   return ret;
 }
 
@@ -1793,7 +1797,9 @@ function MOVE_L(_instr) {
   let res = setArg(_dest, getArg(_source, 4, false, _source.isFetchingCodeLabel).value, 4, false);
   if (res.err) return res.err;
 
-  flgLogical(res.val, SIGN_BIT_32)
+  const isAdReg = (_dest.type == 'reg') && (_dest.tab == regs.a);
+  if (!isAdReg) // flags not updated when writing to address register
+    flgLogical(res.val, SIGN_BIT_32)
   return ret;
 }
 
@@ -1804,7 +1810,10 @@ function MOVEA_X(_instr) {
   let val = getArg(_source, _instr.instrSize, false, _source.isFetchingCodeLabel).value;
   _dest.tab[_dest.ind] = val;
   if (_instr.instrSize == 2) I_EXT_32(_dest.tab, _dest.ind);
-  flgLogical(val, SIGN_BIT_32)
+ 
+  const isAdReg = (_dest.type == 'reg') && (_dest.tab == regs.a);
+  if (!isAdReg) // flags not updated when writing to address register
+    flgLogical(val, SIGN_BIT_32)
   return ret;
 }
 
