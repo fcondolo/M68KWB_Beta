@@ -257,10 +257,11 @@ function lock(_reg, _mask, _reason) {
 function checklocks(_line = null) {
   for (let i = 0; i < 8; i++) {
     if (lockDataA[i]) {
-      if ((regs.a[i] & lockDataA[i].mask) != lockDataA[i].val) {
+      const v = regs.a[i] & lockDataA[i].mask;
+      if (v != lockDataA[i].val) {
         const immune = (_line && _line.isErrorImmune) ? true : false;
         if (immune) {
-          lockDataA[i].val = regs.a[i] & lockDataA[i].mask; // update with new value
+          lockDataA[i].val = v; // update with new value
         } else {
           if (lockDataA[i].reason)
             debug('sorry, register A' + i + ' is locked for: ' + lockDataA[i].reason);
@@ -270,10 +271,11 @@ function checklocks(_line = null) {
       }
     }
     if (lockDataD[i]) {
-      if (regs.d[i] & lockDataD[i].mask != lockDataD[i].val) {
+      const v = regs.d[i] & lockDataD[i].mask;
+      if (v != lockDataD[i].val) {
         const immune = (_line && _line.isErrorImmune) ? true : false;
         if (immune) {
-          lockDataD[i].val = regs.d[i] & lockDataA[i].mask;  // update with new value
+          lockDataD[i].val = v;  // update with new value
         } else {
           if (lockDataD[i].reason)
             debug('sorry, register D' + i + ' is locked for: ' + lockDataD[i].reason);
