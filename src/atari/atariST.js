@@ -474,30 +474,32 @@ function ST_CheckBlitterStart(_index, _value) {
     }
 }
 
+function ST_CheckSoundStart(_index, _value) {
+    if ((_index == SND_DMACTRL-ST_CUSTOM_START)||(_index == SND_DMACTRL-ST_CUSTOM_START+1)) {
+        if (FX_INFO.hasAudio)
+            ST_sound_onDMAControl(_value);
+    }
+}
+
 
 function ST_setCustom_B(_index, _value) {
 	ST_customregs[_index] = _value;
     ST_CheckBlitterStart(_index, _value);
+    ST_CheckSoundStart(_index, _value);
 }
 
 function ST_setCustom_W(_index, _value, _trigger = true) {
-    if (_trigger) {
-        switch (_index) {
-            case SND_DMACTRL-ST_CUSTOM_START:
-                if (FX_INFO.hasAudio)
-                    ST_sound_onDMAControl(_value);
-            break;
-            default:
-            break;
-        }     
-    }
     const hi = (_value>>>8)&255;
     const lo = _value&255;
 	ST_customregs[_index] = hi;
 	ST_customregs[_index + 1] = lo;
     // we want the word to be fully written in memory before the ST reacts and triggers anything
-    ST_CheckBlitterStart(_index, hi);
-    ST_CheckBlitterStart(_index + 1, lo);
+    if (_trigger) {
+        ST_CheckBlitterStart(_index, hi);
+        ST_CheckBlitterStart(_index + 1, lo);
+        ST_CheckSoundStart(_index, hi);
+        ST_CheckSoundStart(_index + 1,lo);
+    }
 }
 
 function ST_setCustom_L(_index, _value) {
@@ -514,6 +516,10 @@ function ST_setCustom_L(_index, _value) {
     ST_CheckBlitterStart(_index + 1, v2);
     ST_CheckBlitterStart(_index + 2, v3);
     ST_CheckBlitterStart(_index + 3, v4);
+    ST_CheckSoundStart(_index, v1);
+    ST_CheckSoundStart(_index + 1, v2);
+    ST_CheckSoundStart(_index + 2, v3);
+    ST_CheckSoundStart(_index + 3, v4);
 }
 
 function ST_custom_update() {

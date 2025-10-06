@@ -15,7 +15,10 @@ class Audio {
 
   restart(){
     let t = this;
-    if (t.source != null) t.source.stop();
+    if (t.source != null) {
+      t.source.stop();
+      t.source.disconnect();
+    }
   }
 
   wavToByteArray(path) {
@@ -129,10 +132,13 @@ byteArrayToBuffer(_array, _samplesPerSec, _channelsCount = 1) {
 
   playBuffer(_buf) {
     let t = this;
+    if (t.source != null) {
+      t.source.stop();
+      t.source.disconnect();
+    }
     // Get an AudioBufferSourceNode.
     // This is the AudioNode to use when we want to play an AudioBuffer
-    if (t.source == null)
-      t.source = t.audioCtx.createBufferSource();
+    t.source = t.audioCtx.createBufferSource();
     // Set the buffer in the AudioBufferSourceNode
     t.source.buffer = _buf;
     // Connect the AudioBufferSourceNode to the

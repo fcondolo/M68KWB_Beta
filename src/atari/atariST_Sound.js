@@ -36,6 +36,7 @@ function ST_sound_onDMAControl(_newValue) {
 			break; // DMA off ==> reset current sound pointer
 			case 1 :
 			case 2 :
+			case 3 :
 				let baseAdrs_hi = ST_getCustomFromPtr_W(SND_FRMBASEADRS_HI);
 				baseAdrs_hi &= 0b00111111;
 				let baseAdrs_mid = ST_getCustomFromPtr_W(SND_FRMBASEADRS_MID);

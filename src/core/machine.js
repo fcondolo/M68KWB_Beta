@@ -436,6 +436,15 @@ class M68K_Machine {
             return regs.a[7] >= t.endUserStack;
         }
     }
+
+    isVBLAllowed() {
+        switch (FX_INFO.platform) {
+            case "OCS" : return true;
+            case "ST" : return regs.sr != $2700;
+            case "STE" : return regs.sr != $2700;
+        }
+        return true;
+    }
     
     getResolution() {
         let w,h;

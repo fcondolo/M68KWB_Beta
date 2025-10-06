@@ -144,17 +144,21 @@ class CodeParser {
     if (!t.startPass()) return false;
     t.showCompilMsg("processing EQU...");
     let processLst = t.list_EQU();
+
+  if (!t.stopGlobalCompilation) {
     for (let passIt = 0; passIt < max_pass; passIt++) {
       if (passIt == max_pass - 1)
         t.lastPass = true;
       if (t.process_EQU(processLst)) break;
     }
+  }
 
 
-    // process conditional compilation directives, right after EQU as it may rely on it
-    if (!t.startPass()) return false;
-    t.showCompilMsg("processing conditional compilation...");
-    t.process_conditionalComp();
+
+  // process conditional compilation directives, right after EQU as it may rely on it
+//    if (!t.startPass()) return false;
+//    t.showCompilMsg("processing conditional compilation...");
+//    t.process_conditionalComp();
 
     // process RS.x
     if (!t.startPass()) return false;
@@ -337,19 +341,21 @@ class CodeParser {
 
   getConditionalComp(_instr) {
     switch (_instr) {
-        case 'IFEQ': return {f:eval_ifeq};
-        case 'IFNE': return {f:eval_ifne};
-        case 'IFD': return {f:eval_ifd};
-        case 'IFND': return {f:eval_ifnd};
-        case 'IFNC': return {f:eval_ifnc};
-        case 'IFGE': return {f:eval_ifge};
-        case 'IFGT': return {f:eval_ifgt};
-        case 'IFLE': return {f:eval_ifle};
-        case 'IFLT': return {f:eval_iflt};
+        case 'IFEQ': return {type:'start', f:eval_ifeq};
+        case 'IFNE': return {type:'start', f:eval_ifne};
+        case 'IFD': return {type:'start', f:eval_ifd};
+        case 'IFND': return {type:'start', f:eval_ifnd};
+        case 'IFNC': return {type:'start', f:eval_ifnc};
+        case 'IFGE': return {type:'start', f:eval_ifge};
+        case 'IFGT': return {type:'start', f:eval_ifgt};
+        case 'IFLE': return {type:'start', f:eval_ifle};
+        case 'IFLT': return {type:'start', f:eval_iflt};
+        case 'ELSE': return {type:'mid'};
+        case 'ENDC': return {type:'end'};
+        case 'ENDIF': return {type:'end'};
         default: return null;
     }
   }
-
 
     showParsingErrors() {
     let t = this;
@@ -978,6 +984,10 @@ class CodeParser {
           align = 2;
         }
           let adrs = MACHINE.allocRAM(ln.attachedLabel.dcLen, 1, lblPrefix+ln.filtered);
+          if (adrs == 0) {
+            this.stopGlobalCompilation = true;
+            return ln.Failed("not enough RAM");            
+          }
       //  console.log("allocating " + ln.attachedLabel.dcLen + " bytes for " + ln.attachedLabel.label + " at " + adrs);
         if (ASSEMBLER_CONFIG.check_dc_align) {
           if ((align > 1) && ((adrs % 2) !== 0)) {
@@ -1177,16 +1187,67 @@ class CodeParser {
     c.splice(i, 0, { name: _name, value: Math.floor(_value), path: _ln.path, line: _ln.line });
   }
 
+
+  // t.condCompLst[]
+  // entries are: {.start, .mid, .end} .mid is optional, handling 'ELSE' statements
+  // each entry contains:
+  // ==> .line : line index in CODEPARSER.strings.lines
+  // ==> .type : 'equ','start', 'mid' or 'end'
+  // ==> .f: function to execute to evaluate 'start' condition
+  // ==> .processed : already done, don't re-process
   list_EQU() {
     let t = this;
     let lst = [];
+    t.condCompLst = [];
     const lnCount = t.strings.lines.length;
     for (let i = 0; i < lnCount; i++) {
       let ln = t.strings.lines[i];
       const wrd1 = ln.readNextWord();
-      if (t.getConditionalComp(wrd1)) {
-          lst.push({cond:i});
-          ln.ofs = 0;
+      let condComp = t.getConditionalComp(wrd1);
+      let found;
+      if (condComp) {
+          condComp.line = i;
+          switch (condComp.type) {
+            case 'start':
+              t.condCompLst.push({start:condComp});
+              lst.push({cond:i});
+            break;
+            case 'mid':
+              found = false;
+              for (let j = t.condCompLst.length-1; j >= 0; j--) {
+                if (t.condCompLst[j].start.type == 'start' && !t.condCompLst[j].end) {
+                  if (t.condCompLst[j].mid) {
+                    ln.Failed("multiple ELSE statements");
+                    this.stopGlobalCompilation = true;
+                    return [];
+                  }
+                  found = true;
+                  t.condCompLst[j].mid = condComp;
+                  break;
+                }
+              }
+              if (!found) {
+                ln.Failed("can't find block start related to this line");
+                this.stopGlobalCompilation = true;
+                return [];
+              }
+            break;
+            case 'end':
+              found = false;
+              for (let j = t.condCompLst.length-1; j >= 0; j--) {
+                if (t.condCompLst[j].start.type == 'start' && !t.condCompLst[j].end) {
+                  found = true;
+                  t.condCompLst[j].end = condComp;
+                  break;
+                }
+              }
+              if (!found) {
+                ln.Failed("can't find block start related to this line");
+                this.stopGlobalCompilation = true;
+                return [];
+              }
+            break;
+          }
           continue;
       }
       const wrd2 = ln.readNextWord();
@@ -1194,34 +1255,99 @@ class CodeParser {
         if (ASSEMBLER_CONFIG.no_space_before_EQU) {
           if (ln.isSpace(ln.text[0])) { // ln.text, not ln.filtered because filtered already removed heading spaces
             ln.Failed("found space at the beginning of the line, but 'no_space_before_EQU' option is set in config.js.");
-            return lst;
+            this.stopGlobalCompilation = true;
+            return [];
           }
         }
         ln.isInstr = false;
         lst.push({w:wrd1, v:i, ofs:ln.ofs, cond:-1});
+        t.condCompLst.push({start:{type:'equ',w:wrd1, v:i, ofs:ln.ofs, cond:-1}, end:{type:'equ'}});
       }
     }
+    
     return lst;
   }
 
+
+
   process_EQU(_equlst) {
+  // t.condCompLst[]
+  // ==> .processed : already done, don't re-process
+  // entries are: {.start, .mid, .end} .mid is optional, handling 'ELSE' statements
+  // each entry contains:
+  // ==> .line : line index in CODEPARSER.strings.lines
+  // ==> .type : 'equ','start', 'mid' or 'end'
+  // ==> .f: function to execute to evaluate 'start' condition
     let t = this;
+    _equlst = t.condCompLst;
     let allDone = true;
     const lnCount = _equlst.length;
     for (let i = 0; i < lnCount; i++) {
-      if (_equlst[i].cond >= 0) {
-        t.process_conditionalComp(_equlst[i].cond);
+      let e = _equlst[i];
+      if (e.processed)
         continue;
-      }
-      let ln = t.strings.lines[_equlst[i].v];
-      if (ln.text[0] != ';') { // line may have been discarded by process_conditionalComp just above
-        let errBhv = PARSE_FAIL_OK;
-        if (t.lastPass) errBhv = PARSE_FAIL_ERROR;
-        ln.ofs = _equlst[i].ofs;
-        const value = ln.readNextNumber(errBhv);
-        if (!isNaN(value)) {
-          t.addConstant(ln, _equlst[i].w, value);
-        } else allDone = false;
+      switch (e.start.type) {
+        case 'equ': {
+          let ln = t.strings.lines[e.start.v];
+          if (ln.text[0] != ';') { // line may have been discarded by process_conditionalComp just above
+            let errBhv = PARSE_FAIL_OK;
+            if (t.lastPass) errBhv = PARSE_FAIL_ERROR;
+            ln.ofs = e.start.ofs;
+            const value = ln.readNextNumber(errBhv);
+            if (!isNaN(value)) {
+              t.addConstant(ln, e.start.w, value);
+              e.processed = true;
+            } else allDone = false;
+          }
+        }
+        break;
+        case 'start': {
+          //console.log("eval: " + t.strings.lines[e.start.line].filtered);
+          e.processed = true;
+          let conditionCode = e.start.f(t.strings.lines[e.start.line]);
+          let needDiscard, startDiscard, endDiscard;
+          if (conditionCode == 1) {
+            needDiscard = false;
+            if (e.mid) {
+              needDiscard = true;
+              startDiscard = e.mid.line + 1;
+              endDiscard = e.end.line;
+            }
+          } else if (conditionCode == 2) {
+              needDiscard = true;
+              startDiscard = e.start.line + 1;
+              endDiscard = e.end.line;
+              if (e.mid) {
+                endDiscard = e.mid.line;
+              }
+          }
+          if (needDiscard) {
+            for (let k = 0; k < lnCount; k++) {
+              if (_equlst[k].start.line >= startDiscard && _equlst[k].start.line < endDiscard) {
+                _equlst[k].processed = true;
+             //console.log("--> discarding: " + t.strings.lines[_equlst[k].start.line].filtered);
+                t.strings.lines[_equlst[k].start.line].makeComment();
+                t.strings.lines[_equlst[k].end.line].makeComment();
+                if (_equlst[k].mid) {
+                  t.strings.lines[_equlst[k].mid.line].makeComment();
+                }
+              }
+            }
+            while (startDiscard < endDiscard) {
+             //console.log("--> discarding: " + t.strings.lines[startDiscard].filtered);
+              t.strings.lines[startDiscard].makeComment();
+              startDiscard++;
+            }
+          }
+          t.strings.lines[e.start.line].makeComment();
+          t.strings.lines[e.end.line].makeComment();
+          if (e.mid) t.strings.lines[e.mid.line].makeComment();
+        }
+        break;
+        default:
+          alert("bad EQU/IFD start type. No further info sorry. Contact Soundy");
+          debugger;
+        break;
       }
     }
     return allDone;
@@ -1378,7 +1504,7 @@ class CodeParser {
       ln.ofs = 0;
       let w = ln.readNextWord();
       if (contitionCode > 0) {
-        if ((contitionCode > 0 ) && (w == 'ELSE')) {
+        if (w == 'ELSE') {
           if (contitionCode == 1) contitionCode = 2;
           else contitionCode = 1;
           ln.isInstr = false;
@@ -1391,11 +1517,11 @@ class CodeParser {
         }
         else {
           if (contitionCode == 2) {
-            ln.text = '; ' + ln.text;
-            ln.filtered = '; ' + ln.filtered;
+            ln.text = ';DISCARDED';//'; ' + ln.text;
+            ln.filtered = ';DISCARDED';//'; ' + ln.filtered;
             ln.isInstr = false;
             ln.jsString = null;
-            ln.filtered = ln.filtered.replace('>JS', '<--');
+            //ln.filtered = ln.filtered.replace('>JS', '<--');
           }
         }
         continue;

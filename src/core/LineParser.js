@@ -754,6 +754,16 @@ class LineParser {
     t.text = "; ==> " + t.text;
     t.isInstr = false;
     t.isLabel = false;
+    t.ofs = 0;
+  }
+
+  discard() {
+    let t = this;
+    t.ofs = 0;
+    t.filtered = "";
+    t.text = "";
+    t.isInstr = false;
+    t.isLabel = false;
   }
 
   readDx() {
