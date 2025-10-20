@@ -36,6 +36,14 @@ testMovem_init:
   ;>JS if (d0.ul != d1.ul) debug("value differ");
   dbra    d7,.testNext
   move.l  testMovem_sp,a7
+
+  move.l  a7,a0
+  move.b  #42,-(sp)
+  ;>JS if (a0.ul != a7.ul+2) debug("stack must remain on even address even for bygte operations");
+  moveq   #0,d0
+  move.b  (sp)+,d0
+  ;>JS if (d0.ul != 42) debug("wrong stack behavior");
+  ;>JS if (a0.ul != a7.ul) debug("stack must remain on even address even for bygte operations");
   rts
 
 testMovem_blop:

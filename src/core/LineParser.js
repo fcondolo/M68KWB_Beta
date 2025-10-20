@@ -956,7 +956,10 @@ class LineParser {
     c--;
     c *= 2;            
     if (t.instrSize == 4) c += 4;
-    t.cycles = t.getArgCycles(t.arg2,  8+c,-1, 12+c, 12+c, 16+c, 16+c, 20+c, 16+c, 20+c, -1, -1,-1);
+    if (t.arg2) // e.g. lsl.w #3,d0
+      t.cycles = t.getArgCycles(t.arg2,  8+c,-1, 12+c, 12+c, 16+c, 16+c, 20+c, 16+c, 20+c, -1, -1,-1);
+    else /// e.g lsl.w (a0)
+      t.cycles = t.getArgCycles(t.arg1,  8+c,-1, 12+c, 12+c, 16+c, 16+c, 20+c, 16+c, 20+c, -1, -1,-1);
     // Name                : Dn   An  (A)  (A)+ -(A) $(A) I(A)  .W   .L  $(P) I(P)  #
     // asl.w #1,*             8   -1   12   12   16   16   20   16   20
   }

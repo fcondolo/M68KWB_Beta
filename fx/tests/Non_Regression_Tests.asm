@@ -1,3 +1,5 @@
   include "testLabels.asm"
   include "testBranches.asm"
   include "testMovem.asm"
+  include "testIFD.asm"
+  include "testShifts.asm"

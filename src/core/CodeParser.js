@@ -543,9 +543,17 @@ class CodeParser {
       }
       if (wrd == "INCLUDE") {
         ln.isInstr = false;
-        let path = ln.readNextWordBetweenQuotes();        
+        let path = ln.readNextWordBetweenQuotes();
         ln.makeComment();
-
+        
+        let upPath = path.toUpperCase();
+        for (let excl = 0; excl < ASSEMBLER_CONFIG.ignoreIncludes.length; excl++) {
+          let upExcl = ASSEMBLER_CONFIG.ignoreIncludes[excl].toUpperCase();
+          if (upPath.includes(upExcl)) {
+            return true;
+          }
+        }
+        
         let pth = t.get_incxx_path(t.incdir+path, FX_INFO.rootPath);
         if (pth.err) {
           ln.Failed(pth.err);
@@ -705,7 +713,10 @@ class CodeParser {
             }
           }
         }
-        t.labels.push({ label: name, index: lnIt, fromFile: ln.path, fromLine: ln.line, dcData: null });
+        if (!t.isValidLabelName(name)) {
+          return ln.Failed("invalid label name: " + name + ". If it's not a label, you probably need to add spaces at the beginning of the line"); 
+        } else
+          t.labels.push({ label: name, index: lnIt, fromFile: ln.path, fromLine: ln.line, dcData: null });
       }
     }
   }
@@ -2318,6 +2329,25 @@ class CodeParser {
       }
       if (line.instrSize < 1 || line.instrSize > 4) line.instrSize = 2;
       line.cycles = 0;
+
+      switch (line.instr) {
+        case 'LSL':
+        case 'LSR':
+        case 'ASL':
+        case 'ASR':
+        case 'ROL':
+        case 'ROR':
+          if (!line.arg2) {
+            if (line.instrSize != 2) {
+              line.Failed("single parameter shifts/rotations are word size only, and effective address param only");
+              return;
+            }
+          }
+        break;
+        default:
+        break;
+      }
+
       switch (line.instr) {
         case 'ADD':
         case 'ADDI':
@@ -2669,5 +2699,28 @@ class CodeParser {
     for (let lnIt = 0; lnIt < lnCount; lnIt++) {
       t.process_executionCallback_oneLine(t.strings.lines[lnIt]);
     }
+  }
+
+  isValidLabelName(name) {
+    switch(name) {
+      case "INCLUDE":
+      case "INCBIN":
+      case "SECTION":
+      case "EVEN":
+      case "DATA_C":
+      case "DATA_F":
+      case "BSS_C":
+      case "BSS_F":
+      case "CODE_C":
+      case "CODE_F":
+      case "CODE_ANY":
+      case "DATA_ANY":
+      case "BSS_ANY":
+      case "XDEF":
+      case "XREF":
+      case "MACRO":
+        return false;
+    }
+    return true;
   }
 }

@@ -1,6 +1,11 @@
 OFFSET EQU 4
 
 testLabels_init:
+  lea     dcbdata+4,a0
+  cmp.l   #dcbdata+4,a0
+  beq     .noerror
+  ;>JS debug();
+.noerror:  
   ; TEST DCB.x, BLK.w
   ;
   lea     dcbdata,a0
@@ -77,3 +82,4 @@ dcbdata:
   blk.b   4,$42
   dcb.w   2
   dc.w    52    ; after dcb data
+

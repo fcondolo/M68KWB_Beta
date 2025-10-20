@@ -745,14 +745,24 @@ function I_ASL_16(_instr) {
   let _dest = _instr.arg2;
   let ret = null;
 
-  let src = getArg(_source, 1, false);
-  if (src.err) { return src.err; }
+  let src,dst,n,d;
 
-  let dst = _dest;
-  var n = src.value & 63;
+  if (_dest) {
+    src = getArg(_source, 1, false);
+    if (src.err) { return src.err; }
+    dst = _dest;
+    n = src.value & 63;
+    d = dst.tab[dst.ind] & 0xffff;
+  } else { // lsl.w <ea>
+    src = {value:1};
+    dst = _source;
+    if (dst.err) { return dst.err; }
+    n = 1;
+    d = getArg(_source,2,false).value;
+  }
+
   _instr.updateShiftCycles(n);
 
-  var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
     var sign = (d & 0x8000) != 0;
     var mask = ~((1 << (16 - n)) - 1) & 0xffff;
@@ -760,7 +770,10 @@ function I_ASL_16(_instr) {
     regs.v = sign ? (d & mask) != mask : (d & mask) != 0;
     //regs.v = (d & mask) != mask && (d & mask) != 0;
     d = ((d << n) & 0xffff) >>> 0;
-    dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    if (_dest)
+      dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    else
+      setArg(_source,d,2,true);
   } else regs.v = regs.c = false;
   regs.n = (d & 0x8000) != 0;
   regs.z = d == 0;
@@ -822,18 +835,30 @@ function I_ASR_16(_instr) {
   let _dest = _instr.arg2;
   let ret = null;
 
-  let src = getArg(_source, 1, false);
-  if (src.err) { return src.err; }
+  let src,dst,n,d;
 
-  let dst = _dest;
+  if (_dest) {
+    src = getArg(_source, 1, false);
+    if (src.err) { return src.err; }
+    dst = _dest;
+    n = src.value & 63;
+    d = dst.tab[dst.ind] & 0xffff;
+  } else { // lsl.w <ea>
+    src = {value:1};
+    dst = _source;
+    if (dst.err) { return dst.err; }
+    n = 1;
+    d = getArg(_source,2,false).value;
+  }
 
-  var n = src.value & 63;
   _instr.updateShiftCycles(n);
-  var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
     d = extWord(d); d = ((d >> n) & 0xffff) >>> 0; //js 32
-    dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    if (_dest)
+      dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    else
+      setArg(_source,d,2,true);
   } else regs.c = false;
   regs.n = (d & 0x8000) != 0;
   regs.z = d == 0;
@@ -896,18 +921,30 @@ function I_LSL_16(_instr) {
   let _dest = _instr.arg2;
   let ret = null;
 
-  let src = getArg(_source, 1, false);
-  if (src.err) { return src.err; }
+  let src,dst,n,d;
 
-  let dst = _dest;
+  if (_dest) {
+    src = getArg(_source, 1, false);
+    if (src.err) { return src.err; }
+    dst = _dest;
+    n = src.value & 63;
+    d = dst.tab[dst.ind] & 0xffff;
+  } else { // lsl.w <ea>
+    src = {value:1};
+    dst = _source;
+    if (dst.err) { return dst.err; }
+    n = 1;
+    d = getArg(_source,2,false).value;
+  }
 
-  var n = src.value & 63;
   _instr.updateShiftCycles(n);
-  var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
     regs.x = regs.c = (d & (1 << (16 - n))) != 0;
     d = ((d << n) & 0xffff) >>> 0;
-    dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    if (_dest)
+      dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    else
+      setArg(_source,d,2,false);
   } else regs.c = false;
   regs.n = (d & 0x8000) != 0;
   regs.z = d == 0;
@@ -968,18 +1005,31 @@ function I_LSR_16(_instr) {
   let _dest = _instr.arg2;
   let ret = null;
 
-  let src = getArg(_source, 1, false);
-  if (src.err) { return src.err; }
+  let src,dst,n,d;
 
-  let dst = _dest;
+  if (_dest) {
+    src = getArg(_source, 1, false);
+    if (src.err) { return src.err; }
+    dst = _dest;
+    n = src.value & 63;
+    d = dst.tab[dst.ind] & 0xffff;
+  } else { // lsl.w <ea>
+    src = {value:1};
+    dst = _source;
+    if (dst.err) { return dst.err; }
+    n = 1;
+    d = getArg(_source,2,false).value;
+  }
 
-  var n = src.value & 63;
+
   _instr.updateShiftCycles(n);
-  var d = dst.tab[dst.ind] & 0xffff;
   if (n) {
     regs.x = regs.c = (d & (1 << (n - 1))) != 0;
     d >>= n;
-    dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    if (_dest)
+      dst.tab[dst.ind] = (dst.tab[dst.ind] & 0xffff0000) | d;
+    else
+      setArg(_source,d,2,false);
   } else regs.c = false;
   regs.n = (d & 0x8000) != 0;
   regs.z = d == 0;
@@ -1574,8 +1624,13 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
     case 'ind':
     case 'adrs': {
       let mem = NaN;
-      let r = _arg // let r = registerFromName(_arg.reg);
-      if (_arg.predecrement) r.tab[r.ind] -= _size;
+      let r = _arg // let r = registerFromName(_arg.reg);      
+      if (_arg.predecrement) {
+        if (r.tab == regs.a && r.ind == 7 && _size == 1)
+          regs.a[7] -= 2; // sp must always be aligned
+        else
+          r.tab[r.ind] -= _size;
+      }
       if (_arg.type == 'adrs')
         mem = _arg.value + _memOfs;
       else
@@ -1587,7 +1642,12 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
         mem += indVal;
       }
       ret.value = MACHINE.getRAMValue(mem,_size,false);      
-      if (_arg.postincrement && getArgAllowPostInc) r.tab[r.ind] += _size;
+      if (_arg.postincrement && getArgAllowPostInc) {
+        if (r.tab == regs.a && r.ind == 7 && _size == 1)
+          regs.a[7] += 2; // sp must always be aligned
+        else
+         r.tab[r.ind] += _size;
+      }
     }
       break;
     default:
@@ -1641,7 +1701,12 @@ function setArg(_arg, _value, _size, _signed, _ofs) {
       break;
     case 'ind': {
       let r = _arg // let r = registerFromName(_arg.reg);
-      if (_arg.predecrement && setArgAllowPredec) r.tab[r.ind] -= _size;
+      if (_arg.predecrement && setArgAllowPredec) {
+        if (r.tab == regs.a && r.ind == 7 && _size == 1)
+          regs.a[7] -= 2; // sp must always be aligned
+        else
+          r.tab[r.ind] -= _size;
+      }
       let mem = r.tab[r.ind];
       if (_arg.disp) mem += _arg.disp;
       if (_arg.indReg) {
@@ -1652,7 +1717,12 @@ function setArg(_arg, _value, _size, _signed, _ofs) {
       if (_ofs)
         mem += _ofs;
       MACHINE.setRAMValue(_value, mem,_size);      
-      if (_arg.postincrement) r.tab[r.ind] += _size;
+      if (_arg.postincrement) {
+        if (r.tab == regs.a && r.ind == 7 && _size == 1)
+          regs.a[7] += 2; // sp must always be aligned
+        else
+          r.tab[r.ind] += _size;
+      }
     }
       break;
     default:
@@ -1933,28 +2003,42 @@ function MOVEM(_instr) {
 
 function ROR(_instr) {
   let ret = null;
-  let amount = getArg(_instr.arg1, _instr.instrSize, false).value & 63;
-  let r = _instr.arg2; // let r = registerFromName(_instr.arg2.reg);
-  _instr.updateShiftCycles(amount&63);
-  switch (_instr.instrSize) {
-    case 1: r.tab[r.ind] = I_ROR_8(amount, r.tab[r.ind]); break;
-    case 2: r.tab[r.ind] = I_ROR_16(amount, r.tab[r.ind]); break;
-    case 4: r.tab[r.ind] = I_ROR_32(amount, r.tab[r.ind]); break;
-    default: return 'unknown instruction';
+
+  if (_instr.arg2) {
+    let amount = getArg(_instr.arg1, _instr.instrSize, false).value & 63;
+    let r = _instr.arg2; // let r = registerFromName(_instr.arg2.reg);
+    _instr.updateShiftCycles(amount);
+    switch (_instr.instrSize) {
+      case 1: r.tab[r.ind] = I_ROR_8(amount, r.tab[r.ind]); break;
+      case 2: r.tab[r.ind] = I_ROR_16(amount, r.tab[r.ind]); break;
+      case 4: r.tab[r.ind] = I_ROR_32(amount, r.tab[r.ind]); break;
+      default: return 'unknown instruction';
+    }
+  } else { // ror.w <ea>
+    _instr.updateShiftCycles(1);
+    let v = getArg(_instr.arg1, 2, false).value;
+    setArg(_instr.arg1, I_ROR_16(1, v), 2, false);
   }
+  
   return ret;
 }
 
 function ROL(_instr) {
   let ret = null;
-  let amount = getArg(_instr.arg1, _instr.instrSize, false) & 63;
-  let r = _instr.arg2; // let r = registerFromName(_instr.arg2.reg);
-  _instr.updateShiftCycles(amount&63);
-  switch (_instr.instrSize) {
-    case 1: r.tab[r.ind] = I_ROL_8(amount, r.tab[r.ind]); break;
-    case 2: r.tab[r.ind] = I_ROL_16(amount, r.tab[r.ind]); break;
-    case 4: r.tab[r.ind] = I_ROL_32(amount, r.tab[r.ind]); break;
-    default: return 'unknown instruction';
+  if (_instr.arg2) {
+    let amount = getArg(_instr.arg1, _instr.instrSize, false).value & 63;
+    let r = _instr.arg2; // let r = registerFromName(_instr.arg2.reg);
+    _instr.updateShiftCycles(amount);
+    switch (_instr.instrSize) {
+      case 1: r.tab[r.ind] = I_ROL_8(amount, r.tab[r.ind]); break;
+      case 2: r.tab[r.ind] = I_ROL_16(amount, r.tab[r.ind]); break;
+      case 4: r.tab[r.ind] = I_ROL_32(amount, r.tab[r.ind]); break;
+      default: return 'unknown instruction';
+    }
+  } else { // rol.w <ea>
+    _instr.updateShiftCycles(1);
+    let v = getArg(_instr.arg1, 2, false).value;
+    setArg(_instr.arg1, I_ROL_16(1, v), 2, false);
   }
   return ret;
 }

@@ -26,6 +26,8 @@ class Non_Regression_Tests {
       {asmInit:"testBranches_init", msg:"Test Branches"},
       {asmInit:"testMovem_init", msg:"Test movem"},
       {asmInit:"testLabels_init", msg:"Test Labels"},
+      {asmInit:"testIFD_init", msg:"Test conditional assembly"},
+      {asmInit:"testshifts_init", msg:"Test shifts"},      
     ];
 
     for (let i = 0; i < t.tests.length; i++) {

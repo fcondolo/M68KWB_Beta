@@ -44,6 +44,11 @@ const ASSEMBLER_CONFIG = {
         //... add your own defines here
     ],
 
+    // list of includes that you want M68KWB to ignore
+    ignoreIncludes : [
+        "ldos_atari.inc"
+    ],
+
     // verify that the destination address is within range when using short branches (e.g. bcc.s, bcc.b)
     check_branch_size : true,
 

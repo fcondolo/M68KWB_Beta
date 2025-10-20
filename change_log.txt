@@ -1,3 +1,9 @@
+20/10/2025
+==========
+- move.b -(sp)/(sp)+ keeps stack aligned (moves stack pointer by 2 bytes)
+- Support single argument shifts and rotations, e.g. LSL.W (a0)
+- Fixed ROL
+
 06/10/2025
 ==========
 - Atari:
