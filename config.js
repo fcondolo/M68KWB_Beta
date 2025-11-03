@@ -44,9 +44,10 @@ const ASSEMBLER_CONFIG = {
         //... add your own defines here
     ],
 
-    // list of includes that you want M68KWB to ignore
-    ignoreIncludes : [
-        "ldos_atari.inc"
+    overrideIncludes : [
+        {override: "ldos_atari.inc", with: null},
+        {override: "ALYFE_PrecalcAPI.i", with: null}
+      //  {override: "ALYFE_PrecalcAPI.i", with: "ALYFE_PrecalcAPI_M68KWB.i"}
     ],
 
     // verify that the destination address is within range when using short branches (e.g. bcc.s, bcc.b)

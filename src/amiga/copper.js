@@ -4,6 +4,7 @@ let wait255Reached = 0;
 let copper_xToWait = 0;
 let copper_yToWait = 0;
 let copperExecMove = 0;	// simulates time taken to execute a MOVE instruction
+let cper_activeList = 0xdff080;
 
 
 function CPER_4digitHex(_s) {
@@ -15,7 +16,7 @@ function CPER_4digitHex(_s) {
 }
 
 function copper_toHTML() {
-	let ptr = AMIGA_getCustomFromPtr_L(0xdff080);
+	let ptr = AMIGA_getCustomFromPtr_L(cper_activeList);
 	if (!ptr) {
 		return "nothing found at $dff080. Please set a copperlist";
 	}
@@ -59,7 +60,7 @@ function copper_toHTML() {
 function copper_onNewFrame() {
 	// Fetch copper list address and reset copper instruction pointer
 	cper_cur = null;
-	cplist = AMIGA_getCustomFromPtr_L(0xdff080);
+	cplist = AMIGA_getCustomFromPtr_L(cper_activeList);
 	if (cplist != 0) {
 		cper_cur = cplist;
 	}
@@ -141,8 +142,8 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 		return false;
 	}
 	else { // move
+		cper_cur += 4; // increment before calling AMIGA_setCustom, because AMIGA_setCustom might execute a copjmp
 		AMIGA_setCustom(word1,word2);
-		cper_cur += 4;
 		if ((bitpane_bplCount < 5) || (_x < DisplayDataFetchFirstPix) || (_x > DisplayDataFetchLastPix))
 			copperExecMove = 8; // See note 5 & tests
 		else if (bitpane_bplCount == 5) {

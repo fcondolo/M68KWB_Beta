@@ -128,6 +128,10 @@ class M68K_Machine {
     }
 
     allocRAM(_bytes, _align = 2, _label = null) {
+        if ((_bytes <= 0) || isNaN(_bytes) || (_bytes == undefined)) {
+            main_Alert("MACHINE.allocRAM: wrong '_bytes' param: " + _bytes);
+            return 0;
+        }
         let t = this;
         while (t.ramIndex % _align !== 0)
             t.ramIndex++;
@@ -345,8 +349,18 @@ class M68K_Machine {
         let r;
         let r32 = new Uint32Array(1); // avoid having negative numbers when grabbing 32 bits value with highet bit set
         _at &= 0xffffff; // 24 bit addressing
-        if (!M68K_CURLINE || !M68K_CURLINE.isErrorImmune)
-            t.chkMem(_at, _size, ALLOW_READ);
+        if (!M68K_CURLINE || !M68K_CURLINE.isErrorImmune) {
+            if (!t.chkMem(_at, _size, ALLOW_READ)) {
+                if (!DEBUGGER_insideInvoke) {
+                    if (CODERPARSER_SINGLETON)
+                        CODERPARSER_SINGLETON.stopGlobalCompilation = true;                    
+                    const msg = "Error seems to come from Javascript, or while assembling code, not asm execution. ";
+                    alert(msg);
+                    debugger;
+                    throw new Error(msg);
+                }
+            }
+        }
         DEBUGGER_lastReadAdrs = _at;
         if (CPU_isCustomAdrs(_at)) {
             switch (_size) {
@@ -396,8 +410,18 @@ class M68K_Machine {
                 debugger;
             }
         }
-        if (!M68K_CURLINE || !M68K_CURLINE.isErrorImmune)
-            t.chkMem(_at, _size, ALLOW_WRITE, _v);
+        if (!M68K_CURLINE || !M68K_CURLINE.isErrorImmune) {
+            if (!t.chkMem(_at, _size, ALLOW_WRITE, _v)) {
+                if (!DEBUGGER_insideInvoke) {
+                    if (CODERPARSER_SINGLETON)
+                        CODERPARSER_SINGLETON.stopGlobalCompilation = true;
+                    const msg = "Error seems to come from Javascript, or while assembling code, not asm execution. ";
+                    debugger;
+                    alert(msg);
+                    throw new Error(msg);
+                }
+            }
+        }
         if (TIME_MACHINE) {
             switch (_size) {
                 case 1: TIME_MACHINE.onMemoryWrite(_at, t.ram[_at], 1); break;

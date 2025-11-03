@@ -547,10 +547,15 @@ class CodeParser {
         ln.makeComment();
         
         let upPath = path.toUpperCase();
-        for (let excl = 0; excl < ASSEMBLER_CONFIG.ignoreIncludes.length; excl++) {
-          let upExcl = ASSEMBLER_CONFIG.ignoreIncludes[excl].toUpperCase();
+        for (let excl = 0; excl < ASSEMBLER_CONFIG.overrideIncludes.length; excl++) {
+          let upExcl = ASSEMBLER_CONFIG.overrideIncludes[excl].override.toUpperCase();
           if (upPath.includes(upExcl)) {
-            return true;
+            if (ASSEMBLER_CONFIG.overrideIncludes[excl].with) {
+              path = upPath.replace(upExcl, ASSEMBLER_CONFIG.overrideIncludes[excl].with);
+              break;
+            }
+            else
+              return true; // no "with" ==> just ignore this include
           }
         }
         
@@ -994,6 +999,10 @@ class CodeParser {
           MACHINE.makeDataEven();
           align = 2;
         }
+          if ((ln.attachedLabel.dcLen <= 0) || isNaN(ln.attachedLabel.dcLen) || (ln.attachedLabel.dcLen == undefined)) {
+            this.stopGlobalCompilation = true;
+            return ln.Failed("can't evaluate the bytes count to alloc");
+          }
           let adrs = MACHINE.allocRAM(ln.attachedLabel.dcLen, 1, lblPrefix+ln.filtered);
           if (adrs == 0) {
             this.stopGlobalCompilation = true;

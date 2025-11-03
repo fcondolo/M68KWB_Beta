@@ -16,6 +16,7 @@ const chain_fx = [
   {class: "FX_StarFieldv2", platform: "OCS"},
   {class: "FX_Heroes", platform: "OCS"},
   {class: "TestCopper", platform: "OCS"},
+  {class: "CopperJelly", platform: "OCS"},
   {class: "AtariSTe_BlitterFill", platform: "STE"},
   {class: "AtariVBL", platform: "STE"},
   {class: "tut_Atari_HBL", platform: "STE"},

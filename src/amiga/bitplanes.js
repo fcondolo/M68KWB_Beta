@@ -10,6 +10,8 @@ let BPL_R, BPL_G, BPL_B;
 let DMA_Bitplane = false;
 let DMA_Copper = false;
 let isHAMMode = false;
+let isDualPlayfield = false;
+let PF2PRI = false;
 
 function useColorIndex(_index) {
 	const color = AMIGA_customregs[COLOR0 / 2 + _index]; // tap directly into table to avoid calling AMIGA_getCustom() once per pixel...
@@ -81,10 +83,20 @@ function bitplanes_updateAllValues() {
 	bitplaneHScroll[5] = bitplaneHScroll[1];
 
 	let BPLCON0_Val = AMIGA_customregs[BPLCON0/2];
+	let BPLCON2_Val = AMIGA_customregs[BPLCON2/2];
+	if ((BPLCON2_Val & 1<<6) != 0)
+		PF2PRI = true;
+	else
+		PF2PRI = false;
+
 	bitpane_bplCount = (BPLCON0_Val >>> 12) & 7;
 	if ((BPLCON0_Val & 1<<11) != 0) {
 		isHAMMode = true;
 	}
+	if ((BPLCON0_Val & 1<<10) != 0) {
+		isDualPlayfield = true;
+	}
+	
 }
 
 function bitplanes_update() {
@@ -163,7 +175,9 @@ function bitplanes_update() {
 				data[d++] = 255;
 			}
 			else { // update bitplanes
-				let colorIndex = 0;
+				let colorIndex = new Uint8Array(2);
+				let pfIndex = 0; // playfieldIndex
+				let colShift = 0;
 				if (isHAMMode) {
 				} else { // NOT HAM
 					for (let curBpl = 0; curBpl < bitpane_bplCount; curBpl++) {
@@ -175,14 +189,36 @@ function bitplanes_update() {
 							//if (pixindex >= 0 && pixindex < bplHorizByteCount*PLAYFIELD_LINES_COUNT) {
 							let data = MACHINE.ram[bitplane + pixindex] & mask;
 							if (data != 0) data = 1;
-							colorIndex |= bplW[curBpl] * (data << curBpl);
+							if (isDualPlayfield) {
+								pfIndex = curBpl & 1;
+								colShift = curBpl >>> 1;
+							} else colShift = curBpl;
+							colorIndex[pfIndex] |= bplW[curBpl] * (data << colShift);
 							//} else 
 							//	debugger;
 						}
 					}	
 				}
 				bplReadX++;
-				useColorIndex(colorIndex);
+				if (isDualPlayfield){
+					if (PF2PRI) {
+						if (colorIndex[1] > 0)
+							useColorIndex(colorIndex[1]+8);
+						else if (colorIndex[0] > 0)
+							useColorIndex(colorIndex[0]);
+						else
+							useColorIndex(0);
+					} else {
+						if (colorIndex[0] > 0)
+							useColorIndex(colorIndex[0]);
+						else if (colorIndex[1] > 0)
+							useColorIndex(colorIndex[1]+8);
+						else
+							useColorIndex(0);
+					}
+				}
+				else
+					useColorIndex(colorIndex[0]);
 				data[d++] = BPL_R;
 				data[d++] = BPL_G;
 				data[d++] = BPL_B;

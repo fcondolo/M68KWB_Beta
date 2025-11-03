@@ -32,6 +32,8 @@ const BLTBDAT =  0x072;
 const BLTADAT =  0x074;
 const COP1LCH =	 0x080;
 const COP1LCL =	 0x082;
+const COPJMP1 =	 0x088;
+const COPJMP2 =	 0x08A;
 const DIWSTRT =  0x08E;
 const DIWSTOP =  0x090;
 const DDFSTRT =  0x092;
@@ -253,6 +255,17 @@ function AMIGA_onCustomWrite(_index, _value) {
 				}
 			}
 		}
+		break;
+		case COPJMP1: 
+			cper_activeList = 0xdff080;
+			cplist = AMIGA_getCustomFromPtr_L(cper_activeList);
+			cper_cur = cplist;
+		break;
+		case COPJMP2: 
+			cper_activeList = 0xdff084;
+			cplist = AMIGA_getCustomFromPtr_L(cper_activeList);
+			cper_cur = cplist;
+		break;
 	}
 }
 
