@@ -1469,56 +1469,6 @@ SINUS2	DC.W	 43
 	DC.W	 75 
 	DC.W	 76 
 	DC.W	 76 
-text:		
-	dc.b	'SIMPLE',1 ;       * simple textroutine *",1
-	dc.b	1
-	dc.b	'flashtro rulez!!',0
-
-chartab: 	
-	dc.b 	'abcdefghijklmnopqrstuvwxyz!'	; chars as they appear
-	dc.b 	'0123456789*-. '		; in our char table
-
-chars:		dc.b	$00,$7C,$E6,$E6,$FE,$E6,$E6,$06	;"A"
-		dc.b	$00,$FC,$E6,$FC,$E6,$E6,$FC,$00	;"B"
-		dc.b	$00,$7E,$E6,$E0,$E0,$E6,$7E,$00	;"C"
-		dc.b	$00,$FC,$E6,$E6,$E6,$E6,$FC,$00	;"D"
-		dc.b	$00,$FE,$E6,$F8,$E0,$E6,$FE,$00	;"E"
-		dc.b	$00,$FE,$E6,$F8,$E0,$E0,$E0,$E0	;"F"
-		dc.b	$00,$7C,$E0,$EE,$E6,$E6,$7E,$00	;"G"
-		dc.b	$E0,$E6,$E6,$FE,$E6,$E6,$E6,$06	;"H"
-		dc.b	$00,$FE,$38,$38,$38,$38,$FE,$00	;"I"
-		dc.b	$0E,$0E,$0E,$0E,$0E,$CE,$7C,$00	;"J"
-		dc.b	$E0,$EE,$FC,$F8,$FC,$EE,$E6,$06	;"K"
-		dc.b	$E0,$E0,$E0,$E0,$E0,$E6,$FE,$00	;"L"
-		dc.b	$00,$C6,$EE,$FE,$F6,$E6,$E6,$06	;"M"
-		dc.b	$06,$C6,$E6,$F6,$FE,$EE,$E6,$E0	;"N"
-		dc.b	$00,$7C,$E6,$E6,$E6,$E6,$7C,$00	;"O"
-		dc.b	$00,$FC,$E6,$E6,$FC,$E0,$E0,$E0	;"P"
-		dc.b	$00,$7C,$E6,$E6,$FA,$EC,$76,$06	;"Q"
-		dc.b	$00,$FC,$E6,$E6,$FC,$E6,$E6,$06	;"R"
-		dc.b	$00,$3C,$70,$3C,$0E,$CE,$FC,$00	;"S"
-		dc.b	$00,$FE,$38,$38,$38,$38,$38,$38	;"T"
-		dc.b	$E0,$E6,$E6,$E6,$E6,$E6,$7C,$00	;"U"
-		dc.b	$E0,$E6,$E6,$E6,$6C,$38,$10,$00	;"V"
-		dc.b	$E0,$E6,$E6,$F6,$FE,$EE,$44,$00	;"W"
-		dc.b	$C0,$EE,$7C,$38,$7C,$E6,$E6,$06	;"X"
-		dc.b	$E0,$E6,$E6,$7C,$38,$38,$38,$38	;"Y"
-		dc.b	$00,$FE,$CE,$1C,$70,$E6,$FE,$00	;"Z"
-		dc.b	$38,$38,$38,$38,$38,$00,$38,$00	;"!"
-		dc.b	$00,$7C,$E6,$EE,$F6,$E6,$7C,$00	;"0"
-		dc.b	$00,$F8,$38,$38,$38,$38,$FE,$00	;"1"
-		dc.b	$00,$7C,$0E,$7C,$E0,$E6,$FE,$00	;"2"
-		dc.b	$00,$FC,$CE,$3C,$0E,$CE,$FC,$00	;"3"
-		dc.b	$00,$0E,$1E,$3E,$6E,$FE,$0E,$0E	;"4"
-		dc.b	$00,$FC,$E0,$FC,$0E,$CE,$FC,$00	;"5"
-		dc.b	$00,$7C,$E0,$FC,$E6,$E6,$7C,$00	;"6"
-		dc.b	$00,$FE,$CE,$1C,$38,$38,$38,$38	;"7"
-		dc.b	$00,$7C,$E6,$7C,$E6,$E6,$7C,$00	;"8"
-		dc.b	$00,$7C,$CE,$CE,$7E,$0E,$7C,$00	;"9"
-		dc.b	$00,$66,$FF,$FF,$7E,$3C,$18,$00	;"*"
-		dc.b	$00,$00,$00,$00,$FE,$00,$00,$00	;"-"
-		dc.b	$00,$00,$00,$00,$00,$38,$38,$00	;"."
-		dc.b	$00,$00,$00,$00,$00,$00,$00,$00 ;" "
 
 bitplane:	blk.b	10240,0				; Space for one
 							; 320x256 bitplane
