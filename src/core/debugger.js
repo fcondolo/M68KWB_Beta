@@ -1,5 +1,6 @@
 var DEBUGGER_SHOWCPUCYCLES = false;
 var DEBUGGER_paranoid = true;
+var DEBUGGER_saveprnd;
 var DEBUGGER_tracing = false;
 var DEBUGGER_canStep = false;
 var DEBUGGER_Base = 16;
@@ -43,7 +44,6 @@ var DEBUGGER_QueryDisplayRefresh = false;
 
 DEBUGGER_DumpCopperList = null;
 DEBUGGER_copperListDump = "";
-const INVALID_BRKPT_ADRS = 0xffffffff;
 var DEBUGGER_PRECLASSLEFT = "col_8";
 var DEBUGGER_PRECLASSRIGHT = "col_4";
 var DEBUGGER_PAUSEUPDATE = false;
@@ -295,8 +295,10 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
 
   // Avoid triggering commands while typing in a text field
   switch (document.activeElement) {
-    case document.getElementById('command'): 
-    case document.getElementById('filterLabel'): 
+    case document.getElementById('command'):
+    case document.getElementById('filterLabel'):
+    case document.getElementById('dregnewval'):
+    case document.getElementById('aregnewval'):
     return;
     case document.getElementById('searchfx'):
       if (event.keyCode == 13) onFxChosen(); // enter 
@@ -436,8 +438,8 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     break;
     case 80: // p
       if (DEBUGGER_SHIFT_PRESSED) {
-        DEBUGGER_setParanoid(!DEBUGGER_paranoid);
-        alert("debugger paranoid mode: " + DEBUGGER_paranoid);
+        DEBUGGER_setParanoid(!DEBUGGER_isParanoid());
+        alert("debugger paranoid mode: " + DEBUGGER_isParanoid());
       }
       else SET_PAUSE(!PAUSED);
     break;
@@ -533,6 +535,19 @@ function SET_PAUSEVBL(p) {
 
 function DEBUGGER_setParanoid(_s) {
   DEBUGGER_paranoid = _s;
+}
+
+function DEBUGGER_isParanoid() {
+  return DEBUGGER_paranoid;
+}
+
+function DEBUGGER_saveAndSetParanoid(_s) {
+  DEBUGGER_saveprnd = DEBUGGER_isParanoid();
+  DEBUGGER_paranoid = _s;
+}
+
+function DEBUGGER_restoreParanoid() {
+  DEBUGGER_paranoid = DEBUGGER_saveprnd;
 }
 
 function changeBitplaneVisibility() {
@@ -969,11 +984,15 @@ function focusOnLabel(_name) {
   if (DEBUGGER_PrevFocus)
     DEBUGGER_PrevFocus.classList.remove('highlight_row');
   let cursorItem = document.getElementById(_name);
-  cursorItem.scrollTo();
-  cursorItem.focus();
-  cursorItem.classList.add('highlight_row');
-  DEBUGGER_PrevFocus = cursorItem;
-  document.getElementById('DBGlines').scrollTop = (cursorItem.offsetTop - 0);  
+  if (!cursorItem) {
+    console.log("could not focus to item named: " + _name);
+  } else {
+    cursorItem.scrollTo();
+    cursorItem.focus();
+    cursorItem.classList.add('highlight_row');
+    DEBUGGER_PrevFocus = cursorItem;
+    document.getElementById('DBGlines').scrollTop = (cursorItem.offsetTop - 0);  
+  }
 }
 
 function DEBUGGER_onHWBreakpointReached(_index) {
@@ -1018,7 +1037,7 @@ function DEBUGGER_SetMemBrkPt(adrs, size) {
 }
 
 function DEBUGGER_ClrMemBrkPt() {
-  DEBUGGER_HWBpts[0] = INVALID_BRKPT_ADRS;
+  DEBUGGER_HWBpts[0] = -1;
   DEBUGGER_HWBpts[1] = 0;
 }
 
@@ -1481,9 +1500,9 @@ function DEBUGGER_dumpRegistersValues() {
   str += '<tr>';
   for (let i = 0; i < 8; i++) {
     if (regs.a[i] == DEBUGGER_saveReg[i + 8])
-      str += normal;
+      str += '<td onclick="onRegAdrsClicked(' + i + ');" style="background-color:#1e1e1e; color:#ddddee;">';
     else
-      str += changed;
+      str += '<td onclick="onRegAdrsClicked(' + i + ');" style="background-color:green; color:white;">';
     str += DBG_reg('a' + i, 4, DEBUGGER_signed).toString(DEBUGGER_Base) + '</td>';
   }
   str += '</tr>';
@@ -1599,9 +1618,97 @@ function onRegDataClicked(_index) {
   msg += '<tr><th>'+str8Lo+'</th><td>$'+u16Lo8Lo.toString(16)+'</td><td>$'+i16Lo8Lo.toString(16)+'</td>';
   msg += '<td>'+u16Lo8Lo.toString()+'</td><td>'+i16Lo8Lo.toString()+'</td></tr>';
   msg += '</tbody></table>'
+  msg += '<br>set new value: <input type="text" id="dregnewval" name="dregnewval" size="10" value="$' + (regs.d[_index]).toString(16) + '" onchange="DEBUGGER_onDRegNewVal(this,'+_index+')">';
 
   showModalBox(msg, null);  
 }
+
+
+function DEBUGGER_onDRegNewVal(_elm, _index) {
+    const value = _elm.value;
+    let jsVal = value.replaceAll('$-', '-0x');
+    jsVal = jsVal.replaceAll('%-', '-0b');
+    jsVal = jsVal.replaceAll('$', '0x');
+    jsVal = jsVal.replaceAll('%', '0b');
+    eval('regs.d['+_index+']='+jsVal);
+    hideModalBox();
+    DEBUGGER_dumpRegistersValues();
+    onRegDataClicked(_index);
+}
+
+function onRegAdrsClicked(_index) {
+  let v = new Uint32Array(1);
+  v[0]  = regs.a[_index];
+  const u32 = v[0];
+  const i32 = TOOLS.toInt32(v[0]);
+  const u16Hi = (v[0] >>> 16) & 0xffff;
+  const i16Hi = TOOLS.toInt16(u16Hi);
+  const u16Lo = v[0] & 0xffff;
+  const i16Lo = TOOLS.toInt16(u16Lo);
+  const u16Lo8hi = u16Lo >>> 8;
+  const i16Lo8hi = TOOLS.toInt8(u16Lo8hi);
+  const u16Lo8Lo = u16Lo & 0xff;
+  const i16Lo8Lo = TOOLS.toInt8(u16Lo8Lo);
+  const str32 = "A"+_index+".l";
+  const str16Hi = "A"+_index+" >> 16";
+  const str16Lo = "A"+_index+" & 0xffff";
+  const str8Hi = "(A"+_index+" >> 8) & 0xff";
+  const str8Lo = "A"+_index+" & 0xff";
+  binval = get8BitBinStr((u32 >>> 24) & 0xff);
+  binval += '.'+get8BitBinStr((u32 >>> 16) & 0xff);
+  binval += '.'+get8BitBinStr((u32 >>> 8) & 0xff);
+  binval += '.'+get8BitBinStr(u32 & 0xff);
+  let msg = "<h1><center>A"+_index+":</center></h1><br>HEX: $" + get32BitHexStr(v[0]) + "<br>BIN: %" + binval + "<br><br><table>";
+  msg += '<thead><tr><th>part</th><th>Unsigned Hex</th><th>Signed Hex</th><th>Unsigned Dec</th><th>Signed Dec</th></thead><tbody>';
+  msg += '<tr><th>'+str32+'</th><td>$'+u32.toString(16)+'</td><td>$'+i32.toString(16)+'</td>';
+  msg += '<td>'+u32.toString()+'</td><td>'+i32.toString()+'</td></tr>';
+  msg += '<tr><th>'+str16Hi+'</th><td>$'+u16Hi.toString(16)+'</td><td>$'+i16Hi.toString(16)+'</td>';
+  msg += '<td>'+u16Hi.toString()+'</td><td>'+i16Hi.toString()+'</td></tr>';
+  msg += '<tr><th>'+str16Lo+'</th><td>$'+u16Lo.toString(16)+'</td><td>$'+i16Lo.toString(16)+'</td>';
+  msg += '<td>'+u16Lo.toString()+'</td><td>'+i16Lo.toString()+'</td></tr>';
+  msg += '<tr><th>'+str8Hi+'</th><td>$'+u16Lo8hi.toString(16)+'</td><td>$'+i16Lo8hi.toString(16)+'</td>';
+  msg += '<td>'+u16Lo8hi.toString()+'</td><td>'+i16Lo8hi.toString()+'</td></tr>';
+  msg += '<tr><th>'+str8Lo+'</th><td>$'+u16Lo8Lo.toString(16)+'</td><td>$'+i16Lo8Lo.toString(16)+'</td>';
+  msg += '<td>'+u16Lo8Lo.toString()+'</td><td>'+i16Lo8Lo.toString()+'</td></tr>';
+  msg += '</tbody></table>'
+  
+  let bestDist = -1;
+  let bestIndex = -1;
+  for (let i = 0; i < CODERPARSER_SINGLETON.labels.length; i++) {
+    const l = CODERPARSER_SINGLETON.labels[i];
+    if (l.dcData) {
+      const d = u32 - l.dcData;
+      if (d >= 0) {
+        if ((bestIndex < 0) || (d < bestDist)) {
+          bestDist = d;
+          bestIndex = i;
+        }
+      }
+    }
+  }
+  if (bestIndex >= 0) {
+    msg += '<br>closest label: <b style="color:white;">' + CODERPARSER_SINGLETON.labels[bestIndex].label + '</b>, offset: $' + bestDist.toString(16)+'<hr>';
+  }
+
+  msg += '<br>set new value: <input type="text" id="aregnewval" name="aregnewval" size="10" value="$' + (regs.a[_index]).toString(16) + '" onchange="DEBUGGER_onARegNewVal(this,'+_index+')">';
+
+  showModalBox(msg, null);  
+}
+
+
+function DEBUGGER_onARegNewVal(_elm, _index) {
+    const value = _elm.value;
+    let jsVal = value.replaceAll('$-', '-0x');
+    jsVal = jsVal.replaceAll('%-', '-0b');
+    jsVal = jsVal.replaceAll('$', '0x');
+    jsVal = jsVal.replaceAll('%', '0b');
+    eval('regs.a['+_index+']='+jsVal);
+    hideModalBox();
+    DEBUGGER_dumpRegistersValues();
+    onRegAdrsClicked(_index);
+}
+
+
 
 var DEBUGGER_lastUpdLine = -1;
 

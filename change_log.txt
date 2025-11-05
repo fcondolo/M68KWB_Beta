@@ -1,5 +1,9 @@
 03/11/2025
 ==========
+- Added Memory Breakpoints window
+
+03/11/2025
+==========
 - Support COPJMP2
 - Support Dual Playfield
 - Added Copper Jelly example

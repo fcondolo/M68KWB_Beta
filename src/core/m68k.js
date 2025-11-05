@@ -2246,14 +2246,15 @@ function NEGX(_instr) {
 }
 
 function MOVEP(_instr) {
-  const p = DEBUGGER_paranoid;
-  DEBUGGER_paranoid = false;    // need to disengage memory check for this instruciton
+  DEBUGGER_saveAndSetParanoid(false);
   switch (_instr.instrSize) {
     case 2: I_MOVEP_16(_instr); break;
     case 4: I_MOVEP_32(_instr); break;
-    default: return 'MOVEP is .W or .L only';
+    default: 
+      DEBUGGER_restoreParanoid();
+    return 'MOVEP is .W or .L only';
   }
-  DEBUGGER_paranoid = p;      // set paranoid mode back
+  DEBUGGER_restoreParanoid();
   return null;
 }
 
@@ -2659,14 +2660,14 @@ function BRA(_line) {
   reportBranch(M68K_IP); 
   if (!isNaN(_line.branchAx)) {
     M68K_NEXTIP = regs.a[_line.branchAx]; 
-    if (!_line.isErrorImmune && DEBUGGER_paranoid) {
+    if (!_line.isErrorImmune && DEBUGGER_isParanoid()) {
       if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
       if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
     }  
   }
   else if (_line.branchAnRn != null) {
     M68K_NEXTIP = regs.a[_line.branchAnRn.An] + TOOLS.toInt16(_line.branchAnRn.rTab[_line.branchAnRn.rInd]);
-    if (!_line.isErrorImmune && DEBUGGER_paranoid) {
+    if (!_line.isErrorImmune && DEBUGGER_isParanoid()) {
       if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
       if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
     }  
@@ -2806,7 +2807,7 @@ function RTS(_line) {
     return 'exit';
   }
   let candidateIP = STACK_POP(4);
-  if (DEBUGGER_paranoid) {
+  if (DEBUGGER_isParanoid()) {
     if (candidateIP < M68K_VECTORS_ZONE_SIZE) {
       runtimeError68k("Corrupted stack? RTS instruction popped invalid address from stack: Address below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
       return;
@@ -2881,12 +2882,12 @@ function DBG_ExitASMBackToJS() {
 }
 
 function CPU_EvaluateVBL(_nextInstr) {
-  const save = DEBUGGER_paranoid;
-  DEBUGGER_paranoid = false;
+  DEBUGGER_saveAndSetParanoid(false);
 
   let doInterrupt = M68K_FORCENEXTVBL;
 
   if (DEBUGGER_tracing) { // do not trust clock when tracing, use cycle counter instead
+    DEBUGGER_restoreParanoid();
     return;/*
     if (M68K_INTERRUPT_COUNTER >= M68K_TICKS_PER_FRAME)
       doInterrupt = true;*/
@@ -2919,7 +2920,7 @@ function CPU_EvaluateVBL(_nextInstr) {
       if (DEBUGGER_PAUSEVBL) debug();
     }
   }
-  DEBUGGER_paranoid = save;
+  DEBUGGER_restoreParanoid();
 }
 
 
@@ -3092,7 +3093,7 @@ async function execCPU() {
       LAST_SETARG = [];
     }
     
-    if (DEBUGGER_paranoid)
+    if (DEBUGGER_isParanoid())
       checklocks(line);
 
     M68K_PREVIP = M68K_IP;

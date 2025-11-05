@@ -226,6 +226,8 @@ function main_startAll() {
     }
   }
 
+  TOOLBOX.onFXStart(FX_INFO);
+
   MYFX.SYS_initialized = false;
 
   var rAF_ID;

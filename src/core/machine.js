@@ -57,7 +57,7 @@ class M68K_Machine {
         }
 
         for (let i = 0; i < DEBUGGER_CONFIG.MAX_HW_BPT * 2; i++) {
-            DEBUGGER_HWBpts[i] = INVALID_BRKPT_ADRS;
+            DEBUGGER_HWBpts[i] = -1;
         }
         
 
@@ -235,7 +235,8 @@ class M68K_Machine {
     // _o : allow write to odd address (for movep)
     // returns true if everything ok, false otherwise
     chkMem(_v, _s, _f, _w, _o = false) {
-        if (!DEBUGGER_paranoid) return true;
+        if (!DEBUGGER_isParanoid()) 
+            return true;
         _v &= 0xffffff; // 24 bit addressing
         let t = this;
         if (_s > 1 && _v & 1) { // word or long size on an odd address
@@ -310,10 +311,10 @@ class M68K_Machine {
             const max1 = _v + _s - 1;
             for (let i = 0; i < DEBUGGER_CONFIG.MAX_HW_BPT; i++) {
                 const min2 = DEBUGGER_HWBpts[i*2];
-                if (min2 != INVALID_BRKPT_ADRS) {
+                if (min2 >= 0) {
                     const max2 = min2 + DEBUGGER_HWBpts[i*2+1]-1;
                     if (min2 >= min1 && min2 <= max1) DEBUGGER_onHWBreakpointReached(i);
-                    if (min1 >= min2 && min1 <= max2) DEBUGGER_onHWBreakpointReached(i);    
+                    else if (min1 >= min2 && min1 <= max2) DEBUGGER_onHWBreakpointReached(i);    
                 }
             }
         } else {
@@ -402,7 +403,7 @@ class M68K_Machine {
     //    if ((_at <= DBGVAR.breakme) && (_at+_size > DBGVAR.breakme))
     //        debugger;
         _at &= 0xffffff; // 24 bit addressing
-        if (DEBUGGER_paranoid) {
+        if (DEBUGGER_isParanoid()) {
             if (_v % 1 !== 0) {
                 let msg = "setRAMValue : Given value should be integer (found: " + _v + "). Please use Math.floor()";
                 console.error(msg);

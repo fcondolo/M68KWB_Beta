@@ -207,15 +207,23 @@
   <div id="draggable" class="ui-widget-content" style="width: 30%; height: 50%; background-color: rgba(200, 200, 200, 0.8); display:none">
     <p>
       <center style="background-color: rgba(208, 151, 222, 0.8);"><b>Toolbox</b></center>
-      <table id="toolbox_contents">        
+      <table id="toolbox_contents">
       </table>
       <br><span id ="tbox_watches" style = "display: none;">Watches:</span>
-      <span id = "amigaonly">
-        <br><button class="inset" onclick="DEBUGGER_DumpCopperList = 1;"><i class="fa fa-bars"></i>&nbsp Copperlist</button>
-      </span>
-      <br><button class="inset" onclick="TOOLS.Screenshot();"><i class="fa fa-camera"></i>&nbsp Screenshot</button>      
-      <br><button class="inset" onclick="DEBUGGER_memoryStats();"><i class="fa fa-bar-chart"></i>&nbsp Mem Stats</button>      
-      <br><button class="inset" onclick="DEBUGGER_showContext();"><i class="fa fa-map-marker"></i>&nbsp Where am I?</button>
+      <table id="toolboxbuttons">
+        <tr>
+          <td><button class="inset" onclick="TOOLS.Screenshot();"><i class="fa fa-camera"></i></button></td>
+          <td onclick="TOOLS.Screenshot();">Take a screenshot</td>
+        </tr>
+        <tr>
+          <td><button class="inset" onclick="DEBUGGER_showContext();"><i class="fa fa-map-marker"></i></button></td>
+          <td onclick="DEBUGGER_showContext();">Where am I?</td>
+        </tr>
+        <tr>
+          <td><button class="inset" onclick="TOOLBOX.CreateHWBreakpointWindow();"><i class="fa fa-minus-circle"></i></button></td>
+          <td onclick="TOOLBOX.CreateHWBreakpointWindow();">Address Breakpoints</td>
+        </tr>
+      </table>
     </p>
   </div>
 

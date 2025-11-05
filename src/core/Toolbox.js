@@ -191,16 +191,13 @@ class Toolbox {
 
         // fetch bitplanes count
         t.bplCount = bitpane_bplCount;
-        let amigaonly = document.getElementById("amigaonly");
         switch (FX_INFO.platform) {
-            case "OCS" : 
-            t.bplCount = bitpane_bplCount;
-            amigaonly.style.display = null;
+            case "OCS" :
+                t.bplCount = bitpane_bplCount;
             break;
             case "ST" :
             case "STE" : 
-            t.bplCount = 4;
-            amigaonly.style.display = "none";
+                t.bplCount = 4;
             break;
         }
 
@@ -227,5 +224,138 @@ class Toolbox {
         MACHINE.setBitplaneWeight(index,_s);
     }
 
+    CreateHWBreakpointWindow() {
+        let allOptions = "<option value='-1'>---- LABELS: ---</option>";
+        for (let i = 0; i < CODERPARSER_SINGLETON.sortedlabels.length; i++) {
+            const lab = CODERPARSER_SINGLETON.sortedlabels[i];
+            if (lab.dcData) {
+                allOptions += '<option value="' + lab.label + '"';
+                allOptions += '>' + lab.label + '</option>';
+            }
+        }
+
+
+        let ret = "<table><tr><th>Adrs or Label</th><th>Adrs</th><th>Size</th></tr>";
+        for (let i = 0;  i< DEBUGGER_CONFIG.MAX_HW_BPT; i++) {
+            const active = (DEBUGGER_HWBpts[i*2] > 0)? true : false;
+            const val = DEBUGGER_HWBpts[i*2];
+            let adrs;
+            if (val < 0)
+                adrs = "-$" + Math.abs(val).toString(16);
+            else
+                adrs = "$"+val.toString(16);
+            const id = "HWBKPT_"+i;
+            let allLabels = "<select onchange='TOOLBOX.refreshHWBkpt()' id='"+id+"_LABELS'><option value=null>ADRS</option>";
+            allLabels += allOptions;
+            allLabels += '</select>';
+            let sizes = "<select onchange='TOOLBOX.refreshHWBkpt()' id='"+id+"_SIZES'>";
+            let allSizes = "";
+            allSizes += "<option value='1'";
+            if (DEBUGGER_HWBpts[i*2+1] == 1 ) allSizes += " selected";
+            allSizes += ">.B</option>";
+            allSizes += "<option value='2'";
+            if (DEBUGGER_HWBpts[i*2+1] == 2 ) allSizes += " selected";
+            allSizes += ">.W</option>";
+            allSizes += "<option value='4'";
+            if (DEBUGGER_HWBpts[i*2+1] == 4 ) allSizes += " selected";
+            allSizes += ">.L</option>";
+            sizes += allSizes;
+            sizes += '</select>';
+            /*
+            ret += '<tr>';            
+            ret += '<td><input type="checkbox" id="'+id+'_CHECK" onclick="TOOLBOX.refreshHWBkpt()"';
+            if (active)
+                ret += ' checked';
+            ret += '></td>';
+            */
+            ret += '<td>';
+            ret += allLabels;
+            ret += '</td><td><input type="text" id="'+id+'_ADRS" name="'+id+'_ADRS" size="10" value="' + adrs + '" onchange="TOOLBOX.refreshHWBkpt()">';
+            ret += '</td><td>'+sizes;
+
+            ret += "</td></tr>";
+        }
+        ret += "</table>";
+        SET_PAUSE(true);
+        showModalBox(ret,  function() {SET_PAUSE(false);TOOLBOX.refreshHWBkpt(true);});
+    }
+
+
+    refreshHWBkpt(_changeBpData = false) {
+        for (let i = 0; i < 4; i++) {
+            const id = "HWBKPT_"+i;
+            let active = false;
+            /*
+            // update according to "Active" checkbox status
+            {
+                let elm = document.getElementById(id+'_CHECK');
+                if (elm.checked) {
+                    DEBUGGER_HWBpts[i*2] = Math.abs(DEBUGGER_HWBpts[i*2]);
+                    active = true;
+                } else {
+                    DEBUGGER_HWBpts[i*2] = -1 * Math.abs(DEBUGGER_HWBpts[i*2]);
+                }
+                elm.checked = false;
+            }*/
+         /*   if (active)*/ {
+                // update according to "Adrs or Label" select list
+                {
+                    let elm = document.getElementById(id+'_LABELS');
+                    const value = elm.value;
+                    if (value != `null`) {
+                        const adrs = TOOLS.getLabelAdrs(value, true , true);
+                        if (!adrs || isNaN(adrs) || (adrs == undefined)) {
+                            alert("could not find adrs for label " + value + ", sorry");
+                        } else {
+                            let elm2 = document.getElementById(id+'_ADRS');
+                            elm2.value = adrs;
+                        }
+                    }
+                }
+                if (!_changeBpData)
+                    return;
+                // update according to "Adrs" text input
+                {
+                    let elm = document.getElementById(id+'_ADRS');
+                    const value = elm.value;
+                    let jsVal = value.replaceAll('$-', '-0x');
+                    jsVal = jsVal.replaceAll('%-', '-0b');
+                    jsVal = jsVal.replaceAll('$', '0x');
+                    jsVal = jsVal.replaceAll('%', '0b');
+                    const adrs = parseInt(jsVal);
+                    if (isNaN(adrs)) {
+                        alert("could not parse number: " + jsVal);
+                        document.getElementById("HWBKPT_"+i+'_CHECK').checked = false;
+                    } else {
+                        DEBUGGER_HWBpts[i*2] = adrs;
+                        elm.value = "$"+adrs.toString(16);
+                      //  document.getElementById("HWBKPT_"+i+'_CHECK').checked = true;
+                    }
+                }
+
+                // update according to "Size" select list
+                {
+                    let elm = document.getElementById(id+'_SIZES');
+                    const value = elm.value;
+                    DEBUGGER_HWBpts[i*2+1] = value;
+                }
+            }
+        }
+    }
+
+    onFXStart(_info) { // append toolbox depending on target platform
+        switch (FX_INFO.platform) {
+        case 'OCS':
+            let xtraBut = "<tr>";
+            xtraBut += "<td><button class='inset' onclick='{DEBUGGER_DumpCopperList = 1; AMIGA_custom_update();}'><i class='fa fa-bars'></i></button></td>";
+            xtraBut += "<td onclick='{DEBUGGER_DumpCopperList = 1; AMIGA_custom_update();}'>Copperlist</td>";
+            xtraBut += "</tr>";
+            let elm = document.getElementById("toolboxbuttons");
+            elm.innerHTML = xtraBut + elm.innerHTML;
+        break;
+        default:
+        break;      
+        }
+  }
 }
   
