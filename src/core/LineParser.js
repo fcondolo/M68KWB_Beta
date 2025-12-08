@@ -750,10 +750,13 @@ class LineParser {
 
   makeComment() {
     let t = this;
-    t.filtered = "; ==> " + t.filtered;
-    t.text = "; ==> " + t.text;
+    t.filtered = ";@ ==> " + t.filtered;
+    t.text = ";@ ==> " + t.text;
     t.isInstr = false;
     t.isLabel = false;
+    t.jsString = null;
+    t.filtered = t.filtered.replaceAll(">JS", ">-JS");
+    t.text = t.text.replaceAll(">JS", ">-JS");
     t.ofs = 0;
   }
 
@@ -821,11 +824,20 @@ class LineParser {
           else if (ln.filtered[ln.ofs] == "'") strchar = "'";
           if (strchar) {
             ln.ofs++;
+            let strToAdd = "";
             while ((ln.ofs < filtLen) && (ln.filtered[ln.ofs] != strchar)) {
-              ln.hideDxArgsDbg = true;
-              ln.DxArgs.push({v:ln.filtered.charCodeAt(ln.ofs),dbg:undefined});
-              numberAdded = true;
+              strToAdd += ln.filtered[ln.ofs];
               ln.ofs++;
+            }
+            // find the original string to avoid uper case only strings (for scrolltexts!)
+            let originalIndex = ln.text.toUpperCase().indexOf(strToAdd.toUpperCase());
+            if (originalIndex >= 0)
+              strToAdd = ln.text.substring(originalIndex, originalIndex + strToAdd.length); 
+            for (let cpyStr = 0; cpyStr < strToAdd.length; cpyStr++)
+            {
+              ln.hideDxArgsDbg = true;
+              ln.DxArgs.push({v:strToAdd.charCodeAt(cpyStr),dbg:undefined});
+              numberAdded = true;
             }
             if (ln.filtered[ln.ofs] == strchar) ln.ofs++;
           }

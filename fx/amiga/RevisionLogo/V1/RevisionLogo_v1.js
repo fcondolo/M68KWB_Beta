@@ -1,13 +1,6 @@
 /*
 V1: roughly prototype the FX in Javascript with a bit of Amiga stuff also
 */
-REGISTER_FX({
-  classname:"RevisionLogo_v1", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/RevisionLogo/V1",
-  source:"RevisionLogo_v1.asm",
-});
-
 class RevisionLogo_v1 {
 
   FX_Init() {

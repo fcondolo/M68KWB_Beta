@@ -32,21 +32,33 @@
     }
     
     
-    
+    // OUT: regs.a[0] ==> backbuffer (to draw in)
+    // OUT: regs.a[1] ==> shown buffer
+    // only a0 is written if no double buffer
     function AMIGA_updateScreenHelper(_params) {
-        AMIGA_CURHELPER = _params;
-        let ptr = _params.bitplanes;
+        if (!_params) _params = AMIGA_CURHELPER;
+        else AMIGA_CURHELPER = _params;
         if (_params.double) {
             _params.swapCounter ^= 1;
             if (_params.swapCounter == 1) {
-                ptr +=  _params.alloc / 2;
+                regs.a[0] = _params.bitplanes;
+                regs.a[1] = _params.bitplanes + _params.alloc / 2;
+            } else {
+                regs.a[0] = _params.bitplanes + _params.alloc / 2;
+                regs.a[1] = _params.bitplanes;
             }
+        } else {
+            regs.a[0] = _params.bitplanes;
+            regs.a[1] = _params.bitplanes;
         }
+        _params.backBuffer = regs.a[0];
+        _params.frontBuffer = regs.a[1];
+
         let bitplanesCount = _params.bplCount;
         let bplSize = _params.bplSize;
         let reg = BPL1PTH;
         let w = _params.cpListBplAdrs;
-    
+        let ptr = _params.frontBuffer;
         for (let i = 0; i < bitplanesCount; i++) {
             AMIGA_setCustom_L(reg, ptr);
             reg += 4;
@@ -56,10 +68,36 @@
             w = MACHINE.setRAMValue(ptr&0xffff, w, 2);
             ptr += bplSize;
         }
-    
     }
     
     
+function AMIGA_plot(_x, _y, _colorIndex) {
+    if (!AMIGA_CURHELPER) {
+        debug("can't call Plot before calling MACHINE.openGFX");
+        return;
+    }
+    if (_x < 0) return;
+    if (_x >= AMIGA_CURHELPER.width) return;
+    if (_y < 0) return;
+    if (_y >= AMIGA_CURHELPER.height) return;
+    let bpl = AMIGA_CURHELPER.backBuffer;
+    for (let i = 0; i < AMIGA_CURHELPER.bplCount; i++) {
+        const bplBit = 1 << i;
+        const colrHasBit = _colorIndex & bplBit;
+        AMIGA_pix2Bitplane(_x,_y,bpl, null, (colrHasBit == 0));
+        bpl += AMIGA_CURHELPER.bplSize;
+    }
+}
+
+function AMIGA_cls() {
+    if (!AMIGA_CURHELPER) {
+        debug("can't call Plot before calling MACHINE.openGFX");
+        return;
+    }
+    const bpl = AMIGA_CURHELPER.backBuffer;
+    MACHINE.ram.fill(0, bpl, bpl + AMIGA_CURHELPER.bplSize * AMIGA_CURHELPER.bplCount);
+}
+
     /**
     AMIGA_GetScreenHelper(_params)
     input _params = {
@@ -156,6 +194,10 @@
         // set copperlist
         AMIGA_setCustom_L(COP1LCH,_params.copperList);
         console.log("starting Amiga helper, bitplanes at $" + _params.bitplanes.toString(16) + ", copperlist at $" + _params.copperList.toString(16));
+    
+        _params.update = AMIGA_updateScreenHelper;
+        _params.plot = AMIGA_plot;
+        _params.cls = AMIGA_cls;
         return _params;
     }
     

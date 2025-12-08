@@ -12,6 +12,8 @@ let DMA_Copper = false;
 let isHAMMode = false;
 let isDualPlayfield = false;
 let PF2PRI = false;
+let BPL5DAT_val = 0;
+let BPL6DAT_val = 0;
 
 function useColorIndex(_index) {
 	const color = AMIGA_customregs[COLOR0 / 2 + _index]; // tap directly into table to avoid calling AMIGA_getCustom() once per pixel...
@@ -90,6 +92,10 @@ function bitplanes_updateAllValues() {
 		PF2PRI = false;
 
 	bitpane_bplCount = (BPLCON0_Val >>> 12) & 7;
+	if (bitpane_bplCount == 7) {
+		BPL5DAT_val = AMIGA_customregs[BPL5DAT/2];
+		BPL6DAT_val = AMIGA_customregs[BPL6DAT/2];
+	}
 	if ((BPLCON0_Val & 1<<11) != 0) {
 		isHAMMode = true;
 	}
@@ -157,6 +163,7 @@ function bitplanes_update() {
 	for (;bplY < PLAYFIELD_LINES_COUNT; bplY++, rasterY++, remainingLines--) {
 		let bplReadX = 0;
 		for (let rasterX = 0; rasterX < SIMU_DEFAULT_WIDTH; rasterX++, copperExecMove--) {
+			let xmsk;
 			if (MACHINE.stop) return;
 			if (DMA_Copper && (copperExecMove <= 0)) {
 				if (copper_processOneInstr(rasterX, rasterY))
@@ -178,29 +185,29 @@ function bitplanes_update() {
 				let colorIndex = new Uint8Array(2);
 				let pfIndex = 0; // playfieldIndex
 				let colShift = 0;
-				if (isHAMMode) {
-				} else { // NOT HAM
-					for (let curBpl = 0; curBpl < bitpane_bplCount; curBpl++) {
-						let readx = bplReadX - bitplaneHScroll[curBpl];
-						if (readx >= 0) {
-							let pixindex = (readx >>> 3) + bplReadY[curBpl];
-							let bitplane = bitplaneAdrs[curBpl];
-							let mask = 1 << (7 - (readx & 7));
-							//if (pixindex >= 0 && pixindex < bplHorizByteCount*PLAYFIELD_LINES_COUNT) {
-							let data = MACHINE.ram[bitplane + pixindex] & mask;
-							if (data != 0) data = 1;
+				const readBplCnt = Math.min(6,bitpane_bplCount);
+				for (let curBpl = 0; curBpl < readBplCnt; curBpl++) {
+					let readx = bplReadX - bitplaneHScroll[curBpl];
+					if (readx >= 0) {
+						let pixindex = (readx >>> 3) + bplReadY[curBpl];
+						let bitplane = bitplaneAdrs[curBpl];
+						xmsk = 1 << (7 - (readx & 7));
+						//if (pixindex >= 0 && pixindex < bplHorizByteCount*PLAYFIELD_LINES_COUNT) {
+						const v = MACHINE.ram[bitplane + pixindex] & xmsk;
+						if (v != 0) {
 							if (isDualPlayfield) {
 								pfIndex = curBpl & 1;
 								colShift = curBpl >>> 1;
 							} else colShift = curBpl;
-							colorIndex[pfIndex] |= bplW[curBpl] * (data << colShift);
-							//} else 
-							//	debugger;
+							colorIndex[pfIndex] |= bplW[curBpl] * (1 << colShift);
 						}
-					}	
-				}
+						//} else 
+						//	debugger;
+					}
+				}	
 				bplReadX++;
-				if (isDualPlayfield){
+
+				if (isDualPlayfield) {
 					if (PF2PRI) {
 						if (colorIndex[1] > 0)
 							useColorIndex(colorIndex[1]+8);
@@ -216,8 +223,34 @@ function bitplanes_update() {
 						else
 							useColorIndex(0);
 					}
+				} else if (isHAMMode) {
+					const hamv = colorIndex[0] & 15; 
+					let hamcode = 0;
+					if (bitpane_bplCount == 6) {
+						hamcode = (colorIndex[0]>>>4)&3;
+					} else if (bitpane_bplCount == 7) {
+						const BPL5DAT_val = AMIGA_customregs[BPL5DAT/2];
+						const BPL6DAT_val = AMIGA_customregs[BPL6DAT/2];
+						let v = BPL5DAT_val & xmsk;
+						if (v != 0)
+							hamcode = bplW[4];
+						v = BPL6DAT_val & xmsk;
+						if (v != 0)
+							hamcode |= bplW[5] << 1;
+					}
+					if (hamcode == 0)
+						useColorIndex(hamv);
+					else {
+						const c = hamv<<4;
+						switch (hamcode) {
+							case 1: BPL_B = c; break;
+							case 2: BPL_R = c; break;
+							case 3: BPL_G = c; break;
+							default: runtimeError68k("bad HAM code"); return;
+						}
+					}
 				}
-				else
+				else 
 					useColorIndex(colorIndex[0]);
 				data[d++] = BPL_R;
 				data[d++] = BPL_G;

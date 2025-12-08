@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"BlitterTornado", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/BlitterTornado",
-  source:"blitter_tornado.asm"
-});
-
 class BlitterTornado {
   FX_Init() {
     invoke68K("init");

@@ -1,15 +1,6 @@
 /*
 V3: Start being serious about asm conversion
 */
-
-REGISTER_FX({
-  classname:"FX_Spherev3", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/Sphere/v3",
-  startPaused:false,
-  source:"sphv3.asm",
-});
-
 class FX_Spherev3 {
 
   FX_Init() {

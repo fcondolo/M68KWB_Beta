@@ -210,6 +210,10 @@ function assemble_group_1101(_l, w0, _out) {
        return _out;
        case "EOR": {
         if (!asmbl_argIsDataReg(_l.arg1)) {
+            if (_l.arg1.type == 'imm') {
+                _l.instr = "EORI";
+                return assemble_group_0000(_l, w0, _out);
+            }
             asmbl_syntaxError(_l,"EOR: arg1 must be a data register", ["EOR Dn,ea"]);
             return null;
         }

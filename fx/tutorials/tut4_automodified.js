@@ -1,11 +1,3 @@
-REGISTER_FX({
-  classname:"tut4_automodified", 
-  platform:"STE", 
-  rootPath:"fx/tutorials",
-  source:"tut4_automodified.asm",
-});
-
-
 class tut4_automodified {
   FX_Init() {
     invoke68K("init");

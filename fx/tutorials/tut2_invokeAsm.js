@@ -1,15 +1,3 @@
-REGISTER_FX({
-  classname:"FX_tut2", 
-  platform:"OCS", 
-  rootPath:"fx/tutorials",
-  source:"tut2.asm"
-});
-/*
-As you can guess, the "source" field is used to indicate the .asm source to bind to your FX.
-Note that if your code is pread across several .asm files, just include them from your main .asm file.
-The asm "include" directive is fully supported.
-*/
-
 class FX_tut2 {
     /*
     Finally some asm! open tut2.asm, and note the following:

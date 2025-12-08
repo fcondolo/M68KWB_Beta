@@ -16,9 +16,9 @@ BLT_SRC_ADRS   EQU $FF8A24; // Source Address (23 Bit - Bit 31..24, Bit 0 unused
 BLT_ENDMASK_1  EQU $FF8A28; // ENDMASK 1 (16 Bits)
 BLT_ENDMASK_2  EQU $FF8A2A; // ENDMASK 2 (16 Bits)
 BLT_ENDMASK_3  EQU $FF8A2C; // ENDMASK 3 (16 Bits)
-BLT_DST_XINCR  EQU $FF8A2E; // Destination X Increment (15 Bit - Bit 0 is unused)
-BLT_DST_YINCR  EQU $FF8A30; // Destination Y Increment (15 Bit - Bit 0 is unused)
-BLT_DST_ADRS   EQU $FF8A32; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
+BLT_TGT_XINCR  EQU $FF8A2E; // Destination X Increment (15 Bit - Bit 0 is unused)
+BLT_TGT_YINCR  EQU $FF8A30; // Destination Y Increment (15 Bit - Bit 0 is unused)
+BLT_TGT_ADRS   EQU $FF8A32; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
 BLT_COUNT_X    EQU $FF8A36; // X Count (16 Bits)
 BLT_COUNT_Y    EQU $FF8A38; // Y Count (16 Bits)
 BLT_HOP        EQU $FF8A3A; // HOP (8 Bits)
@@ -80,18 +80,18 @@ update:
   ENDR
 
   ; blitter fill
-  move.l    screens,a0
+  move.l    screens,a0      ; dest bitplane
 	move.l		a0,BLT_SRC_ADRS
-  add.l     #160,a0
-	move.l		a0,BLT_DST_ADRS
+  add.l     #160,a0         ; 160 btes = 1 line below
+	move.l		a0,BLT_TGT_ADRS
 	move.w		#2,BLT_SRC_XINCR
-	move.w		#2,BLT_DST_XINCR
-	move.w		#8,BLT_SRC_YINCR
-	move.w		#8,BLT_DST_YINCR
+	move.w		#2,BLT_TGT_XINCR
+	move.w		#8,BLT_SRC_YINCR ; only 1 bitplane, skip others
+	move.w		#8,BLT_TGT_YINCR
 	move.w		#1,BLT_COUNT_X
 	move.w		#20*199,BLT_COUNT_Y
-  move.b    #2,BLT_HOP
-  move.b    #6,BLT_OP
+  move.b    #2,BLT_HOP      ; All bits taken from source
+  move.b    #6,BLT_OP       ; Dest = Source XOR Dest
   move.b    #0,BLT_MISC_2
   move.b    #1<<7,BLT_MISC_1
 .waitBlt2:

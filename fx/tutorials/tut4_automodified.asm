@@ -48,7 +48,9 @@ set_pix:
      move.l    screens,a0
      add.l     #160*100,a0
      lea       autoCode,a1
-     jmp      (a1)  ; M68KWB_NOERROR ==> allow jumping outside of code section
+     ;>JS DEBUGGER_paranoid = false   // allow jumping outside of code section
+     jmp      (a1)
+     ;>JS DEBUGGER_paranoid = true  // set memory protection back
 
 
 auto_begin:
@@ -95,4 +97,4 @@ VAL  SET       VAL+160
      ENDR
 
 autoCode:
-       ds.b   1024          ; can't do auto_end-auto_begin yet, sorry
+       ds.b   1024 

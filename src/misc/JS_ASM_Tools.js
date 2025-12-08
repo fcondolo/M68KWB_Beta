@@ -187,6 +187,8 @@ class JS_ASM_Tools {
           return CODERPARSER_SINGLETON.labels[i].dcData;
         else {
           if (_canBeCode) {
+            const ofs = CODERPARSER_SINGLETON.labels[i].codeSectionOfs;
+            if (ofs != null) return ofs;
             return NaN;
           } else {
             debugger;

@@ -46,6 +46,7 @@ class M68K_Machine {
         CPU_CODE_SECTION= t.ram;
         t.allowBlitter = true;
         t.allowBlitterClearOnly = false;
+        t.GFX = null;
     
     
         // put garbage in registers, having them all cleared is too easy...
@@ -130,6 +131,7 @@ class M68K_Machine {
     allocRAM(_bytes, _align = 2, _label = null) {
         if ((_bytes <= 0) || isNaN(_bytes) || (_bytes == undefined)) {
             main_Alert("MACHINE.allocRAM: wrong '_bytes' param: " + _bytes);
+            debugger;
             return 0;
         }
         let t = this;
@@ -152,6 +154,16 @@ class M68K_Machine {
             t.ramIndex++;
     }
     
+
+    openGFX(_params) {
+        let t = this;
+        switch (FX_INFO.platform) {
+            case "OCS" : t.GFX = AMIGA_GetScreenHelper(_params); break;
+            case "ST" : t.GFX = ST_GetScreenHelper(_params); break;
+            case "STE" : t.GFX = ST_GetScreenHelper(_params); break;
+        }
+    }
+
 
     getOutsideBoundaryDebugString(_v, _s, _f, _min, _max) {
         let t = this;

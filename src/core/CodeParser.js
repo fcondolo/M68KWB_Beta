@@ -97,6 +97,9 @@ class CodeParser {
       }
     }
 
+    // set constant for target plartorm
+    t.constants.push({ name: "TARGET_"+FX_INFO.platform, value: 1, path: "", line: "" });
+
     // set default constants from config
     for (let ic = 0; ic < ASSEMBLER_CONFIG.defines.length; ic++) {
       t.constants.push({ name: ASSEMBLER_CONFIG.defines[ic].name, value: ASSEMBLER_CONFIG.defines[ic].value, path: "ASSEMBLER_CONFIG", line: "" });
@@ -1309,7 +1312,10 @@ class CodeParser {
       switch (e.start.type) {
         case 'equ': {
           let ln = t.strings.lines[e.start.v];
-          if (ln.text[0] != ';') { // line may have been discarded by process_conditionalComp just above
+          let discard = true;
+          if (ln.text[0] == ';' && ln.text[1] == '@')
+            discard = false; // line may have been discarded by process_conditionalComp just above
+          if (discard) { 
             let errBhv = PARSE_FAIL_OK;
             if (t.lastPass) errBhv = PARSE_FAIL_ERROR;
             ln.ofs = e.start.ofs;
@@ -1537,8 +1543,10 @@ class CodeParser {
         }
         else {
           if (contitionCode == 2) {
-            ln.text = ';DISCARDED';//'; ' + ln.text;
-            ln.filtered = ';DISCARDED';//'; ' + ln.filtered;
+            t.filtered = t.filtered.replaceAll(">JS", ">-JS");
+            t.text = t.text.replaceAll(">JS", ">-JS");
+            ln.text = ';@DISCARDED: ';//'; ' + ln.text;
+            ln.filtered = ';@DISCARDED: ';//'; ' + ln.filtered;
             ln.isInstr = false;
             ln.jsString = null;
             //ln.filtered = ln.filtered.replace('>JS', '<--');

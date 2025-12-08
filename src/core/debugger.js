@@ -307,7 +307,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     break;
   }
 
-  if (WATCHES.hasFocus)
+  if (WATCHES && WATCHES.hasFocus)
     return;
 
   if (PREV_KEYDOWN == event.keyCode) return;
@@ -1767,7 +1767,10 @@ function DEBUGGER_update(_force, _showNextIntr = true) {
           }
           str += "<br>";
         }
-        str += 'Next: ' + curLine.filtered;
+        if (curLine.jsString)
+          str += 'Next: >JS';
+        else
+          str += 'Next: ' + curLine.filtered;
         if (DEBUGGER_AdditionalDbgMsg.length > 0) {
           str += "<br>" + DEBUGGER_AdditionalDbgMsg;
         }

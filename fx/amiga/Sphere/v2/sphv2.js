@@ -1,14 +1,6 @@
 /*
 V2: Calculate the animation for the concentric circles
 */
-
-REGISTER_FX({
-  classname:"FX_Spherev2", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/Sphere/v2",
-  source:"sphv2.asm",
-});
-
 class FX_Spherev2 {
 
   FX_Init() {

@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"FX_tut3", 
-  platform:"OCS", 
-  rootPath:"fx/tutorials",
-  source:"tut3.asm",
-});
-
 /*
 For this tutorial, the JavaScript piece is exactly the same. The new stuff is in "tut3.asm":
 There are 2 new instructions within   a ">JS" "" tag. Everything in-between can be any valid

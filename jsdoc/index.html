@@ -148,16 +148,6 @@
               
                 
                 <li><a
-                  href='#atari_psg'
-                  class="">
-                  ATARI_PSG
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
                   href='#st_getxscreenofs'
                   class="">
                   ST_getXScreenOfs
@@ -211,16 +201,6 @@
                   href='#st_getcustom_b'
                   class="">
                   ST_getCustom_B
-                  
-                </a>
-                
-                </li>
-              
-                
-                <li><a
-                  href='#st_getcustom_w'
-                  class="">
-                  ST_getCustom_W
                   
                 </a>
                 
@@ -1485,55 +1465,6 @@ Same as AMIGA_setCustom_L(), except that the parameter is not relative to $dff00
   
   <div class='clearfix'>
     
-    <h3 class='fl m0' id='atari_psg'>
-      ATARI_PSG
-    </h3>
-    
-    
-  </div>
-  
-
-  
-    <div class='pre p1 fill-light mt0'>new ATARI_PSG()</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
     <h3 class='fl m0' id='st_getxscreenofs'>
       ST_getXScreenOfs
     </h3>
@@ -1939,83 +1870,10 @@ Same as AMIGA_setCustom_L(), except that the parameter is not relative to $dff00
   </div>
   
 
-  <p>ST_getCustom_W(_index)
-Returns the current 8 bit value of a custom register</p>
-
-    <div class='pre p1 fill-light mt0'>new ST_getCustom_B(_index: any): any</div>
-  
-  
-
-  
-  
-  
-  
-  
-  
-
-  
-    <div class='py1 quiet mt1 prose-big'>Parameters</div>
-    <div class='prose'>
-      
-        <div class='space-bottom0'>
-          <div>
-            <span class='code bold'>_index</span> <code class='quiet'>(any)</code>
-	    :   custom register index (relative to ST_CUSTOM_START)
-
-          </div>
-          
-        </div>
-      
-    </div>
-  
-
-  
-
-  
-    
-      <div class='py1 quiet mt1 prose-big'>Returns</div>
-      <code>any</code>:
-        the register's 8 bit value
-
-      
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-</section>
-
-          
-        
-          
-          <section class='p2 mb2 clearfix bg-white minishadow'>
-
-  
-  <div class='clearfix'>
-    
-    <h3 class='fl m0' id='st_getcustom_w'>
-      ST_getCustom_W
-    </h3>
-    
-    
-  </div>
-  
-
-  <p>ST_getCustom_W(_index)
+  <p>ST_getCustom(_index)
 Returns the current 16 bit value of a custom register</p>
 
-    <div class='pre p1 fill-light mt0'>new ST_getCustom_W(_index: any): any</div>
+    <div class='pre p1 fill-light mt0'>new ST_getCustom_B(_index: any): any</div>
   
   
 
@@ -2919,7 +2777,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> yOfs = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">40</span>, lineY);</pre>
     
       
-      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">79</span>, <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>])); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
+      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title class_">JSInt32ToAsm</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">79</span>, <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]))); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
     
   
 
@@ -3022,7 +2880,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> slope = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(delta, iter);</pre>
     
       
-      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt32</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]), <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">1</span>]); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
+      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title class_">JSInt32ToAsm</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt32</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]), <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">1</span>]))); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
     
   
 

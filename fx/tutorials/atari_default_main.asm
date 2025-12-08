@@ -10,15 +10,6 @@ old_palette:
     ds.l        8
 ints_backup:
     ds.b	    30
-; vbl counting heuristic:
-; in main loop : build a frame to show and timestamp it with lastUpdateFrameIndex = VBLCounter
-; in VBL interrupt: VBLCounter++, and if (lastShownFrameIndex < lastUpdateFrameIndex) { show lastUpdateFrameIndex screen; lastShownFrameIndex = lastUpdateFrameIndex}
-VBLCounter:             ; used as timestamp
-    ds.l        1
-lastUpdateFrameIndex:          ; timestamp of the latest built frame
-    ds.l        1
-lastShownFrameIndex:           ; timestamp of the latest frame shown on screen
-    ds.l        1
 
     section code
 
@@ -35,9 +26,9 @@ BLT_SRC_ADRS   EQU $FF8A24; // Source Address (23 Bit - Bit 31..24, Bit 0 unused
 BLT_ENDMASK_1  EQU $FF8A28; // ENDMASK 1 (16 Bits)
 BLT_ENDMASK_2  EQU $FF8A2A; // ENDMASK 2 (16 Bits)
 BLT_ENDMASK_3  EQU $FF8A2C; // ENDMASK 3 (16 Bits)
-BLT_DST_XINCR  EQU $FF8A2E; // Destination X Increment (15 Bit - Bit 0 is unused)
-BLT_DST_YINCR  EQU $FF8A30; // Destination Y Increment (15 Bit - Bit 0 is unused)
-BLT_DST_ADRS   EQU $FF8A32; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
+BLT_TGT_XINCR  EQU $FF8A2E; // Destination X Increment (15 Bit - Bit 0 is unused)
+BLT_TGT_YINCR  EQU $FF8A30; // Destination Y Increment (15 Bit - Bit 0 is unused)
+BLT_TGT_ADRS   EQU $FF8A32; // Destination Address (23 Bit - Bit 31..24, Bit 0 unused)
 BLT_COUNT_X    EQU $FF8A36; // X Count (16 Bits)
 BLT_COUNT_Y    EQU $FF8A38; // Y Count (16 Bits)
 BLT_HOP        EQU $FF8A3A; // HOP (8 Bits)
@@ -50,9 +41,6 @@ DEFAULT_ENTRY_POINT:
     ;SHOW_FPS EQU 1
 
     bsr     backupSystem
-    move.l  #0,VBLCounter
-    move.l  #0,lastUpdateFrameIndex
-    move.l  #0,lastShownFrameIndex
     
     jsr     FX_INIT
     IFD M68KWB
@@ -60,9 +48,6 @@ DEFAULT_ENTRY_POINT:
     ENDC
 
 DEFAULT_MAIN_LOOP:
-    move.l  lastShownFrameIndex,d0
-    cmp.l   lastUpdateFrameIndex,d0
-    blo.b   DEFAULT_MAIN_LOOP
 
     ifd SHOW_FPS
     move.w  #$f00,$ff8240
@@ -71,8 +56,6 @@ DEFAULT_MAIN_LOOP:
     ifd SHOW_FPS
     move.w  #$000,$ff8240
     endc
-
-    add.l   #1,lastUpdateFrameIndex
 
     cmp.b   #$39,$fffffc02.w                ;check for space key
     beq.w   DEFUALT_EXIT                    ;exit    

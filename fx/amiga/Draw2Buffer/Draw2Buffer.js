@@ -1,9 +1,3 @@
-REGISTER_FX({
-  classname:"Draw2Buffer", 
-  platform:"OCS", 
-  source:"fx/amiga/Draw2Buffer/Draw2Buffer.asm"
-});
-
 class Draw2Buffer {
     FX_Init() {
       let t = this;

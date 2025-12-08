@@ -40,10 +40,14 @@ function copper_toHTML() {
 				DEBUGGER_copperListDump += "<td>END OF COPPERLIST</td></tr></table>";
 				return DEBUGGER_copperListDump;
 			}
-			let yToWait = (word1 >> 8) & 0xff;
+			let yToWait = (word1 >>> 8) & 0xff;
 			if (yToWait < 64) // handling the case when we are still on line 255
 				yToWait += reached255;
-			DEBUGGER_copperListDump += "<td>WAIT x: $" + CPER_4digitHex(word1 & 0xff)  + ", y: $" + CPER_4digitHex(yToWait) + "</td></tr>";
+			if ((word2&1) == 1)
+				DEBUGGER_copperListDump += "<td>SKIP";
+			else
+				DEBUGGER_copperListDump += "<td>WAIT";
+			DEBUGGER_copperListDump += " x: $" + CPER_4digitHex(word1 & 0xfe)  + ", y: $" + CPER_4digitHex(yToWait) + "</td></tr>";
 		}
 		else { // move
 			DEBUGGER_copperListDump += "<td>" + AMIGA_GetConstantName(word1) + " = $" + CPER_4digitHex(word2) + "</td></tr>";
@@ -117,15 +121,15 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 		if ((word2&0xff) == 0)
 			copper_xToWait = 0;
 		else 
-			copper_xToWait = ((word1 & 0xff) - OCS_CONFIG.COPPER_SCREEN_LEFT_X) / 4; // Division by 4 : see note 2
+			copper_xToWait = ((word1 & 0xfe) - OCS_CONFIG.COPPER_SCREEN_LEFT_X) / 4; // Division by 4 : see note 2
 		if ((word2&0xff00) == 0)
 			copper_yToWait = 0;
 		else 
-			copper_yToWait = (word1 >> 8) & 0xff;
+			copper_yToWait = (word1 >>> 8) & 0xff;
 		if (copper_yToWait < 64) // handling the case when we are still on line 255
 			copper_yToWait += wait255Reached;
 		if (_x >= copper_xToWait && _y >= copper_yToWait) {
-			if ((word1 >> 8) == 0xff)
+			if ((word1 >>> 8) == 0xff)
 				wait255Reached = _y;
 			if ((word2 & 1) == 0)
 				cper_cur += 4;	// this was a WAIT, go to next instruction

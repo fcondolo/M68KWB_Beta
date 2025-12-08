@@ -1,9 +1,3 @@
-REGISTER_FX({
-  classname:"FX_Heroes", 
-  platform:"OCS", 
-  source:"fx/amiga/heroes.asm",
-});
-
 class FX_Heroes {
   constructor() {
     let t = this;

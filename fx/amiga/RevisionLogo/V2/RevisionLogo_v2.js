@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"RevisionLogo_v2",
-  platform:"OCS", 
-  rootPath:"fx/amiga/RevisionLogo/V2",
-  source:"RevisionLogo_v2.asm",
-});
-
 class RevisionLogo_v2 {
 
   FX_Init() {

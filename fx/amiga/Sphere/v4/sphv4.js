@@ -1,14 +1,6 @@
 /*
-V4: Serious as mconversion
+V4: Serious asm conversion
 */
-
-REGISTER_FX({
-  classname:"FX_Spherev4", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/Sphere/v4",
-  source:"sphv4.asm",
-});
-
 class FX_Spherev4 {
 
   FX_Init() {

@@ -1,13 +1,6 @@
 /*
 V1: roughly prototype the FX in Javascript with a bit of Amiga stuff also
 */
-REGISTER_FX({
-  classname:"FX_Spherev1", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/Sphere/v1",
-  source:"sphv1.asm",
-});
-
 class FX_Spherev1 {
 
   FX_Init() {

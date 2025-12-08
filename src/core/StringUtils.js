@@ -204,6 +204,10 @@ function load_binary_resource(_url, _label) {
   if (req.status != 200) {
     return "failed loading binary file";
   }
+  if ((!req.responseText.length) || (req.responseText.length <= 0)) {
+    main_Alert("Can't load empty file: " + _url);
+    return null;
+  }
   let byteArray = MACHINE.allocRAM(req.responseText.length, 1, "load binary file: " + _url);
   let w = byteArray;
   for (var i = 0; i < req.responseText.length; ++i) {

@@ -25,24 +25,12 @@ FX_INIT:
 
 
 myVBL:
-       movem.l       d0-d7/a0-a6,-(sp)
+    movem.l      d0-d7/a0-a6,-(sp)
 
-       move.l        lastUpdateFrameIndex,d0
-       cmp.l         lastShownFrameIndex,d0
-       bls           .endVbl
 
-       move.l        screens,a0
-       bsr           ShowScreen
-       move.l        screens,d0
-       move.l        screens+4,d1
-       move.l        d0,screens+4
-       move.l        d1,screens
-
-       add.l         #1,lastShownFrameIndex
 .endVbl:
-       add.l         #1,VBLCounter
-       movem.l       (sp)+,d0-d7/a0-a6
-       rte
+    movem.l      (sp)+,d0-d7/a0-a6
+    rte
 
   
 
@@ -62,10 +50,12 @@ clearBpl:
 	bne.s		.waitBlt1
 	rts
 
+
+
 FX_UPDATE:
 ; compute ofs in d4
-       move.l        lastUpdateFrameIndex,d4
-       and.l         #63,d4
+       move.w        lastUpdateFrameIndex,d4
+       and.w         #63,d4
        add.w         #16,d4
        muls          #160,d4
        add.w         #48,d4
@@ -96,11 +86,11 @@ FX_UPDATE:
   move.l    screens,a0
 	move.l		a0,BLT_SRC_ADRS
   add.l     #160,a0
-	move.l		a0,BLT_DST_ADRS
+	move.l		a0,BLT_TGT_ADRS
 	move.w		#2,BLT_SRC_XINCR
-	move.w		#2,BLT_DST_XINCR
+	move.w		#2,BLT_TGT_XINCR
 	move.w		#8,BLT_SRC_YINCR
-	move.w		#8,BLT_DST_YINCR
+	move.w		#8,BLT_TGT_YINCR
 	move.w		#1,BLT_COUNT_X
 	move.w        #20*199,BLT_COUNT_Y
        move.b        #2,BLT_HOP

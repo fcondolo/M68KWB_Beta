@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"TestCopper", 
-  platform:"OCS", 
-  rootPath:"fx/amiga",
-  source:"TestCopper.asm"
-});
-
 class TestCopper {
   constructor() {
     let t = this;

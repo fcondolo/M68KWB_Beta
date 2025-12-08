@@ -1,13 +1,6 @@
 /*
 v2: roughly prototype the FX in Javascript with a bit of Amiga stuff also
 */
-REGISTER_FX({
-  classname:"FX_StarFieldv2", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/StarField/v2",
-  source:"strfldv2.asm",
-});
-
 class FX_StarFieldv2 {
 
   FX_Init() {

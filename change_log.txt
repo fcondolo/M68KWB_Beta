@@ -1,3 +1,11 @@
+08/12/2025
+==========
+- New fx registration system using user_fx.js
+- Support Dual playfield
+- Support HAM6
+- Support 7 bitplanes HAM6 OCS cheat mode
+- Added "CopperJelly" sample FX ( in fx/amiga/)
+
 03/11/2025
 ==========
 - Added Memory Breakpoints window

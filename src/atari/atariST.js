@@ -96,6 +96,8 @@ const ST_DATASTART = 0;
 var     ST_customregs = null;
 
 let ST_started = false;
+let ST_CURHELPER = null;
+
 var ST_MODEL = ATARI_MODEL_ST; // 0 : ST, 1 : STE
 
 
@@ -386,8 +388,12 @@ ST_drawPix(_x, _y, _colorIndex, _destScreen)
 */
 function ST_drawPix(_x, _y, _colorIndex, _destScreen) {
     if (!_destScreen) {
-        if (ST_PHYSICAL_SCREEN <= 0) return;
-        _destScreen = ST_PHYSICAL_SCREEN;
+        if (ST_CURHELPER && ST_CURHELPER.backBuffer) {
+            _destScreen = ST_CURHELPER.backBuffer;
+        } else {
+            if (ST_PHYSICAL_SCREEN <= 0) return;
+            _destScreen = ST_PHYSICAL_SCREEN;
+        }
     }
     if (_x < 0) return;
     if (_x > 319) return;
@@ -410,17 +416,15 @@ function ST_drawPix(_x, _y, _colorIndex, _destScreen) {
     }
 }
 
-function ST_clearScreen(_colorIndex = 0, _destScreen = null) {
-    if (!_destScreen) {
+function ST_clearScreen() {
+    let _destScreen;
+    if (ST_CURHELPER && ST_CURHELPER.backBuffer) {
+        _destScreen = ST_CURHELPER.backBuffer;
+    } else {
         if (ST_PHYSICAL_SCREEN <= 0) return;
         _destScreen = ST_PHYSICAL_SCREEN;
     }
-    let adrs = _destScreen;
-    for (let i = 0; i < 160*200; i++) 
-    {
-        MACHINE.setRAMValue(_colorIndex, adrs, 1);
-        adrs++;
-    }
+    MACHINE.ram.fill(0, _destScreen, _destScreen+32000);
 }
 
 /**
@@ -463,6 +467,74 @@ function ST_isCustomAdrs(_p) {
 	return false;
 }
 
+// OUT: regs.a[0] ==> backbuffer (to draw in)
+// OUT: regs.a[1] ==> shown buffer
+// only a0 is written if no double buffer
+function ST_updateScreenHelper(_params) {
+    if (!_params) _params = ST_CURHELPER;
+    else ST_CURHELPER = _params;
+    let ptr = _params.bitplanes;
+    if (_params.double) {
+        _params.swapCounter ^= 1;
+        if (_params.swapCounter == 1) {
+            regs.a[0] = _params.bitplanes;
+            regs.a[1] = _params.bitplanes + 32000;
+        } else {
+            regs.a[0] = _params.bitplanes + 32000;
+            regs.a[1] = _params.bitplanes;
+        }
+    } else {
+        regs.a[0] = _params.bitplanes;
+        regs.a[1] = _params.bitplanes;
+    }
+        
+    _params.backBuffer = regs.a[0];
+    _params.frontBuffer = regs.a[1];
+
+    ST_PHYSICAL_SCREEN = _params.frontBuffer;
+    ST_setCustomFromPtr_B(ST_SCREEN_HI,(ST_PHYSICAL_SCREEN>>>16)&255);
+    ST_setCustomFromPtr_B(ST_SCREEN_MID,(ST_PHYSICAL_SCREEN>>>8)&255);
+    switch(ST_MODEL) {
+        case ATARI_MODEL_ST:
+            if ((ST_PHYSICAL_SCREEN&255) != 0)
+                console.error("on ST, screen address must be aligned on 256 bytes");
+        break;
+        case ATARI_MODEL_STE:
+            if ((ST_PHYSICAL_SCREEN&1) != 0) 
+                console.error("on STE, screen address must be WORD aligned");
+            ST_setCustomFromPtr_B(STE_SCREEN_LOW,ST_PHYSICAL_SCREEN&255);
+        break;
+    }
+}
+
+
+/**
+ST_GetScreenHelper(_params)
+input _params = {
+    double      : double buffering (true/false, default: false)
+}
+*/
+function  ST_GetScreenHelper(_params) {
+    _params.bplCount = 4;
+    _params.width = 320;
+    _params.height = 200;
+    if (!_params.double) _params.double = false;
+    _params.lineBytes = Math.floor(_params.width / 8);
+    ST_CURHELPER = _params;
+
+    ST_start();
+    _params.alloc = 32000;
+    if (_params.double) {
+        _params.swapCounter = 0;
+        _params.alloc *= 2;
+    }
+    _params.bitplanes = MACHINE.allocRAM(_params.alloc, 2, 'ST_GetScreenHelper: bitplanes');
+    ST_updateScreenHelper(_params);
+    _params.update = ST_updateScreenHelper;
+    _params.plot = ST_drawPix;
+    _params.cls = ST_clearScreen;
+    return _params;
+}
 
 
 function ST_CheckBlitterStart(_index, _value) {

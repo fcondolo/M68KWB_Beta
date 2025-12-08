@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"testAmigaBlitter", 
-  platform:"OCS",
-  rootPath:"fx/tutorials",
-  source:"testAmigaBlitter.asm"
-});
-
 class testAmigaBlitter {
     FX_Init() {
       let t = this;

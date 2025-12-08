@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"CopperJelly", 
-  platform:"OCS", 
-  rootPath:"fx/amiga/CopperJelly",
-  source:"CopperJelly.s"
-});
-
 class CopperJelly {
   FX_Init() {
     invoke68K("init");

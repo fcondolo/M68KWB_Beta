@@ -1,12 +1,3 @@
-
-
-REGISTER_FX({
-  classname:"AtariSTe_BlitterFill", 
-  platform:"STE", 
-  source:"AtariSTe_BlitterFill.asm",
-  rootPath:"fx/tutorials",
-});
-
 class AtariSTe_BlitterFill {
   FX_Init() {
       invoke68K("init");
