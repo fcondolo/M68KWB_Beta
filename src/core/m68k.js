@@ -297,16 +297,11 @@ function unlock(_reg, _check = true) {
 
   let clrTab = null;
   if (reg.tab == regs.a) clrTab = lockDataA; else clrTab = lockDataD;
-  let data = reg.tab[reg.ind];
 
   if (_check) {
-    if (!data)
+    if (clrTab[reg.ind] == null)
       runtimeError68k("can't unlock " + _reg + " : register is not locked");
-  
-    if (reg.tab[reg.ind] & data.mask != data.val)
-      runtimeError68k("unlock failed for:" + _reg + ". Value changed");  
   }
-
   clrTab[reg.ind] = null;
 }
 

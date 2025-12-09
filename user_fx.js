@@ -138,6 +138,14 @@ var user_fx = [
         source:     "CopperJelly.s",
         js:         'fx/amiga/CopperJelly/CopperJelly.js'
     },
+    {   // WRITER
+        fxName:     "Writer",
+        platform:   "OCS",
+        rootPath:   "fx/tutorials/writer",
+        source:     "src/writer.asm",
+        asmInit:    "init",
+        asmUpdate:  "update"
+    },
 
     // ************************************* TUTORIALS
     {
