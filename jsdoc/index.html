@@ -148,6 +148,16 @@
               
                 
                 <li><a
+                  href='#atari_psg'
+                  class="">
+                  ATARI_PSG
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#st_getxscreenofs'
                   class="">
                   ST_getXScreenOfs
@@ -178,6 +188,16 @@
               
                 
                 <li><a
+                  href='#st_getxyfromofs'
+                  class="">
+                  ST_getXYFromOfs
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#st_drawpix'
                   class="">
                   ST_drawPix
@@ -198,9 +218,29 @@
               
                 
                 <li><a
+                  href='#st_getscreenhelper'
+                  class="">
+                  ST_GetScreenHelper
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
                   href='#st_getcustom_b'
                   class="">
                   ST_getCustom_B
+                  
+                </a>
+                
+                </li>
+              
+                
+                <li><a
+                  href='#st_getcustom_w'
+                  class="">
+                  ST_getCustom_W
                   
                 </a>
                 
@@ -369,6 +409,24 @@
                       </a></li>
                       
                       <li><a
+                        href='#js_asm_toolsgetfilesizefromurl'
+                        class='regular pre-open'>
+                        #getFileSizeFromURL
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolsgetfilesizefromadrs'
+                        class='regular pre-open'>
+                        #getFileSizeFromAdrs
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolsgetfileadrsfromurl'
+                        class='regular pre-open'>
+                        #getFileAdrsFromURL
+                      </a></li>
+                      
+                      <li><a
                         href='#js_asm_toolsgetconstvalue'
                         class='regular pre-open'>
                         #getConstValue
@@ -378,6 +436,12 @@
                         href='#js_asm_toolsgetvariable'
                         class='regular pre-open'>
                         #getVariable
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolssetvariable'
+                        class='regular pre-open'>
+                        #setVariable
                       </a></li>
                       
                       <li><a
@@ -516,6 +580,36 @@
                         href='#js_asm_toolsscreenshot'
                         class='regular pre-open'>
                         #Screenshot
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolslimitread'
+                        class='regular pre-open'>
+                        #limitRead
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolsfreeread'
+                        class='regular pre-open'>
+                        #freeRead
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolslimitwrite'
+                        class='regular pre-open'>
+                        #limitWrite
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolsfreewrite'
+                        class='regular pre-open'>
+                        #freeWrite
+                      </a></li>
+                      
+                      <li><a
+                        href='#js_asm_toolsloadstringfiles'
+                        class='regular pre-open'>
+                        #LoadStringFiles
                       </a></li>
                       
                     </ul>
@@ -1465,6 +1559,55 @@ Same as AMIGA_setCustom_L(), except that the parameter is not relative to $dff00
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='atari_psg'>
+      ATARI_PSG
+    </h3>
+    
+    
+  </div>
+  
+
+  
+    <div class='pre p1 fill-light mt0'>new ATARI_PSG()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='st_getxscreenofs'>
       ST_getXScreenOfs
     </h3>
@@ -1681,6 +1824,79 @@ Same as AMIGA_setCustom_L(), except that the parameter is not relative to $dff00
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='st_getxyfromofs'>
+      ST_getXYFromOfs
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>ST_getXYFromOfs(_msk, _ofs)</p>
+
+    <div class='pre p1 fill-light mt0'>new ST_getXYFromOfs(_msk: any, _ofs: any)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_msk</span> <code class='quiet'>(any)</code>
+	    :   word mask used to display the pix within the 16 bits block
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_ofs</span> <code class='quiet'>(any)</code>
+	    :   ofs of the 16 bits block in screen
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='st_drawpix'>
       ST_drawPix
     </h3>
@@ -1862,6 +2078,72 @@ Same as AMIGA_setCustom_L(), except that the parameter is not relative to $dff00
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='st_getscreenhelper'>
+      ST_GetScreenHelper
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>ST_GetScreenHelper(_params)
+input _params = {
+double      : double buffering (true/false, default: false)
+}</p>
+
+    <div class='pre p1 fill-light mt0'>new ST_GetScreenHelper(_params: any)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_params</span> <code class='quiet'>(any)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='st_getcustom_b'>
       ST_getCustom_B
     </h3>
@@ -1870,10 +2152,83 @@ Same as AMIGA_setCustom_L(), except that the parameter is not relative to $dff00
   </div>
   
 
-  <p>ST_getCustom(_index)
-Returns the current 16 bit value of a custom register</p>
+  <p>ST_getCustom_W(_index)
+Returns the current 8 bit value of a custom register</p>
 
     <div class='pre p1 fill-light mt0'>new ST_getCustom_B(_index: any): any</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_index</span> <code class='quiet'>(any)</code>
+	    :   custom register index (relative to ST_CUSTOM_START)
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code>any</code>:
+        the register's 8 bit value
+
+      
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+          
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
+    <h3 class='fl m0' id='st_getcustom_w'>
+      ST_getCustom_W
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>ST_getCustom_W(_index)
+Returns the current 16 bit value of a custom register</p>
+
+    <div class='pre p1 fill-light mt0'>new ST_getCustom_W(_index: any): any</div>
   
   
 
@@ -2777,7 +3132,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> yOfs = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">40</span>, lineY);</pre>
     
       
-      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title class_">JSInt32ToAsm</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">79</span>, <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]))); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
+      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">MULS_68K</span>(<span class="hljs-number">79</span>, <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>])); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
     
   
 
@@ -2880,7 +3235,7 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
       <pre class='p1 overflow-auto round fill-light'><span class="hljs-keyword">let</span> slope = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(delta, iter);</pre>
     
       
-      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title class_">JSInt32ToAsm</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt32</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]), <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">1</span>]))); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
+      <pre class='p1 overflow-auto round fill-light'>regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>] = <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">DIVS_68K</span>(<span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt32</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">0</span>]), <span class="hljs-variable constant_">TOOLS</span>.<span class="hljs-title function_">toInt16</span>(regs.<span class="hljs-property">d</span>[<span class="hljs-number">1</span>]); <span class="hljs-comment">// remember that regiters are stored as unsigned long while JS variables are signed integers, so need to convert</span></pre>
     
   
 
@@ -3366,6 +3721,243 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
       </div>
     </div>
   
+    <div class='border-bottom' id='js_asm_toolsgetfilesizefromurl'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getFileSizeFromURL(_url)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Returns the size of a file given its URL (typicall loaded through incbin)</p>
+
+    <div class='pre p1 fill-light mt0'>getFileSizeFromURL(_url: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_url</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    file local path (path used to incbin for example)
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
+        the file size in bytes (bytes actually loaded in RAM)
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Throws</div>
+    <ul>
+      
+        <li>any: breakpoint if file not found in the list of loaded files
+</li>
+      
+    </ul>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolsgetfilesizefromadrs'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getFileSizeFromAdrs(_adrs)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Returns the size of a file given its address</p>
+
+    <div class='pre p1 fill-light mt0'>getFileSizeFromAdrs(_adrs: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_adrs</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    the address where the file was loaded
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
+        the file size in bytes
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Throws</div>
+    <ul>
+      
+        <li>any: breakpoint if file not found in the list of loaded files
+</li>
+      
+    </ul>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolsgetfileadrsfromurl'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>getFileAdrsFromURL(_url)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Returns the address at which a file was loaded given its URL</p>
+
+    <div class='pre p1 fill-light mt0'>getFileAdrsFromURL(_url: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>): <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_url</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    file local path (path used to incbin for example)
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+    
+      <div class='py1 quiet mt1 prose-big'>Returns</div>
+      <code><a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></code>:
+        the file address (where it' ben loaded in RAM)
+
+      
+    
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Throws</div>
+    <ul>
+      
+        <li>any: breakpoint if file not found in the list of loaded files
+</li>
+      
+    </ul>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
     <div class='border-bottom' id='js_asm_toolsgetconstvalue'>
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
@@ -3524,6 +4116,87 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
 
       
     
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolssetvariable'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>setVariable(_name, _value, _size)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Sets the value at a given label</p>
+
+    <div class='pre p1 fill-light mt0'>setVariable(_name: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>, _value: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>, _size: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_name</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    Label's name
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_value</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    The value to set
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_size</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a>)</code>
+	    Bytes to write (1, 2 or 4)
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
   
 
   
@@ -5557,6 +6230,327 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
 	    If null, will generate a name as follows: "&#x3C;fx_classname>
 <em>frame</em>
 &#x3C;frame_number>"
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolslimitread'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>limitRead(_min, _max)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Forbids memory read access outside a given zone [_min, _max[</p>
+
+    <div class='pre p1 fill-light mt0'>limitRead(_min: integer, _max: integer)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_min</span> <code class='quiet'>(integer)</code>
+	    Minimum allowed read address (inclusive)
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_max</span> <code class='quiet'>(integer)</code>
+	    Maximum allowed read address (exclusive)
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolsfreeread'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>freeRead()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Cancels memory read limit</p>
+
+    <div class='pre p1 fill-light mt0'>freeRead()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolslimitwrite'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>limitWrite(_min, _max)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Forbids memory write access outside a given zone [_min, _max[</p>
+
+    <div class='pre p1 fill-light mt0'>limitWrite(_min: integer, _max: integer)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_min</span> <code class='quiet'>(integer)</code>
+	    Minimum allowed write address (inclusive)
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_max</span> <code class='quiet'>(integer)</code>
+	    Maximum allowed write address (exclusive)
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolsfreewrite'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>freeWrite()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Cancels memory write limit</p>
+
+    <div class='pre p1 fill-light mt0'>freeWrite()</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolsloadstringfiles'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>LoadStringFiles(_paths, _onLoaded, _path)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Loads a file and returs its contents as a string</p>
+
+    <div class='pre p1 fill-light mt0'>LoadStringFiles(_paths: any, _onLoaded: any, _path: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_paths</span> <code class='quiet'>(any)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_onLoaded</span> <code class='quiet'>(any)</code>
+	    
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_path</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    The file's path
 
           </div>
           

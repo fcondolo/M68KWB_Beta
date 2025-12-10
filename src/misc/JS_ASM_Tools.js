@@ -208,6 +208,68 @@ class JS_ASM_Tools {
 
 
   /**
+   * Returns the size of a file given its URL (typicall loaded through incbin)
+   * @param   {string} _url  - file local path (path used to incbin for example)
+   * @returns {number} the file size in bytes (bytes actually loaded in RAM)
+   * @throws     breakpoint if file not found in the list of loaded files
+  */
+  getFileSizeFromURL(_url) {
+    let url = "";
+    if (FX_INFO && FX_INFO.rootPath) {
+      url = FX_INFO.rootPath.toUpperCase();
+    }
+    if (url[url.length-1] != '/')
+      url += '/';
+    url += _url.toUpperCase();
+
+    if (CODERPARSER_SINGLETON && CODERPARSER_SINGLETON.loadedFiles) {
+      const f = CODERPARSER_SINGLETON.loadedFiles;
+      for (let i = 0; i < f.length; i++) {
+        if (f[i].name == url)
+          return f[i].size;
+      }
+    }
+    debug(_url + " not found");
+  }
+
+  /**
+   * Returns the size of a file given its address
+   * @param   {number} _adrs  - the address where the file was loaded
+   * @returns {number} the file size in bytes
+   * @throws     breakpoint if file not found in the list of loaded files
+  */
+  getFileSizeFromAdrs(_adrs) {
+    if (CODERPARSER_SINGLETON && CODERPARSER_SINGLETON.loadedFiles) {
+      const f = CODERPARSER_SINGLETON.loadedFiles;
+      for (let i = 0; i < f.length; i++) {
+        if (f[i].adrs == _adrs)
+          return f[i].bytes;
+      }
+    }
+    debug("file not found");
+  }
+
+
+  /**
+   * Returns the address at which a file was loaded given its URL
+   * @param   {string} _url  - file local path (path used to incbin for example)
+   * @returns {number} the file address (where it' ben loaded in RAM)
+   * @throws     breakpoint if file not found in the list of loaded files
+  */
+  getFileAdrsFromURL(_url) {
+    const url = _url.toUpperCase();
+    if (CODERPARSER_SINGLETON && CODERPARSER_SINGLETON.loadedFiles) {
+      const f = CODERPARSER_SINGLETON.loadedFiles;
+      for (let i = 0; i < f.length; i++) {
+        if (f[i].name == url)
+          return f[i].adrs;
+      }
+    }
+    debug(_url + " not found");
+  }
+
+
+  /**
    * Retrieves the value of an asm constant declared with 'EQU' or '='
    * @param   {string} _label  - the name of the constant
    * @param   {boolean} _canFail  - (optional) set to true is the constant search can fail silently (default: false)
@@ -669,7 +731,42 @@ class JS_ASM_Tools {
     saveLink.click();  
   }
 
-  
+  /**
+   * Forbids memory read access outside a given zone [_min, _max[
+   * @param {integer} _min  - Minimum allowed read address (inclusive)
+   * @param {integer} _max  - Maximum allowed read address (exclusive)
+   */
+  limitRead(_min, _max) {
+    CPU_DBG_READ_ALLOW_START = _min;
+    CPU_DBG_READ_ALLOW_END = _max;
+  }
+
+  /**
+   * Cancels memory read limit
+   */
+  freeRead() {
+    CPU_DBG_READ_ALLOW_START = -1;
+    CPU_DBG_READ_ALLOW_END = -1;
+  }
+
+  /**
+   * Forbids memory write access outside a given zone [_min, _max[
+   * @param {integer} _min  - Minimum allowed write address (inclusive)
+   * @param {integer} _max  - Maximum allowed write address (exclusive)
+   */
+  limitWrite(_min, _max) {
+    CPU_DBG_WRITE_ALLOW_START = _min;
+    CPU_DBG_WRITE_ALLOW_END = _max;
+  }
+
+  /**
+   * Cancels memory write limit
+   */
+  freeWrite() {
+    CPU_DBG_WRITE_ALLOW_START = -1;
+    CPU_DBG_WRITE_ALLOW_END = -1;
+  }
+ 
   /**
    * Loads a file and returs its contents as a string
    * @param {string} _path  - The file's path

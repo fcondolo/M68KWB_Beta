@@ -1,2 +1,2 @@
 backBuf:
-    ds.b    10240
+    ds.b    SCR_W_BYTES*SCR_H

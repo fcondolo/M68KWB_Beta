@@ -3,6 +3,9 @@ ASCII_SPACE     EQU 32
 
 text:
         dc.b    ASCII_NEWLINE,ASCII_NEWLINE,ASCII_NEWLINE
+        IFD TARGET_OCS
+        dc.b    ASCII_NEWLINE,ASCII_NEWLINE
+        ENDC
         dc.b    ASCII_NEWLINE,'             M68KWB RULEZ!            '
         dc.b    ASCII_NEWLINE,'         KEEP CODING THE 68000        '
         dc.b	ASCII_NEWLINE,"  5 FINGER PUNCH,ALCATRAZ,DESIRE,DHS  "
@@ -25,6 +28,7 @@ text:
 fontData:
     incbin "data/font8x8_bitplanes.bin"
 
+    IFD TARGET_OCS
 cplist:
        dc.w   DIWSTRT,$2c81 ; PAL default window start
        dc.w   DIWSTOP,$2cc1 ; PAL default window stop
@@ -33,6 +37,7 @@ cplist:
        dc.w   DMACON, $83c0 ; blitter + copper + bitplane DMA
        dc.w   BPLCON0,$1200  ;1 bitplane
        dc.w   $ffff,$fffe
+    ENDC
 
 FONT_LETTERS_PER_LINE   EQU 30
 FONT_IMG_W_BYTES        EQU 240/8

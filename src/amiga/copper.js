@@ -20,14 +20,30 @@ function copper_toHTML() {
 	if (!ptr) {
 		return "nothing found at $dff080. Please set a copperlist";
 	}
+	if (MACHINE.stop) {
+		return ("can't dump copperlist, machine is stopped due to a previous error");
+	}
 	let reached255 = 0;
 	let watchdog = 0;
 	DEBUGGER_copperListDump = "<table><tr><th>adrs</th><th>opcode</th><th>instruction</th></tr>";
 
+	MACHINE.pauseMemCheck();
+
 	while (true) {
 		const word1 = MACHINE.getRAMValue(ptr,2,false);
+		if (MACHINE.stop) {
+			MACHINE.unpauseMemCheck();
+			return ("error, COPPER reading an invalid address");
+		}
 		const word2 = MACHINE.getRAMValue(ptr+2,2,false);
-		if (MACHINE.stop) return;
+		if (MACHINE.stop) {
+			MACHINE.unpauseMemCheck();
+			return ("error, COPPER reading an invalid address");
+		}
+		if (MACHINE.stop) {
+			MACHINE.unpauseMemCheck();
+			return ("error, COPPER reading an invalid address");
+		}
 
 		let w1s = CPER_4digitHex(word1);
 		while (w1s.length<4) w1s = "0"+w1s;
@@ -38,6 +54,7 @@ function copper_toHTML() {
 		if ((word1&1)  != 0) { // wait
 			if (word1 == 0xffff) { // end of copperlist?
 				DEBUGGER_copperListDump += "<td>END OF COPPERLIST</td></tr></table>";
+				MACHINE.unpauseMemCheck();
 				return DEBUGGER_copperListDump;
 			}
 			let yToWait = (word1 >>> 8) & 0xff;
@@ -56,9 +73,11 @@ function copper_toHTML() {
 		watchdog++;
 		if (watchdog > 2048) {
 			DEBUGGER_copperListDump += "<td>STOPPING - TOO MANY INSTRUCTIONS</td></tr></table>";
+			MACHINE.unpauseMemCheck();
 			return DEBUGGER_copperListDump;
 		}
 	}
+	MACHINE.unpauseMemCheck();
 }
 
 function copper_onNewFrame() {
@@ -106,16 +125,23 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 	if (!cplist || !cper_cur)
 		return false;
 
+	if (MACHINE.stop)
+		return false;
+
+	MACHINE.pauseMemCheck();
 
 	const word1 = MACHINE.getRAMValue(cper_cur,2,false);
 	const word2 = MACHINE.getRAMValue(cper_cur+2,2,false);
 
 	if ((word1&1)  != 0) { // wait
-		if (_breakIfWait)
+		if (_breakIfWait) {
+			MACHINE.unpauseMemCheck();
 			return false;
+		}
 		if ((word2 & (1<<15)) == 0) // wait blitter bit is cleared ==> wait for blitter (yes, wait when it's cleared, not set)
 			AMIGA_NEED_WAIT_BLT = false;
 		if (word1 == 0xffff) { // end of copperlist?
+			MACHINE.unpauseMemCheck();
 			return false;
 		}
 		if ((word2&0xff) == 0)
@@ -136,6 +162,7 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 			else
 				cper_cur += 8;	// this was a SKIP, skip next instruction
 			copperExecMove = 0; // See note 1
+			MACHINE.unpauseMemCheck();
 			return true;
 		} else {
 			if ((word2 & 1) != 0) {
@@ -143,6 +170,7 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 				copperExecMove = 0;
 			}
 		}
+		MACHINE.unpauseMemCheck();
 		return false;
 	}
 	else { // move
@@ -156,6 +184,8 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 		}
 		else
 			copperExecMove = 16; // See tests
+		MACHINE.unpauseMemCheck();
 		return true;
 	}
+	MACHINE.unpauseMemCheck();
 }

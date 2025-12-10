@@ -1489,6 +1489,10 @@ class CodeParser {
         ln.jsString = ln.jsString.replaceAll("getram(","MACHINE.getRAMValue(");
         ln.jsString = ln.jsString.replaceAll("print(","DEBUGGER_LOG(");
         ln.jsString = ln.jsString.replaceAll("struct(","TOOLS.getStructField(");
+        ln.jsString = ln.jsString.replaceAll("limitRead(", "TOOLS.limitRead(");
+        ln.jsString = ln.jsString.replaceAll("freeRead(", "TOOLS.freeRead(");
+        ln.jsString = ln.jsString.replaceAll("limitWrite(", "TOOLS.limitWrite(");
+        ln.jsString = ln.jsString.replaceAll("freeWrite(", "TOOLS.freeWrite(");
         
         for (let rr = 0; rr < t.constants.length; rr++) {
           const ind = ln.jsString.indexOf(t.constants[rr].name);

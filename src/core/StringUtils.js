@@ -204,13 +204,18 @@ function load_binary_resource(_url, _label) {
   if (req.status != 200) {
     return "failed loading binary file";
   }
-  if ((!req.responseText.length) || (req.responseText.length <= 0)) {
+  const bytes = req.responseText.length;
+  if ((!bytes) || (bytes <= 0)) {
     main_Alert("Can't load empty file: " + _url);
     return null;
   }
-  let byteArray = MACHINE.allocRAM(req.responseText.length, 1, "load binary file: " + _url);
+  if (!CODERPARSER_SINGLETON.loadedFiles) {
+    CODERPARSER_SINGLETON.loadedFiles = [];
+  }
+  let byteArray = MACHINE.allocRAM(bytes, 1, "load binary file: " + _url);
+  CODERPARSER_SINGLETON.loadedFiles.push({name:_url.toUpperCase(), size:bytes, adrs:byteArray});
   let w = byteArray;
-  for (var i = 0; i < req.responseText.length; ++i) {
+  for (var i = 0; i < bytes; ++i) {
     w = MACHINE.setRAMValue(req.responseText.charCodeAt(i) & 0xff, w, 1);
   }
   if ((!_label.dcData) || (byteArray < _label.dcData))

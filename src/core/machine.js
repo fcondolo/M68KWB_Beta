@@ -348,6 +348,25 @@ class M68K_Machine {
         return true;
     }   
 
+
+    pauseMemCheck() {
+    	DBGVAR.memchk1 = CPU_DBG_WRITE_ALLOW_START;
+        DBGVAR.memchk2 = CPU_DBG_WRITE_ALLOW_END;
+        DBGVAR.memchk3 = CPU_DBG_READ_ALLOW_START;
+        DBGVAR.memchk4 = CPU_DBG_READ_ALLOW_END;
+    	CPU_DBG_WRITE_ALLOW_START = -1;
+        CPU_DBG_WRITE_ALLOW_END = -1;
+        CPU_DBG_READ_ALLOW_START = -1;
+        CPU_DBG_READ_ALLOW_END = -1;
+    }
+
+    unpauseMemCheck() {
+    	CPU_DBG_WRITE_ALLOW_START = DBGVAR.memchk1;
+        CPU_DBG_WRITE_ALLOW_END = DBGVAR.memchk2;
+        CPU_DBG_READ_ALLOW_START = DBGVAR.memchk3;
+        CPU_DBG_READ_ALLOW_END = DBGVAR.memchk4;
+    }
+
     /**
     getRAMValue fetches a byte, word or long from a given address
     @param      {number} _at     -   'address' to read
@@ -372,6 +391,8 @@ class M68K_Machine {
                     debugger;
                     throw new Error(msg);
                 }
+                t.stop = true;
+                return 0;
             }
         }
         DEBUGGER_lastReadAdrs = _at;
