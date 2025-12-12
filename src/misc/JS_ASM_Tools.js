@@ -763,8 +763,8 @@ class JS_ASM_Tools {
    * Cancels memory write limit
    */
   freeWrite() {
-    CPU_DBG_WRITE_ALLOW_START = -1;
-    CPU_DBG_WRITE_ALLOW_END = -1;
+    CPU_DBG_WRITE_ALLOW_START = 0;
+    CPU_DBG_WRITE_ALLOW_END = 9999999;
   }
  
   /**

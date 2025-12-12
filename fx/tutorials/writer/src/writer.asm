@@ -2,7 +2,6 @@
 
 init:
     bsr         font_init
-
     IFD TARGET_OCS
     lea         $dff000,a6
     ;>JS lock('a6', 0xffffffff, "custom regs")
