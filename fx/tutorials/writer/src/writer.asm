@@ -19,6 +19,7 @@ init:
 
 showA0  MACRO
     IFD TARGET_OCS
+    ;>JS if (a6.ul != 0xdff000) debug("a6 is supposed to point to custom registers")
     move.l      a0,BPL1PTH(a6)
     ELSE
     move.l      a0,d0
