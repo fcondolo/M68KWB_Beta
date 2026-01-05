@@ -265,8 +265,10 @@ class M68K_Machine {
             if (!CPU_isCustomAdrs(_v)) {
                 let msg = null;
                 if ((_v + _s) > CPU_DBG_WRITE_FORBID_START && _v < CPU_DBG_WRITE_FORBID_END) {
-                    msg = "Writing in forbidden zone [CPU_DBG_WRITE_FORBID_START..CPU_DBG_WRITE_FORBID_END]\n";
-                    msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_WRITE_FORBID_START, CPU_DBG_WRITE_FORBID_END);                    
+                    msg = "Writing in forbidden zone at address  = $" + _v.toString(16);
+                    msg += "\n- Code: " + M68K_CURLINE.filtered;
+                    msg += "\n- CPU_DBG_WRITE_FORBID_START = $" + CPU_DBG_WRITE_FORBID_START.toString(16);
+                    msg += "\n- CPU_DBG_WRITE_FORBID_END = $" + CPU_DBG_WRITE_FORBID_END.toString(16);
                 }
                 if (_v < ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES && _v >= M68K_VECTORS_ZONE_SIZE) {
                     msg = "Overwriting code section at $" + _v.toString(16);
