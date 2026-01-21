@@ -4,10 +4,13 @@
 var AUDIO_SINGLETON = null;
 
 class Audio {
-  constructor() {
+  constructor(_ctx) {
     let t = this;
     AUDIO_SINGLETON = this;
-    t.audioCtx = new AudioContext();
+    if (_ctx)
+      t.audioCtx = _ctx;
+    else
+      t.audioCtx = new AudioContext();
     t.channels = 2;
     t.waitFile = null;
     t.source = null;
@@ -90,6 +93,37 @@ memoryToByteArray(_start, _stop) {
   return ret;
 }
 
+playSampleFromAdrs(_adrs, _size, _freq) {
+    if (!_freq) _freq = 22050;
+    let t = this;
+    let buf = t.memoryToInt8(_adrs, _adrs + _size);
+    t.playBuffer(t.signedByteArrayToBuffer(buf.data,_freq,1));
+  }
+  
+memoryToInt8(_start, _stop) {
+  let t = this;
+  let len = _stop - _start;
+  let ret = {};
+  ret.rate = t.audioCtx.sampleRate;
+  ret.bits = 8;
+  ret.size = len;
+  ret.data = new Int8Array(len);
+  let min,max;
+  for (let i = 0; i < len; i++) {
+    let v = MACHINE.ram[_start + i];
+    ret.data[i] = castByte(v);
+    if (i == 0) {
+      min = ret.data[i];
+      max = ret.data[i];
+    } else {
+      min = Math.min(min, ret.data[i]);
+      max = Math.max(max, ret.data[i]);
+    }
+  }
+  console.log("memoryToInt8 min=" + min + ", max=" + max);
+  return ret;
+}
+
 byteArrayToBuffer(_array, _samplesPerSec, _channelsCount = 1) {
     let t = this;
     let smoothing = false;
@@ -129,6 +163,66 @@ byteArrayToBuffer(_array, _samplesPerSec, _channelsCount = 1) {
 
 
   
+  manualResample(audioBuffer, targetSampleRate) {
+  const ratio = targetSampleRate / audioBuffer.sampleRate;
+  const numChannels = audioBuffer.numberOfChannels;
+  const length = Math.round(audioBuffer.length * ratio);
+  const newBuffer = new AudioContext().createBuffer(numChannels, length, targetSampleRate);
+
+  for (let ch = 0; ch < numChannels; ch++) {
+    const input = audioBuffer.getChannelData(ch);
+    const output = newBuffer.getChannelData(ch);
+    for (let i = 0; i < length; i++) {
+      const srcIndex = i / ratio;
+      const i0 = Math.floor(srcIndex);
+      const i1 = Math.min(i0 + 1, input.length - 1);
+      const frac = srcIndex - i0;
+      output[i] = input[i0] * (1 - frac) + input[i1] * frac; // linear interpolation
+    }
+  }
+  return newBuffer;
+  }
+
+  signedByteArrayToBuffer(_array, _samplesPerSec, _channelsCount = 1, _maxLen = 0) {
+    let t = this;
+    let smoothing = false;
+    let len = _array.length;
+    if (_maxLen > 0) len = Math.min(len,_maxLen);
+    const duration = Math.floor(len /  _samplesPerSec);
+    const rate = t.audioCtx.sampleRate;
+    let  buffer = new AudioBuffer({
+      numberOfChannels: _channelsCount,
+      length: duration * rate,
+      sampleRate: rate,
+    });
+
+    if (t.audioCtx.sampleRate < _samplesPerSec) {
+      console.error("web sample rate is lower than sample");
+      debugger;
+    }
+    const repeat = Math.floor(t.audioCtx.sampleRate/_samplesPerSec);
+    let nowBuffering = buffer.getChannelData(0);
+    let ofs = 0;
+    let prevS = 0;
+    for (let i = 0; i < len; i++) {
+      let s = _array[i]; // -128..127
+      s /= 128.0; // -1..1
+      if (smoothing) {
+        if (i>0) s = (s + prevS )/2;
+        prevS = s;
+      }
+      for (let cpy = 0; cpy < repeat; cpy++) {
+        nowBuffering[ofs++] = s; 
+      }
+    }
+    if (nowBuffering.length-ofs > 0) {
+      console.log("padding " + (nowBuffering.length-ofs).toString() +  "/" + nowBuffering.length + " bytes");
+      while (ofs < nowBuffering.length) nowBuffering[ofs++] = 0;  
+    }
+    return this.manualResample(buffer,_samplesPerSec);
+  }
+
+ 
 
   playBuffer(_buf) {
     let t = this;

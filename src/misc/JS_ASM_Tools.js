@@ -763,8 +763,8 @@ class JS_ASM_Tools {
    * Cancels memory write limit
    */
   freeWrite() {
-    CPU_DBG_WRITE_ALLOW_START = 0;
-    CPU_DBG_WRITE_ALLOW_END = 9999999;
+  CPU_DBG_WRITE_ALLOW_START = 0;
+  CPU_DBG_WRITE_ALLOW_END = 9999999;
   }
  
   /**
@@ -823,6 +823,43 @@ class JS_ASM_Tools {
       }
     }
   }
+
+  loadPNGFromURL(url, _customData) {
+    return new Promise((resolve) => {
+      let rootPath = "";
+      if (FX_INFO && FX_INFO.rootPath)
+        rootPath= FX_INFO.rootPath;
+      if (rootPath.length > 0 && rootPath[rootPath.length-1] != '/')
+          rootPath += "/";    
+      url = rootPath + url;
+
+      const img = new Image();
+      img.M68KWB_customData = _customData;
+      img.crossOrigin = "anonymous"; // important even on localhost
+      img.onerror = () => {
+        MYFX.onPNGLoaded({error:"can't load: " + img.src});
+      }
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, img.width, img.height);
+        resolve(MYFX.onPNGLoaded ({
+          customData:img.M68KWB_customData,
+          width: img.width,
+          height: img.height,
+          data: imageData.data
+        }));
+      };
+
+      img.src = url;
+    });
+  }
+
 }
 
 

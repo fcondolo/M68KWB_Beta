@@ -206,7 +206,7 @@ function main_startAll() {
   }
   if (FX_INFO.hasAudio) {
     try {
-      AUDIO_SINGLETON = new Audio();
+      new Audio();
     } catch(e) {
       alert("Could not create Audio:\n" + e);
     }
@@ -253,7 +253,11 @@ function showMouseCoord(event) {
   document.getElementById("mouseCoordLabel").innerHTML = px + ", " + py;
 
   var elm = document.getElementById('mouseFollow').style;
-  setTooltipPos(event,elm);	
+  setTooltipPos(event,elm);
+  if (MYFX) {
+    MYFX.mouseX = px;
+    MYFX.mouseY = py;
+  }
 }
 
 

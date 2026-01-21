@@ -816,7 +816,7 @@ function DEBUGGER_BeforeInstr() {
     document.getElementById('mycvs').focus();
     onNewOutputResolution();
     DEBUGGER_QueryDisplayRefresh = true;
-    MACHINE.customUpdate();
+    //MACHINE.customUpdate(); DO NOT REFRESH HERE
     return;
   }
 
@@ -848,7 +848,7 @@ function DEBUGGER_BeforeInstr() {
         else {
           DEBUGGER_lastBreakPointProcessed = M68K_IP;
           DEBUGGER_update(true);
-          MACHINE.customUpdate();
+         // MACHINE.customUpdate(); DO NOT UPDATE CUSTOM HERE!!! IT WILL TRIGGER HBL INTERRUPTS AND JUMP SOMEWHERE ELSE IN THE CODE RESULTING IN TRACING THE WRONG CODE
           imgDataToScreen();
           WATCHES.update();
 

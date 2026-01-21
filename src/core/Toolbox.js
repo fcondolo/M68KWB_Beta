@@ -168,6 +168,7 @@ class Toolbox {
             t.data["tlbx_blterclr"].checked = MACHINE.allowBlitterClearOnly;
             t.blitterContent += t.addCheckbox("Allow Blitter", "tlbx_blterglbl", ["MACHINE.allowBlt"], t.data["tlbx_blterglbl"].checked);
             t.blitterContent += t.addCheckbox("Blitter clear only", "tlbx_blterclr", ["MACHINE.allowBltClr"], t.data["tlbx_blterclr"].checked);
+            if (MACHINE.lastBlitContext) t.blitterContent += "<br>Last blit context:<br>"+MACHINE.lastBlitContext;  
         }
     }
 

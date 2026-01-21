@@ -367,7 +367,10 @@ ST_getXYFromOfs(_msk, _ofs)
 function ST_getXYFromOfs(_msk, _ofs) {
 	let y = Math.floor(_ofs/160);
     let blockOfs = _ofs % 160;
-    if (blockOfs % 8 != 0) main_Alert("ST_getXYFromOfs: wrong ofs");
+    if (blockOfs % 8 != 0) {
+        main_Alert("ST_getXYFromOfs: _ofs should be a multiple of 8 (" + _ofs + ")");
+        debugger;
+    }
     let x = (blockOfs / 8) * 16;
     for (let j = 0; j < 16; j++) {
         if (_msk == 1<<j) {
