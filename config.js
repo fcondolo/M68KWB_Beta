@@ -45,15 +45,13 @@ const ASSEMBLER_CONFIG = {
     ],
 
     overrideIncludes : [
-        {override: "ldos_atari.inc", with: null},
-        {override: "ALYFE_PrecalcAPI.i", with: null},
-        {override: "ALYFE_PrecalcAPI_FAKE.i", with: null}
+        {override: "ldos_atari.inc", with: null}    // ignore inclusions of LDOS
     ],
 
     // verify that the destination address is within range when using short branches (e.g. bcc.s, bcc.b)
     check_branch_size : true,
 
-    // number of instructions that can be rewound (still experimental)
+    // number of instructions that can be rewound
     time_machine : 128,
 
     // Allow ds.x 0, e.g: "ds.l 0". Not allowed by default, avoids stupid mistakes when wanting to tyoe "dc.l 0" and typing "ds.l 0" instead 
