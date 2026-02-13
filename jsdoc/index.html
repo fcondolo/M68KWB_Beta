@@ -612,6 +612,12 @@
                         #LoadStringFiles
                       </a></li>
                       
+                      <li><a
+                        href='#js_asm_toolsnickname'
+                        class='regular pre-open'>
+                        #nickname
+                      </a></li>
+                      
                     </ul>
                   
                   
@@ -6565,6 +6571,86 @@ Same as ST_setCustom_L(), except that the parameter is not relative to ST_CUSTOM
 
   
 
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='js_asm_toolsnickname'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>nickname(_reg, _nickName)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Sets a nickname for a register that is shown when tracing the code.</p>
+
+    <div class='pre p1 fill-light mt0'>nickname(_reg: stirng, _nickName: <a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</div>
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_reg</span> <code class='quiet'>(stirng)</code>
+	    name of the register, e.g. "d0", "a5"
+
+          </div>
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>_nickName</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String">string</a>)</code>
+	    nickname to assign to the register. Can be null to delete a nickname.
+
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Throws</div>
+    <ul>
+      
+        <li>any: error if the register name is not recognized
+</li>
+      
+    </ul>
   
 
   

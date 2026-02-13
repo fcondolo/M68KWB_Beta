@@ -1,11 +1,3 @@
-    IFD TARGET_OCS
-SCR_W_BYTES EQU 320/8
-SCR_H       EQU 256
-    ELSE
-SCR_W_BYTES EQU 160
-SCR_H       EQU 200
-    ENDC
-
 font_init:
     rts
 
@@ -53,6 +45,7 @@ font_draw:
     ;>JS freeRead()
     bra         .lp
 .endLp:
+    ;>JS freeWrite()
     ;>JS unlock('a2')
     ;>JS unlock('a3')
     ;>JS unlock('a4')

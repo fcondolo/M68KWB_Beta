@@ -1,5 +1,3 @@
-ASCII_NEWLINE   EQU 255
-ASCII_SPACE     EQU 32
 
 text:
         dc.b    ASCII_NEWLINE,ASCII_NEWLINE,ASCII_NEWLINE
@@ -39,9 +37,6 @@ cplist:
        dc.w   $ffff,$fffe
     ENDC
 
-FONT_LETTERS_PER_LINE   EQU 30
-FONT_IMG_W_BYTES        EQU 240/8
-FONT_CHAR_HEIGHT        EQU 8
 
 fontUV:
     ; line 1

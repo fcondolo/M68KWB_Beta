@@ -135,6 +135,19 @@ class CodeParser {
         t.process_oneInclude("./src/atari/atariST_Default.asm", null, t.strings.lines.length);
       break;
     }
+    // process FX extra includes
+    if (FX_INFO.xtraInclude) {
+        let pth = t.get_incxx_path(FX_INFO.xtraInclude, FX_INFO.rootPath);
+        if (pth.err) {
+          main_Alert("xtraInclude: error building full path.\npath: " + FX_INFO.xtraInclude + "\nerror: " + pth.err);
+          return false;
+        }
+
+        if (!t.process_oneInclude(pth.final, null, t.strings.lines.length)) {
+          return false;
+        }
+    }
+    
 
     if (!t.startPass()) return false;
     t.showCompilMsg("processing labels...");
@@ -499,8 +512,19 @@ class CodeParser {
 
   process_oneInclude(finalPath, ln = null, i = null) {
     let t = this;
+    finalPath = finalPath.toUpperCase();
     for (let check = 0; check < CODERPARSER_SINGLETON.includes.length; check++) {
       if (CODERPARSER_SINGLETON.includes[check] === finalPath) {
+        for (let excl = 0; excl < ASSEMBLER_CONFIG.overrideIncludes.length; excl++) {
+          const ovrwith = ASSEMBLER_CONFIG.overrideIncludes[excl].with;
+          if (ovrwith) {
+            let upExcl = ovrwith.toUpperCase();
+            if (finalPath.includes(upExcl)) {
+              return true; // ignore if overriden includes are included multiple times
+            }
+          }
+        }
+        
         let str;
         if (ln)
           str = ln.getWarningString("<br>file already included:<br>" + finalPath);
@@ -869,13 +893,26 @@ class CodeParser {
 
     let ret = {final: "", err: null};
 
+    if (!path) {
+      ret.err = "can't load file : null path";
+      return ret;
+    }
+    if (typeof path != 'string') {
+      ret.err = "can't load file : path is not a string";
+      return ret;
+    }
+
     if (rootPath) {
+      if (typeof rootPath != 'string') {
+        ret.err = "can't load file : rootPath property is set in user_fx.js, but it's not a string.";
+        return ret;
+      }
       if (rootPath[rootPath.length-1] != '/')
         rootPath += "/";
     }  
 
     if (path.length < 2) {
-      ret.err = "can't load file : path not found";
+      ret.err = "can't load file : path string is less than 2 characters";
       return ret;
     }
     let finalPath  = "";
@@ -1184,6 +1221,8 @@ class CodeParser {
 */
 
   addConstant(_ln, _name, _value) {
+    if (_ln.filtered[0] == ';')
+      return;
     let t = this;
     let c = t.constants;
     const l = c.length;
@@ -1359,6 +1398,9 @@ class CodeParser {
                 }
               }
             }
+
+             console.log("--> discarding from: " + (startDiscard-1) + "(" + t.strings.lines[startDiscard-1].filtered + ")" + ", " + t.strings.lines[startDiscard-1].getFileLineStr());
+             console.log("--> discarding first " + startDiscard + "(" + t.strings.lines[startDiscard].filtered + ")");
             while (startDiscard < endDiscard) {
              //console.log("--> discarding: " + t.strings.lines[startDiscard].filtered);
               t.strings.lines[startDiscard].makeComment();

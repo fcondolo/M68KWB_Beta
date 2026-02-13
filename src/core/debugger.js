@@ -109,13 +109,13 @@ function showHTMLError(_err, _showFileLine = true) {
 }
 
 function DEBUGGER_LOG(_s) {
-  DEBUGGER_lastJSExecLog = ">JS print(): ";
+  let s = ">JS print(): ";
   if (typeof _s === 'string' || _s instanceof String)
-      DEBUGGER_lastJSExecLog += _s.slice(0);
+      s += _s.slice(0);
   else {
-    DEBUGGER_lastJSExecLog += "$"+_s.toString(16);
+    s += "$"+_s.toString(16);
   }
-  console.log(DEBUGGER_lastJSExecLog);
+  console.log(s);
 }
 
 function onLayout() {
@@ -1750,20 +1750,36 @@ function DEBUGGER_update(_force, _showNextIntr = true) {
           str += DEBUGGER_lastJSExecLog + '<br><hr>';  
         }
         if (LAST_GETARG.length > 0) {
-          str += "last reads: ";
+          str += "last reads:<br>";
           for (let rv = 0; rv < LAST_GETARG.length; rv++) {
-            str += LAST_GETARG[rv];
+            const arg = LAST_GETARG[rv].arg;
+            str += arg.str;
+            let nick = null;
+            if (arg.reg) {
+              nick = TOOLS.nicks[arg.reg];
+            }
+            str += " = $" + LAST_GETARG[rv].val.toString(16);
+            if (nick) 
+              str += "<br>--> '" + nick + "'";
             if (rv < LAST_GETARG.length - 1)
-              str += ", ";
+              str += "<br>";
           }
           str += "<br>";
         }
         if (LAST_SETARG.length > 0) {
-          str += "last writes: ";
+          str += "last writes:<br>";
           for (let rv = 0; rv < LAST_SETARG.length; rv++) {
-            str += LAST_SETARG[rv];
+            const arg = LAST_SETARG[rv].arg;
+            str += arg.str;
+            let nick = null;
+            if (arg.reg) {
+              nick = TOOLS.nicks[arg.reg];
+            }
+            str += " = $" + LAST_SETARG[rv].val.toString(16);
+            if (nick) 
+              str += "<br>--> '" + nick + "'";
             if (rv < LAST_SETARG.length - 1)
-              str += ", ";
+              str += "<br>";
           }
           str += "<br>";
         }

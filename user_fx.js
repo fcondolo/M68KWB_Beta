@@ -14,28 +14,19 @@ var user_fx = [
         startPaused:    Boolean Yes         Always nice to have time to place breakpoints before it’s too late. Use the ‘p’ key to unpause.
         zoom:           Integer Yes         Influences the zoom slider if you want to see a bigger rendering for your fx (values in [100..200] range).
         hasAudio:       Boolean Yes         Set to true if the fx outputs sound (STe only)
+        xtraInclude:    String  Yes         Include an extra asm file. Used to simulate a library on M68KWB using a fake implementation in a dedicated file
     */
 
-    // ************************************* ATARI FX
-    {   // TEST ATARI
-        fxName:     "Test Atari",
-        classname:  "FX_testAtari", 
-        js:         'fx/atari/MISC/testAtari.js',
-        platform:   "STE", 
-        rootPath:   "fx/atari/MISC",
-        source:     "testAtari.asm"
-    },
-    {   // TEST CYCLES
-        fxName:     "Test Cycles",
-        platform:   "STE",
-        rootPath:   "fx/atari/MISC",
-        source:     "TestCycles.asm",
-        watchdog:   0,
+
+    // ************************************* AMIGA FX
+    {   // WRITER
+        fxName:     "Writer",
+        platform:   "OCS",
+        rootPath:   "fx/tutorials/writer",
+        source:     "src/writer.asm",
         asmInit:    "init",
         asmUpdate:  "update"
     },
-
-    // ************************************* AMIGA FX
     {
         fxName:     "Revision Logo V1",
         classname:  "RevisionLogo_v1", 
@@ -137,14 +128,6 @@ var user_fx = [
         rootPath:   "fx/amiga/CopperJelly",
         source:     "CopperJelly.s",
         js:         'fx/amiga/CopperJelly/CopperJelly.js'
-    },
-    {   // WRITER
-        fxName:     "Writer",
-        platform:   "OCS",
-        rootPath:   "fx/tutorials/writer",
-        source:     "src/writer.asm",
-        asmInit:    "init",
-        asmUpdate:  "update"
     },
 
     // ************************************* TUTORIALS

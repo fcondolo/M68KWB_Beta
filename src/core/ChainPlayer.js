@@ -26,7 +26,7 @@ const chain_fx = [
   "Tut5: OCS image",
   "Tut6: STE image",
   "Tut6: STE image",
-  "HAM6 image",
+  "HAM6 image"
 ];
 
 

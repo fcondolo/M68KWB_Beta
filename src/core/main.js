@@ -744,7 +744,7 @@ function main_onFXJSLoaded() {
     default: alert("'platform' field must be 'OCS', 'ST', or 'STE'"); break;
   }
   
-  new JS_ASM_Tools();
+  if (!TOOLS) new JS_ASM_Tools();
   new M68K_TimeMachine();
   new DebugPrimitives();
   

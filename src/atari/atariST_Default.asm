@@ -22,8 +22,3 @@ M68KWB_defaultMainLoop:
     rts
 
 
-
-    IFD M68KWB
-fx_canExit:
-    dc.w    0
-    ENDC

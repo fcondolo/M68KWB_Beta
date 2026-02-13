@@ -21,6 +21,7 @@ openScreen:
 ; a0 : destination bitplane
 ; d0 : pattern
 drawSquare:
+       ;>JS TOOLS.nickname("a0","bitplane ptr");
        move.w        #15,d7
 .loopY:
        ; >JS print("d7 value =" + d7.uw) 

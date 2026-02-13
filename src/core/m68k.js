@@ -1605,7 +1605,7 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
       ret.value = label.codeSectionOfs & mask;
     }
     else runtimeError68k("could not solve arg address (label not found?)");
-    if (DEBUGGER_tracing) LAST_GETARG.push("error");
+    if (DEBUGGER_tracing) LAST_GETARG.push({arg:"error", val:0});
     return ret;
   }
   switch (_arg.type) {
@@ -1648,7 +1648,7 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
     default:
       if (!isNaN(_arg.isLabelIndex)) {
         ret.value = MACHINE.getRAMValue(CODERPARSER_SINGLETON.labels[_arg.isLabelIndex].dcData + _memOfs, _size, false);
-    if (DEBUGGER_tracing) LAST_GETARG.push(_arg.str + "= $" + ret.value.toString(16));
+    if (DEBUGGER_tracing) LAST_GETARG.push({arg:_arg, val:ret.value});
         return ret;
       }
       debugger;
@@ -1656,14 +1656,14 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
       break;
   }
 
-  if (DEBUGGER_tracing) LAST_GETARG.push(_arg.str + "= $" + ret.value.toString(16));
+  if (DEBUGGER_tracing) LAST_GETARG.push({arg:_arg, val:ret.value});
   return ret;
 }
 
 function setArg(_arg, _value, _size, _signed, _ofs) {
   // if (_signed)
    // debugger; // at this stage, everything should be unsigned. decoding of signed/unsigned should be in calling instruction
-  if (DEBUGGER_tracing) LAST_SETARG.push(_arg.str + "= $" + _value.toString(16));
+  if (DEBUGGER_tracing) LAST_SETARG.push({arg:_arg, val:_value});
   let ret = {};
   let mask = 0;
   switch (_size) {

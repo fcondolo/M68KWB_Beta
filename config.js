@@ -46,8 +46,8 @@ const ASSEMBLER_CONFIG = {
 
     overrideIncludes : [
         {override: "ldos_atari.inc", with: null},
-        {override: "ALYFE_PrecalcAPI.i", with: null}
-      //  {override: "ALYFE_PrecalcAPI.i", with: "ALYFE_PrecalcAPI_M68KWB.i"}
+        {override: "ALYFE_PrecalcAPI.i", with: null},
+        {override: "ALYFE_PrecalcAPI_FAKE.i", with: null}
     ],
 
     // verify that the destination address is within range when using short branches (e.g. bcc.s, bcc.b)

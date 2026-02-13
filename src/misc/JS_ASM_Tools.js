@@ -8,10 +8,10 @@ var TOOLS = null;
 class JS_ASM_Tools {
   constructor() {
     if (TOOLS != null) {
-        debugger;
         return;
     }
     TOOLS = this;
+    this.nicks = [];
   }
 
   /**
@@ -858,6 +858,23 @@ class JS_ASM_Tools {
 
       img.src = url;
     });
+  }
+
+  /**
+   * Sets a nickname for a register that is shown when tracing the code.
+   * @param   {stirng} _reg - name of the register, e.g. "d0", "a5"
+   * @param   {string} _nickName - nickname to assign to the register. Can be null to delete a nickname.
+   * @throws error if the register name is not recognized
+   */
+  nickname(_reg, _nickName) {
+    _reg = _reg.toUpperCase();
+    let reg = registerFromName(_reg);
+    if (!reg) {
+      runtimeError68k('nickname: bad register name: ' + _reg);
+      return;
+    }
+
+    this.nicks[_reg] = _nickName;
   }
 
 }

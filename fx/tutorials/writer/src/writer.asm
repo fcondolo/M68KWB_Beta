@@ -1,7 +1,20 @@
     section code
 
+    include "src/defines.i"
+
 init:
+    lea         fxStruct,a5
+    bsr         interp_init
     bsr         font_init
+
+     ;>JS lock('a5',0xffffffff,"fxStruct")
+
+    move.l      #screen1,showScreenPtr(a5)
+    move.l      #screen2,drawScreenPtr(a5)
+
+    lea         backBuf,a0
+    bsr         font_draw
+
     IFD TARGET_OCS
     lea         $dff000,a6
     ;>JS lock('a6', 0xffffffff, "custom regs")
@@ -19,7 +32,6 @@ init:
 
 showA0  MACRO
     IFD TARGET_OCS
-    ;>JS if (a6.ul != 0xdff000) debug("a6 is supposed to point to custom registers")
     move.l      a0,BPL1PTH(a6)
     ELSE
     move.l      a0,d0
@@ -34,13 +46,18 @@ showA0  MACRO
     ENDM
 
 update:
-    lea         backBuf,a0
-    bsr         font_draw
-    lea         backBuf,a0
+    move.l      showScreenPtr(a5),d0
+    move.l      drawScreenPtr(a5),a0
+    move.l      a0,showScreenPtr(a5)
+    move.l      d0,drawScreenPtr(a5)
     showA0
+
+    bsr         interp_spawn
+    bsr         interp_update
     rts    
 
     include "src/font.asm"
+    include "src/interpolator.asm"
 
     section data_c
     include "src/data.asm"

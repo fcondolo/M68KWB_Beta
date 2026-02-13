@@ -41,7 +41,11 @@ class StringParser {
           t.waitingOnFile = null;
           return true;
         } else switch (rawFile.status) {
-          case 403: main_Alert("can't load file: " + _path + " : error 403 (forbidden)"); CODERPARSER_SINGLETON.stopGlobalCompilation = true; t.waitingOnFile = null; return false;
+          case 403: 
+            main_Alert("can't load file: " + _path + " : error 403 (forbidden)");
+            CODERPARSER_SINGLETON.stopGlobalCompilation = true; 
+            t.waitingOnFile = null; 
+            return false;
           case 404:
             main_Alert("can't load file: " + _path + " : error 404 (not found)");
             CODERPARSER_SINGLETON.stopGlobalCompilation = true;
