@@ -180,6 +180,14 @@ var user_fx = [
         asmUpdate:  "update"
     },
     {
+        fxName:     "Tut7: errorContext",
+        platform:   "ST", 
+        rootPath:   "fx/tutorials",
+        source:     "tut7_errorContext.asm",
+        asmInit:    "test",
+        asmUpdate:  "test"
+    },    
+    {
         fxName:     "Tut: Atari1",
         platform:   "STE",
         rootPath:   "fx/tutorials",

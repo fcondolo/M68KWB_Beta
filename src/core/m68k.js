@@ -29,6 +29,7 @@ var CPU_DBG_WRITE_ALLOW_START = 0;
 var CPU_DBG_WRITE_ALLOW_END = 9999999;
 var CPU_DBG_WRITE_FORBID_START = -1;
 var CPU_DBG_WRITE_FORBID_END = -1;
+var CPU_DBG_AFTERINSTR = null;
 var CPU_LAST_INTERRUPT_TIME = 0;
 var LAST_GETARG = [];
 var LAST_SETARG = [];
@@ -255,6 +256,10 @@ function lock(_reg, _mask, _reason) {
 
 
 function checklocks(_line = null) {
+  if (CPU_DBG_AFTERINSTR) {
+    if (_line && (!_line.isErrorImmune))
+      eval(CPU_DBG_AFTERINSTR);
+  }
   for (let i = 0; i < 8; i++) {
     if (lockDataA[i]) {
       const v = regs.a[i] & lockDataA[i].mask;

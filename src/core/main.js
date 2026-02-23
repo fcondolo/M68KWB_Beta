@@ -541,7 +541,14 @@ function main_Alert(_msg, _makeLastMsg = false, _skipAsm = false) {
     if (l > 0) {
       _msg += "<br>Context:<br>";
       for (let i = 0; i < l; i++) {
-        _msg += DBGCTX[i]+"\n";
+        let id = "";
+        for (let j = 0; j < DBGCTX[i].indent*2; j++) {
+          id += "-";
+        }
+        if (DBGCTX[i].data)
+          _msg += id + "> " + DBGCTX[i].data+"\n";
+        else if (DBGCTX[i].enter)
+          _msg += id + " " + DBGCTX[i].enter+"\n";
       }
     }  
     MAIN_ALERTS_LIST.push(_msg);

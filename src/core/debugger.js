@@ -57,22 +57,17 @@ function DebugCtx_reset(_defaultMsg = null) {
   DBGCTX = [];
   DBGCTX_INDENT = 0;
   if (_defaultMsg)
-    DBGCTX.push(_defaultMsg);
+    DBGCTX.push({indent:DBGCTX_INDENT,data:_defaultMsg});
 }
 
 function DebugCtx_log(_s) {
-  for (let i = 0; i < DBGCTX_INDENT*4; i++) {
-    _s = "-" + _s;
-  }
-  DBGCTX.push(_s);
+  let id = "";
+  DBGCTX.push({indent:DBGCTX_INDENT+1,data:_s});
 }
 
 function DebugCtx_enter(_s) {
-  for (let i = 0; i < DBGCTX_INDENT*4; i++) {
-    _s = "-" + _s;
-  }
   DBGCTX_INDENT++;
-  DBGCTX.push(" " + _s);
+  DBGCTX.push({indent:DBGCTX_INDENT,enter:true, data:_s});
 }
 
 function DebugCtx_exit(_count = 1) {
@@ -80,6 +75,7 @@ function DebugCtx_exit(_count = 1) {
     DBGCTX_INDENT -= _count;
   else
     DBGCTX_INDENT = 0;
+  DBGCTX.push({indent:DBGCTX_INDENT,exit:true});
 }
 
 function showHTMLError(_err, _showFileLine = true) {
@@ -99,10 +95,22 @@ function showHTMLError(_err, _showFileLine = true) {
   }
   const l = DBGCTX.length;
   if (l > 0) {
-    _err += "<br>Context:<br>";
+    _err += "<details open>";
+    _err += "<summary>Context</summary>";
     for (let i = 0; i < l; i++) {
-      _err += DBGCTX[i]+"<br>";
+      if (DBGCTX[i].enter) {
+        _err += "<details>";
+        let s = DBGCTX[i].data; 
+        if (DBGCTX[i].data) _err += "<summary>" + s + "</summary>";
+      }
+      else if (DBGCTX[i].exit)
+        _err += "</details>";
+      else if (DBGCTX[i].data) {
+        let s = DBGCTX[i].data; 
+        _err += "<p>" + s +"</p>";
+      }
     }
+    _err += "</details>";
   }
   _err.replaceAll("\n", "<br>");
   document.getElementById("errors").innerHTML += _err + "<br>";

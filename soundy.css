@@ -140,3 +140,41 @@ input[type=submit] {
   border: 1px solid black;
   clear: both;
 }
+
+table#limited-table {
+    table-layout: fixed;
+    width: 50%;
+    border-collapse: collapse;
+    color: #97d0ef; /* normal text */    
+  }
+
+  #limited-table strong,
+  #limited-table b {
+    color: #1d4ed8; /* bold text color */
+    font-weight: 700;
+  }
+
+  /* only cells inside this table */
+  table#limited-table td.cell {
+    max-width: 10%;
+    padding: 6px;
+    border: 0px;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* indent nested details */
+details details {
+  margin-left: 20px;
+}
+
+/* optional: indent files inside folders */
+details p {
+  margin-left: 20px;
+}
+
+/* better cursor & spacing */
+summary {
+  cursor: pointer;
+  padding: 2px 0;
+}

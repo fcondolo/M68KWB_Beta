@@ -43,3 +43,4 @@ palette
 
 
 image     incbin "SYSROOT/images/alone-bitplanes-STE.bin"
+
