@@ -1408,6 +1408,11 @@ class LineParser {
   function eval_ifeq(ln) {
     const v = ln.readNextWord();
     const r = ln.parseJSNumber(v, 0, true);
+    if (isNaN(r)) {
+      if (CODERPARSER_SINGLETON.lastPass)
+        ln.Failed("could not evaluate '"+v+"'. Not yet defined at this stage of code parsing?");
+      return 3;
+    }
     if (r == 0) contitionCode = 1; else contitionCode = 2;
     return contitionCode;
   }
@@ -1415,6 +1420,11 @@ class LineParser {
   function eval_ifne(ln) {
     const v = ln.readNextWord();
     const r = ln.parseJSNumber(v, 0, true);
+    if (isNaN(r)) {
+      if (CODERPARSER_SINGLETON.lastPass)
+        ln.Failed("could not evaluate '"+v+"'. Not yet defined at this stage of code parsing?");
+      return 3;
+    }
     if (r != 0) contitionCode = 1; else contitionCode = 2;
     return contitionCode;
   }
@@ -1443,6 +1453,11 @@ class LineParser {
   function eval_ifge(ln) {
     const v = ln.readNextWord();
     const r = ln.parseJSNumber(v, 0, true);
+    if (isNaN(r)) {
+      if (CODERPARSER_SINGLETON.lastPass)
+        ln.Failed("could not evaluate '"+v+"'. Not yet defined at this stage of code parsing?");
+      return 3;
+    }
     if (r >= 0) contitionCode = 1; else contitionCode = 2;
     return contitionCode;
   }
@@ -1450,6 +1465,11 @@ class LineParser {
   function eval_ifgt(ln) {
     const v = ln.readNextWord();
     const r = ln.parseJSNumber(v, 0, true);
+    if (isNaN(r)) {
+      if (CODERPARSER_SINGLETON.lastPass)
+        ln.Failed("could not evaluate '"+v+"'. Not yet defined at this stage of code parsing?");
+      return 3;
+    }
     if (r > 0) contitionCode = 1; else contitionCode = 2;
     return contitionCode;
   }
@@ -1457,6 +1477,11 @@ class LineParser {
   function eval_ifle(ln) {
     const v = ln.readNextWord();
     const r = ln.parseJSNumber(v, 0, true);
+    if (isNaN(r)) {
+      if (CODERPARSER_SINGLETON.lastPass)
+        ln.Failed("could not evaluate '"+v+"'. Not yet defined at this stage of code parsing?");
+      return 3;
+    }
     if (r <= 0) contitionCode = 1; else contitionCode = 2;
     return contitionCode;
   }
@@ -1464,6 +1489,11 @@ class LineParser {
   function eval_iflt(ln) {
     const v = ln.readNextWord();
     const r = ln.parseJSNumber(v, 0, true);
+    if (isNaN(r)) {
+      if (CODERPARSER_SINGLETON.lastPass)
+        ln.Failed("could not evaluate '"+v+"'. Not yet defined at this stage of code parsing?");
+      return 3;
+    }
     if (r < 0) contitionCode = 1; else contitionCode = 2;
     return contitionCode;
   }

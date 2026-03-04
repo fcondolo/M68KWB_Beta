@@ -52,7 +52,7 @@ class CodeParser {
     t.errors = [];
     t.errorContext = [];
     t.firstPass = true;
-    t.lastPass = false;
+    t.lastPass = true;
     t.rsOffset = 0;
     t.set = [];
     t.macros = [];
@@ -115,6 +115,7 @@ class CodeParser {
     watchdog = 0;
     const max_include_files = 100;
     t.incdir = "";
+    t.trySimpleEq(0,_path); // check first EQU in casethere are conditional includes
     do {
       while (t.strings.waitingOnFile != null) {
         t.showCompilMsg("loading file: " + t.strings.waitingOnFile);
@@ -159,7 +160,7 @@ class CodeParser {
     t.lastPass = false;
     if (!t.startPass()) return false;
     t.showCompilMsg("processing EQU...");
-    let processLst = t.list_EQU();
+    let processLst = t.list_EQU(0);
 
   if (!t.stopGlobalCompilation) {
     for (let passIt = 0; passIt < max_pass; passIt++) {
@@ -319,7 +320,11 @@ class CodeParser {
 
     t.showCompilMsg(null);
     HideDebugLog();
-
+/*
+    for (let i = 0; i < t.constants.length; i++) {
+      console.log(t.constants[i].name + ": " + t.constants[i].value + " (" + t.constants[i].path + ", " + t.constants[i].line + ")");
+    }
+*/
     //document.getElementById("log").innerHTML = log;
     return true;
   }
@@ -399,7 +404,76 @@ class CodeParser {
     return null;
   }
 
-  startPass() {
+  trySimpleEq(_startIndex=0, _file=null) {
+ //   console.log("========== NEW FILE : :" + _file + " index:" + _startIndex);
+    let t = this;
+    const lnCount = t.strings.lines.length;
+    let condLst = [];
+    let condCompStacked = 0;
+    for (let i = _startIndex; i < lnCount; i++) {
+      let ln = t.strings.lines[i];
+      if (!ln.filtered || ln.jsString ||  ln.filtered[0] == ';')
+        continue;
+
+      if (ln.path.toUpperCase() != _file.toUpperCase()) {
+   //    console.log("========= FUCK OFF, WE REACHED " + ln.path);
+        return;
+      }
+      const wrd1 = ln.readNextWord();
+      // ignore anything inside a conditionbal comp for simple eq.
+      // we don't want to efine something based on an unknown condition
+      let condComp = t.getConditionalComp(wrd1);
+      if (condComp) {
+          condComp.line = i;
+          switch (condComp.type) {
+            case 'start':
+              //console.log("start on:" + ln.filtered + " at:" + ln.getFileLineStr());
+              condLst.push({msg:"open", line:ln});
+              condCompStacked++;
+            break;
+            case 'mid':
+              condLst.push({msg:"middle", line:ln});
+              //console.log("middle on:" + ln.filtered + " at:" + ln.getFileLineStr());
+            break;
+            case 'end':
+              condLst.push({msg:"close", line:ln});
+              //console.log("end on:" + ln.filtered + " at:" + ln.getFileLineStr());
+              condCompStacked--;
+              if (condCompStacked < 0) {
+                let errStr = "Too many ENDC/ENDIF while parsing: " + _file + "<br>Last conditions:";
+                let start = Math.max(condLst.length-8,0);
+                while (start > 0 && condLst[start].msg != "open") start--;
+                for (let k = start; k < condLst.length; k++) {
+                  errStr += "<br>" + condLst[k].msg + ": " + condLst[k].line.filtered + "  " + condLst[k].line.getFileLineStr();
+                }
+                ln.Failed(errStr);
+                this.stopGlobalCompilation = true;
+                return;
+              }
+            break;
+          }
+          continue;
+      }
+      if (condCompStacked == 0) { // don't rocess if we are inside a conditional block
+        const wrd2 = ln.readNextWord();
+        if (wrd2 == "EQU" || wrd2 == "=") {
+          if (ASSEMBLER_CONFIG.no_space_before_EQU) {
+            if (ln.isSpace(ln.text[0])) { // ln.text, not ln.filtered because filtered already removed heading spaces
+              ln.Failed("found space at the beginning of the line, but 'no_space_before_EQU' option is set in config.js.");
+              this.stopGlobalCompilation = true;
+              return;
+            }
+          }
+          ln.isInstr = false;
+          let val = ln.readNextNumber(PARSE_FAIL_OK); // can fail, we are in try simple here...
+          if (!isNaN(val))
+            t.addConstant(ln, wrd1,val);
+        }
+      }
+    }
+   }
+
+  rewind() {
     let t = this;
     // stop if previous step generated an error
     if (t.stopGlobalCompilation) {
@@ -422,6 +496,10 @@ class CodeParser {
       t.strings.lines[i].finalLine = i;
     }
     return true;
+  }
+
+  startPass() {
+    return this.rewind();
   }
 
   Error(_str) {
@@ -550,8 +628,10 @@ class CodeParser {
         return false;  
       }
     }
-
     t.errorContext.pop();
+    //if (finalPath.includes("R24_EDGE_CODE"))
+    //  debugger;
+    t.trySimpleEq(i+1,finalPath);
     return true;
   }
 
@@ -1234,19 +1314,27 @@ class CodeParser {
       if (n == _name) {
         if (c[i].line == _ln.line && c[i].path == _ln.path) {
           c[i].value = _value;
-          continue; // same entry, due to multi-pass EQU solving
+          if (ASSEMBLER_CONFIG.log_conditional_blocks) console.log(_name + " already there, just updating/confirming value: " + _value);
+          return; // same entry, due to multi-pass EQU solving
         }
         if (c[i].path == "MACHINE" || c[i].path == "ASSEMBLER_CONFIG") {
           c[i].value = _value; // override default value
-          continue;
+          if (ASSEMBLER_CONFIG.log_conditional_blocks) console.log(_name + " overriding with: " + _value);
+          return;
         }
         _ln.Failed("constant '" + _name + "' already defined in '" + c[i].path + "' at line " + c[i].line);
         return;
       }
+      // this one is tricky: constants are stored by increasing name length.
+      // the reason is that there are many string replace occurring, especially for ;>JS instructions
+      // processing string replace starting with the shortest strings will avoid bad replacements
+      // e.g.: if you have MY_NUMBER and MY_NUMBER_2, you don't want the "MY_NUMBER" part of "MY_NUMBER_2"
+      // to be replaced by the value of "MY_NUMBER".
       if (n.length < o)
         break;
     }
     c.splice(i, 0, { name: _name, value: Math.floor(_value), path: _ln.path, line: _ln.line });
+    if (ASSEMBLER_CONFIG.log_conditional_blocks) console.log("new constant: " + _name + ": " + _value + " (" + _ln.path + ", " + _ln.line + ")");
   }
 
 
@@ -1257,13 +1345,15 @@ class CodeParser {
   // ==> .type : 'equ','start', 'mid' or 'end'
   // ==> .f: function to execute to evaluate 'start' condition
   // ==> .processed : already done, don't re-process
-  list_EQU() {
+  list_EQU(_start = 0) {
     let t = this;
     let lst = [];
     t.condCompLst = [];
     const lnCount = t.strings.lines.length;
-    for (let i = 0; i < lnCount; i++) {
+    for (let i = _start; i < lnCount; i++) {
       let ln = t.strings.lines[i];
+      if (ln.jsString ||  ln.filtered[0] == ';')
+        continue;
       const wrd1 = ln.readNextWord();
       let condComp = t.getConditionalComp(wrd1);
       let found;
@@ -1369,9 +1459,11 @@ class CodeParser {
         case 'start': {
           //console.log("eval: " + t.strings.lines[e.start.line].filtered);
           e.processed = true;
-          let conditionCode = e.start.f(t.strings.lines[e.start.line]);
+          let sln = t.strings.lines[e.start.line];
+          let conditionCode = e.start.f(sln);
           let needDiscard, startDiscard, endDiscard;
           if (conditionCode == 1) {
+            if (ASSEMBLER_CONFIG.log_conditional_blocks) console.log("condition " + sln.filtered + " ==> true");
             needDiscard = false;
             if (e.mid) {
               needDiscard = true;
@@ -1379,12 +1471,20 @@ class CodeParser {
               endDiscard = e.end.line;
             }
           } else if (conditionCode == 2) {
+              if (ASSEMBLER_CONFIG.log_conditional_blocks) console.log("condition " + sln.filtered + " ==> false");
               needDiscard = true;
               startDiscard = e.start.line + 1;
               endDiscard = e.end.line;
               if (e.mid) {
                 endDiscard = e.mid.line;
               }
+          } else if (conditionCode == 3) { // can't process yet, try later
+            if (ASSEMBLER_CONFIG.log_conditional_blocks) console.log("condition " + sln.filtered + " ==> undefined");
+            e.processed = false;
+            continue;
+          } else {
+            ln.Failed("internal error: could not evaluate contition code.");
+            continue;
           }
           if (needDiscard) {
             for (let k = 0; k < lnCount; k++) {
@@ -1399,8 +1499,8 @@ class CodeParser {
               }
             }
 
-             console.log("--> discarding from: " + (startDiscard-1) + "(" + t.strings.lines[startDiscard-1].filtered + ")" + ", " + t.strings.lines[startDiscard-1].getFileLineStr());
-             console.log("--> discarding first " + startDiscard + "(" + t.strings.lines[startDiscard].filtered + ")");
+          //   console.log("--> discarding from: " + (startDiscard-1) + "(" + t.strings.lines[startDiscard-1].filtered + ")" + ", " + t.strings.lines[startDiscard-1].getFileLineStr());
+          //   console.log("--> discarding first " + startDiscard + "(" + t.strings.lines[startDiscard].filtered + ")");
             while (startDiscard < endDiscard) {
              //console.log("--> discarding: " + t.strings.lines[startDiscard].filtered);
               t.strings.lines[startDiscard].makeComment();

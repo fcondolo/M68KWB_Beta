@@ -31,6 +31,11 @@ const ASSEMBLER_CONFIG = {
     // dc.w v2  ; declaring a word at an odd address ==> throw error!
     check_dc_align : true,
 
+    // If true, logs in your browser's console all the evaluations of conditional expressions.
+    // It will also log constants that are registered as the assembly goes on (EQU, =)
+    // Can be used to understand what is assembed and what isn't
+    // e.g. IFD,IFND,IFEQ, etc.
+    log_conditional_blocks : false,
 
     // --------------------------------------------------
     // MISC SETTINGS
