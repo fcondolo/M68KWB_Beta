@@ -309,7 +309,8 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     case document.getElementById('aregnewval'):
     return;
     case document.getElementById('searchfx'):
-      if (event.keyCode == 13) onFxChosen(); // enter 
+      if (event.keyCode == 13)
+        onFxChosen(); // enter 
     return;
     default:
     break;
@@ -318,14 +319,21 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
   if (WATCHES && WATCHES.hasFocus)
     return;
 
-  if (PREV_KEYDOWN == event.keyCode) return;
+  if (PREV_KEYDOWN == event.keyCode) 
+    return;
   PREV_KEYDOWN = event.keyCode;
 
   if (DEBUGGER_CTRL_PRESSED)
     return;
 
-  if (!CODERPARSER_SINGLETON || !MYFX)
+  if (!MYFX)
     return; // in case keys are pressed beore the fx is loaded
+
+
+  if (!CODERPARSER_SINGLETON) { // if no asm, simplified keyboard management
+    onkey_JSOnly(event.keyCode);
+    return;
+  }
 
   if ((!DEBUGGER_insideInvoke) && (!DEBUGGER_tracing)) {
     if (MYFX && MYFX.FX_OnKey) {
@@ -459,7 +467,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         window.location.reload();
       }
       if (!TIME_MACHINE.isPresent()) {
-        alert("restaure present");
+        alert("restore present");
         TIME_MACHINE.restorePresent();
       }
       DEBUGGER_justHitRun = true;
@@ -510,6 +518,53 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
   }
  // if (stop) event.stopPropagation();
 
+}
+
+
+function onkey_JSOnly(_keyCode) {
+  switch (_keyCode) {
+    case 65: // a
+      DEBUGGER_ToggleCard();
+    break;
+    case 66: // b
+      DEBUGGER_BitplanesVisibility();
+    break;
+    case 67: // c
+      DEBUGGER_DumpCopperList = 1;
+      MACHINE.customUpdate();
+    break;
+    case 72: // h
+      DEBUGGER_help();
+    break;
+    case 77: // m
+      DEBUGGER_memoryStats();
+    break;
+    case 80: // p
+      SET_PAUSE(!PAUSED);
+    break;
+    case 82: // r
+      if (DEBUGGER_SHIFT_PRESSED) { // restart
+        localStorage.setItem(LOCALSTORAGE_FX_PAUSED,PAUSED);
+        localStorage.setItem(LOCALSTORAGE_FX_ZOOM,document.getElementById("outpuResolution").value);
+        console.log("RELOADING PAGE...");
+        window.location.reload();
+      }
+    break;
+    case 84: // t
+        TOOLBOX.toggleShow();
+    break;
+    case 90: // z
+    if (DEBUGGER_SHIFT_PRESSED) { // zap
+      console.log("ZAPPING...");
+      let curFx = localStorage.getItem(LOCALSTORAGE_FX_NAME);
+      localStorage.clear();
+      localStorage.setItem(LOCALSTORAGE_FX_PREV, curFx);
+      window.location.reload();
+    }
+    break;
+    default:
+    break;
+  }
 }
 
 function DEBUGGER_ToggleCycles(_force = "zob") {

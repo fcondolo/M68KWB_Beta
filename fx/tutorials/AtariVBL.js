@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"AtariVBL", 
-  platform:"STE",
-  rootPath:"fx/tutorials",
-  source:"AtariVBL.asm"
-});
-
 class AtariVBL {
     FX_Init() {
       invoke68K("DEFAULT_ENTRY_POINT");

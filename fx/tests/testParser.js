@@ -1,9 +1,3 @@
-REGISTER_FX({
-  classname:"FX_TestParser", 
-  platform:"ST", 
-});
-
-
 class FX_TestParser {
   constructor() {
     let t = this;

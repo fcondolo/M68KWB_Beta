@@ -1005,7 +1005,7 @@ class CodeParser {
     }
     if (path.startsWith("../")) {
       if (!rootPath) {
-        ret.err = "can't use relative path if rootPath is not set in REGISTER_FX in your .js FX file";
+        ret.err = "can't use relative path if rootPath is not set in user_fx.js for your FX";
         return ret;
       }
       path = path.substr(3);

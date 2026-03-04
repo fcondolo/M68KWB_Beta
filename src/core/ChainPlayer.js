@@ -2,8 +2,8 @@ const LOCALSTORAGE_CHAININDEX = "chain_index";
 
 var CHAIN_MODE = false;
 const chain_fx = [
-  "Non_Regression_Tests",
-  "FX_TestParser",
+  "Non-Regression Tests",
+  "TestParser",
   "Draw2Buffer",
   "Blitter Tornado",
   "Copper Jelly",

@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"FX_Playground", 
-  platform:"STE", 
-  rootPath:"fx/tests",
-  source:"playground.asm",
-});
-
 class FX_Playground {
   constructor() {
     let t = this;

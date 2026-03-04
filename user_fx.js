@@ -15,6 +15,7 @@ var user_fx = [
         zoom:           Integer Yes         Influences the zoom slider if you want to see a bigger rendering for your fx (values in [100..200] range).
         hasAudio:       Boolean Yes         Set to true if the fx outputs sound (STe only)
         xtraInclude:    String  Yes         Include an extra asm file. Used to simulate a library on M68KWB using a fake implementation in a dedicated file
+        hide:           Boolean Yes         Does not show the FX in the FX chooser window
     */
 
 
@@ -233,5 +234,38 @@ var user_fx = [
         source:     "AtariVBL.asm",
         asmInit:    "DEFAULT_ENTRY_POINT",
         asmUpdate:  "DEFAULT_MAIN_LOOP"
+    },
+    {
+        fxName:     "Playground",
+        classname:  "FX_Playground",
+        platform:   "STE", 
+        source:     "playground.asm",
+        rootPath:   "fx/tests",
+        js:         'fx/tests/playground.js'
+    },
+    {
+        fxName:     "tut1 basicFX",
+        classname:  "tut1_basicFX",
+        platform:   "OCS", 
+        rootPath:   "fx/tutorials",
+        js:         'fx/tutorials/tut1_basicFX.js',
+    },
+
+    {
+        fxName:     "Non-regression Tests",
+        classname:  "Non_Regression_Tests", 
+        platform:   "STE", 
+        source:     "Non_Regression_Tests.asm",
+        rootPath:   "fx/tests",
+        js:         'fx/tests/Non_Regression_Tests.js',
+        hide:       true
+    },
+    {
+        fxName:     "TestParser",
+        classname:  "FX_TestParser",
+        platform:   "ST", 
+        rootPath:   "fx/tests",
+        js:         'fx/tests/testParser.js',
+        hide:       true
     },
 ];

@@ -54,11 +54,11 @@ clearBpl:
 
 FX_UPDATE:
 ; compute ofs in d4
-       move.w        lastUpdateFrameIndex,d4
-       and.w         #63,d4
-       add.w         #16,d4
-       muls          #160,d4
-       add.w         #48,d4
+  move.w        lastUpdateFrameIndex,d4
+  and.w         #63,d4
+  add.w         #16,d4
+  muls          #160,d4
+  add.w         #48,d4
   ; cls
 	move.l		screens,a2
   bsr     clearBpl
@@ -102,6 +102,7 @@ FX_UPDATE:
 	nop
 	bne.s		.waitBlt2
 
+  add.w   #1,lastUpdateFrameIndex
   rts
 
 
@@ -137,3 +138,6 @@ screen1:
   ds.b  32000
 screen2:
   ds.b  32000
+
+lastUpdateFrameIndex:
+  ds.w  1

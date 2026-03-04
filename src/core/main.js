@@ -275,6 +275,8 @@ function failedStartingFX(_fxName) {
   fxList += '<select name="fxListSelect" id="fxListSelect">';
   let prevName = localStorage.getItem(LOCALSTORAGE_FX_PREV);
   for (let i = 0; i < user_fx.length; i++) {
+    if (user_fx[i].hide)
+      continue;
     const name = user_fx[i].fxName;
     let fullName = name + " (" + user_fx[i].platform + ")";
     if (name == prevName)
@@ -294,8 +296,10 @@ function main_startChosenFx(_fxName) {
   FX_INFO = null;
   let _index = -1;
 
+  const upName = _fxName.toUpperCase();
   for (let i = 0; i < user_fx.length; i++) {
-    if (user_fx[i].fxName.toUpperCase() == _fxName.toUpperCase()) {
+    const thisName = user_fx[i].fxName.toUpperCase();
+    if (thisName == upName) {
       _index = i;
       break;
     }
@@ -364,6 +368,8 @@ function updateFxList() {
   let search = document.getElementById("searchfx").value.toUpperCase();
   let firstDone = false;
   for (let i = 0; i < user_fx.length; i++) {
+    if (user_fx[i].hide)
+      continue;
     if (!user_fx[i].fxName) {
       if (user_fx[i].className) {
         user_fx[i].fxName = user_fx[i].className;

@@ -1,10 +1,3 @@
-REGISTER_FX({
-  classname:"Non_Regression_Tests", 
-  platform:"STE", 
-  rootPath:"fx/tests",
-  source:"Non_Regression_Tests.asm",
-});
-
 class Non_Regression_Tests {
   constructor() {
     let t = this;
