@@ -212,7 +212,7 @@ class CodeParser {
     t.process_SET();
 
     // try to fix all labels. Single pass : labels won't infer other labels
-    // CODE labels must be processed AFTER nything that impacts line numbers:
+    // CODE labels must be processed AFTER anything that impacts line numbers:
     // ==> REPT 
     // ==> include
     // ==> MACRO
@@ -220,6 +220,7 @@ class CodeParser {
     // ==> dc.x
     // ==> ds.x
     // ==> incbin
+    // so that labels addresses are correct
     if (!t.startPass()) return false;
     t.showCompilMsg("processing labels (pass2)...");
     t.process_labels(false);
@@ -801,8 +802,8 @@ class CodeParser {
         ln.isInstr = false;  
         for (let i = index + 1; i < len; i++) {
           if (!isSpace(ln.filtered[i])) {
-            ln.Failed("It sucks, but for the moment the parser does not support anything after ':' on a line. Case 1: if you're defining a label, insert a newline after ':'. Case 2: if you're defining a struct using rs.x, don't use ':' after your label name");
-            break;
+            ln.Failed("It sucks, but in this case, the parser does not support anything after ':' on a line. Case 1: if you're defining a label, insert a newline after ':'. Case 2: if you're defining a struct using rs.x, don't use ':' after your label name");
+            return;
           }
         }
       }
@@ -827,8 +828,13 @@ class CodeParser {
         }
         if (!t.isValidLabelName(name)) {
           return ln.Failed("invalid label name: " + name + ". If it's not a label, you probably need to add spaces at the beginning of the line"); 
-        } else
-          t.labels.push({ label: name, index: lnIt, fromFile: ln.path, fromLine: ln.line, dcData: null });
+        } else {
+          if (ASSEMBLER_CONFIG.log_labels)
+            console.log("Add new label: " + name + " from " + ln.getFileLineStr());
+//            if (name.includes("M68KWB_defaultRTE"))
+  //            debugger;
+            t.labels.push({ label: name, index: lnIt, fromFile: ln.path, fromLine: ln.line, dcData: null });
+          }
       }
     }
   }
@@ -1904,9 +1910,15 @@ class CodeParser {
           _arg.value = Math.floor(found)
           processed = true;
         } else {
-          if (_arg.type == 'imm' && !_lastChance) {
-            this.lateArgs.push({arg:_arg, line:_l, ofs:_l.ofs});
-            return;
+
+          if (_arg.type == 'imm') {
+            if  (_lastChance) {
+              // try further below, maybe it's a label
+            }
+            else {
+              this.lateArgs.push({arg:_arg, line:_l, ofs:_l.ofs});
+              return;
+            }
           }
           if (_l.instrSize == 4)
             _arg.cycles = 16; // absolute long

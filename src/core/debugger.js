@@ -280,13 +280,14 @@ function checkKeyUP(e) { // https://css-tricks.com/snippets/javascript/javascrip
 
 var PREV_KEYDOWN = 0;
 function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascript-keycodes/ 
+
   var event = window.event ? window.event : e;
+
   if (event.keyCode == 27) { // esc
     DEBUGGER_SHIFT_PRESSED = false;
     DEBUGGER_CTRL_PRESSED = false;
     DEBUGGER_ALT_PRESSED = false;
     PREV_KEYDOWN = 0;
-    document.getElementById("myModal").style.display = "none";
   }
 
   if (event.keyCode == 16) // shift
@@ -300,7 +301,31 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     DEBUGGER_ALT_PRESSED = event.altKey;
     DEBUGGER_SHIFT_PRESSED = event.shiftKey;
 
-
+  // hide modal box if enter or esc or space is pressed
+  let modal = document.getElementById("myModal");
+  if (modal.style.display != "none") {
+    let doClose = false;
+    switch (event.keyCode) {
+      case 13: // enter
+          doClose = true;
+      break;
+      case 27: // esc
+          doClose = true;
+      break;
+      case 32: // space
+        if (MODAL_closeCallback == DEBUGGER_OnCloseBreakpointModal)
+          doClose = true;
+      break;
+    }
+    if (doClose) {
+      event.stopPropagation();
+      e.preventDefault(); // avoid fucking scrollng when pressing space
+      modal.style.display = "none";
+      MODAL_closeCallback();
+      MODAL_closeCallback = null;
+    }
+    return;
+  }
   // Avoid triggering commands while typing in a text field
   switch (document.activeElement) {
     case document.getElementById('command'):
@@ -309,8 +334,10 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     case document.getElementById('aregnewval'):
     return;
     case document.getElementById('searchfx'):
-      if (event.keyCode == 13)
+      if (event.keyCode == 13) {
         onFxChosen(); // enter 
+        event.stopPropagation();
+      }
     return;
     default:
     break;
@@ -1997,34 +2024,46 @@ function debug(_alertMessage = null, _useContext = false) {
   if (DEBUGGER_insideInvoke) {
     MACHINE.setFileLineContext();
     if (MACHINE.errorContext.file) {
-      msg += "\n file: " + MACHINE.errorContext.file;
-      msg += "\n line: " + MACHINE.errorContext.line;
+      msg += "<br>file: " + MACHINE.errorContext.file;
+      msg += "<br>line: " + MACHINE.errorContext.line;
     } else {
-      msg += "\n no asm file/line found";
+      msg += "<br>no asm file/line found";
     }
   } else {
       const err = new Error();
       msg = filterStack(err.stack);
   }
   if (_alertMessage)
-    msg += "\n" + _alertMessage;
+    msg += "<br>" + _alertMessage;
   if (_useContext) {
-      msg += "\n" + MACHINE.getErrorContexts(true);
+      msg += "<br>" + MACHINE.getErrorContexts(true);
   }
 //  if (_alertMessage) {
 //    DEBUGGER_AdditionalDbgMsg = _alertMessage;
 //  }
-  MAIN_ALERTS_LIST = []; // empty main alert list to avoid "too many errors" message wneh hitting a breakpoint frame after frame
-  main_Alert(msg, false, true);
-  msg = msg.replaceAll("\n","<br>");
   showHTMLError(msg, false);
-  if (DEBUGGER_insideInvoke) {
+  setTraceMode(true);
+  DEBUGGER_traceTillRTS = false;
+  DEBUGGER_runTillIP = null;
+  DEBUGGER_update();
+  DEBUGGER_dumpRegistersValues();
+  DEBUGGER_HitBp(M68K_IP);
+  MAIN_ALERTS_LIST = []; // empty main alert list to avoid "too many errors" message wneh hitting a breakpoint frame after frame
+  showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);//main_Alert(msg, false, true);
+  //msg = msg.replaceAll("\n","<br>");
+/*  if (DEBUGGER_insideInvoke) {
     setTraceMode(true);
     DEBUGGER_traceTillRTS = false;
     DEBUGGER_runTillIP = null;
     DEBUGGER_update();
     DEBUGGER_dumpRegistersValues();
     DEBUGGER_HitBp(M68K_IP);
+    focusOnCodeLine(M68K_PREVIP);
+  }*/
+}
+
+function DEBUGGER_OnCloseBreakpointModal() {
+  if (DEBUGGER_insideInvoke) {
     focusOnCodeLine(M68K_PREVIP);
   }
 }

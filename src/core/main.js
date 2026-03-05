@@ -24,6 +24,8 @@ var FX_INFO = null;
 var PLATFORM_OFSX = 0;
 var PLATFORM_OFSY = 0;
 
+var MODAL_closeCallback = null;
+
 var PAUSED = false;
 
 var cvs, ctx, smallRenderCtx, smallRenderCvs;
@@ -603,8 +605,9 @@ function getDebugLogString() {
   return document.getElementById('liner').innerHTML;
 }
 
-function showModalBox(_content, _closeCallback) {
+function showModalBox(_content, _closeCallback=null) {
   // Get the modal
+  MODAL_closeCallback = _closeCallback;
   var modal = document.getElementById("myModal");
   if (_content) // content may already be filled outside of this function (by the caller)
     document.getElementById("modalContent").innerHTML = _content;
@@ -618,12 +621,18 @@ function showModalBox(_content, _closeCallback) {
   // When the user clicks on <span> (x), close the modal
   span.onclick = function() {
     modal.style.display = "none";
-    if (_closeCallback) _closeCallback();
+    if (MODAL_closeCallback) {
+      MODAL_closeCallback();
+      MODAL_closeCallback = null;
+    }
   }
 
   closeb.onclick = function() {
     modal.style.display = "none";
-    if (_closeCallback) _closeCallback();
+    if (MODAL_closeCallback) {
+      MODAL_closeCallback();
+      MODAL_closeCallback = null;
+    }
   }
 
 

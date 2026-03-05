@@ -37,6 +37,9 @@ const ASSEMBLER_CONFIG = {
     // e.g. IFD,IFND,IFEQ, etc.
     log_conditional_blocks : false,
 
+    // If true, logs in your browser's console all the registered labels
+    log_labels : false,
+
     // --------------------------------------------------
     // MISC SETTINGS
     // --------------------------------------------------

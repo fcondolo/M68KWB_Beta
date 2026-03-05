@@ -224,7 +224,8 @@ function runtimeError68k(_e) {
   }*/
   _e += "<br>";
 
-  main_Alert(_e, true);
+  //main_Alert(_e, true);
+  _e = _e.replaceAll("\n","<br>");
   debug(_e);
   MACHINE.stop = true;
   //DEBUGGER_showContext();
