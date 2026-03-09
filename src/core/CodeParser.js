@@ -2352,6 +2352,7 @@ class CodeParser {
         line.codeSectionOfs = codeSectionOfs; // write address even for labels
       if (line.jsString) {
         line.filtered = line.jsString;
+        line.assembledIP = codeSectionOfs;
         ASMBL_ADRSTOLINE[codeSectionOfs] = line.finalLine;
         CPU_CODE_SECTION[codeSectionOfs++] = 0b01001010; // ILLEGAL OPCODE
         CPU_CODE_SECTION[codeSectionOfs++] = 0b11111100;
@@ -2369,6 +2370,7 @@ class CodeParser {
         //if (lnIt == 59) debugger;
         asmbl_go(line, out);
         if (out.ofs > 0) {
+          line.assembledIP = codeSectionOfs;
           ASMBL_ADRSTOLINE[codeSectionOfs] = line.finalLine; // index in CODERPARSER_SINGLETON.strings.lines[]
           let len = out.ofs;
           line.instrBytes = len;
@@ -2444,6 +2446,7 @@ class CodeParser {
       let lab = t.labels[i];
       const l = t.strings.lines[lab.index];
       lab.codeSectionOfs = l.codeSectionOfs;
+      l.assembledIP = l.codeSectionOfs;
     }
 
     // solve branches addreses

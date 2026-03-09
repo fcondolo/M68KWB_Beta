@@ -3,7 +3,8 @@ const PARSE_FAIL_ERROR = 1;
 const PARSE_FAIL_REWIND = 2;
 
 var PARSEJSNUMBER_ALLOWDCDATA = false;
-  
+var ALLLINES_FILES = [];
+
 class LineParser {
 
   constructor(_path, _line, _text, _originalIndex) {
@@ -30,6 +31,11 @@ class LineParser {
     t.lastFoundNumberIndex = NaN;
     t.IP = NaN;
     t.updateImmunityflag();
+    const shortPath =  _path.split(/[/\\]/).pop();
+    if (!ALLLINES_FILES[shortPath])
+      ALLLINES_FILES[shortPath] = [];
+    let af = ALLLINES_FILES[shortPath];
+    af[_line] = this;
   }
 
   clone() {

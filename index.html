@@ -107,8 +107,10 @@
     <br>
     <div style="color: #ff00ff;" id="errors" class="col_12"></div>
     <div class="col_12">
-      <br>Jump to label: <input class="autocomplete" type="text" id="filterLabel" name="filterLabel" size="30"><br>
-      <br><select name="labels" id="labels" onchange="focusOnLabel(getComboValue(this))"></select>
+      <br>Jump to label (autocomplete): <input class="autocomplete" type="text" id="filterLabel" name="filterLabel" size="30"><br>
+      <br>Jump to label:<select name="labels" id="labels" onchange="focusOnLabel(getComboValue(this))"></select>
+      <br>Jump to file:<select name="jumpToFile" id="jumpToFile"></select>
+      line:<input type="number" id="jumpToLine" name="jumpToLine" size="4" min="0" max="9999" onchange="DEBUGGER_jumpToFileLine()" onblur="DEBUGGER_jumpToFileLine()"/>
     </div>
     <div id="debugger-left" class="col_8" style="overflow:auto; max-height:768px;"></div>
     <div id="rightPane" class="col_4" style="overflow:auto; max-height:768px;">

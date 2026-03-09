@@ -1,3 +1,7 @@
+09/03/2026
+==========
+- Added "jump to file/line" option
+
 04/03/2026
 ==========
 - Changed alert boxes

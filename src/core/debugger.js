@@ -1395,6 +1395,28 @@ function syntaxColoring(_s, _ln) {
   }
 
 
+  function DEBUGGER_jumpToFileLine() {
+    const file = document.getElementById("jumpToFile").value;
+    const line = parseInt(document.getElementById("jumpToLine").value);
+    let af = ALLLINES_FILES[file];
+    let ln = null;
+    if (af) {
+      ln = af[line];
+      if (!ln) {
+        return;
+      }
+    } else {
+      return;
+    }
+    let IP = 0;
+    if (ln) {
+      if (ln.assembledIP) {
+        focusOnCodeLine(ln.assembledIP);
+        return;
+      }
+    }
+  }
+
 function DEBUGGER_initFile(_refreshCyclesOnly = false) {
   CODERPARSER_SINGLETON.sortedlabels = [...CODERPARSER_SINGLETON.labels].sort((a, b) =>
   a.label.localeCompare(b.label)
@@ -1474,6 +1496,16 @@ function DEBUGGER_initFile(_refreshCyclesOnly = false) {
     str += '  <option value="' + CODERPARSER_SINGLETON.labels[i].label.toUpperCase() + '">' + labelName + '</option>';
   }
   document.getElementById('labels').innerHTML = str;
+
+  str = "";
+  for (let i = 0; i < CODERPARSER_SINGLETON.includes.length; i++) {
+    let name = CODERPARSER_SINGLETON.includes[i];
+    name = name.split(/[/\\]/).pop();
+    let af = ALLLINES_FILES[name];
+    if (af && af.length)
+      str += '  <option value="' + name + '">' + name + '</option>';
+  }
+  document.getElementById('jumpToFile').innerHTML = str;
 
   str = '';
   str += '<table name="DBGlines" id="DBGlines">';
