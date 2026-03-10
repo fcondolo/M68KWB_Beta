@@ -41,6 +41,7 @@ var DEBUGGER_timeM_prevRow = null;
 var DEBUGGER_hitBP_prevRow = null;
 var DEBUGGER_ForceFocus = null;
 var DEBUGGER_QueryDisplayRefresh = false;
+var DEBUGGER_lastError = null;
 
 DEBUGGER_DumpCopperList = null;
 DEBUGGER_copperListDump = "";
@@ -432,10 +433,16 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     break;
     case 69: // e
       if (DEBUGGER_tracing) {
-        DEBUGGER_skipNextBP = M68K_IP;
-        DEBUGGER_traceTillRTS = true;
-        DEBUGGER_canStep = true;
-        setTraceMode(false);
+        if (DEBUGGER_SHIFT_PRESSED) {
+          if (DEBUGGER_lastError)
+          MAIN_ALERTS_LIST = []; // empty main alert list to avoid "too many errors" message wneh hitting a breakpoint frame after frame
+          showModalBox("<b style='color:white;'>Last error:</b><br>"+DEBUGGER_lastError,DEBUGGER_OnCloseBreakpointModal);
+        } else {
+          DEBUGGER_skipNextBP = M68K_IP;
+          DEBUGGER_traceTillRTS = true;
+          DEBUGGER_canStep = true;
+          setTraceMode(false);
+        }
       }
     break;
     case 70: // f
@@ -722,33 +729,34 @@ function DEBUGGER_AllowJSCommands(_s) {
 
 
 function DEBUGGER_help() {
-  let msg = "<center><b style='color:white'>M68KWB Help</b></center><br>";
-  msg += "<table><tr><th>KEY(s)</th><th>COMMAND</th><th>DESCRIPTION</th></tr>";
-  msg += "<tr><td>a</td><td>Anchors</td><td>Show anchors / test card</td></tr>";
-  msg += "<tr><td>b</td><td>Bitplanes visibility</td><td>Switch bitplanes on/off</td></tr>";
-  msg += "<tr><td>alt + b</td><td>break update</td><td>trigger breakpoint at the beginning of update (on/off)</td></tr>";
-  msg += "<tr><td>c</td><td>cycles</td><td>toggle show CPU cycles per frame on/off</td></tr>";
+  let msg = "<center><b>M68KWB Help</b></center><br>";
+  msg += "<table><tr><th><b>KEY(s)</b></th><th><b>COMMAND</b></th><th><b>DESCRIPTION</b></th></tr>";
+  msg += "<tr><td>a</td><td><b>a</b>nchors</td><td>Show anchors / test card</td></tr>";
+  msg += "<tr><td>b</td><td><b>b</b>itplanes visibility</td><td>Switch bitplanes on/off</td></tr>";
+  msg += "<tr><td>alt + b</td><td><b>b</b>reak update</td><td>trigger breakpoint at the beginning of update (on/off)</td></tr>";
+  msg += "<tr><td>c</td><td><b>c</b>ycles</td><td>toggle show CPU cycles per frame on/off</td></tr>";
   if (FX_INFO.platform == 'OCS')
-    msg += "<tr><td>shift + c</td><td>copperlist</td><td>shows current copperlist (OCS only)</td></tr>";
-  msg += "<tr><td>shift + d</td><td>decimal</td><td>dump registers values in decimal (on/off)</td></tr>";
-  msg += "<tr><td>e</td><td>exit</td><td>executes code util RTS is reached</td></tr>";
-  msg += "<tr><td>f</td><td>focus</td><td>set focus on current executed instruction</td></tr>";
-  msg += "<tr><td>h</td><td>help</td><td>show this help</td></tr>";
-  msg += "<tr><td>shift + h</td><td>hexadecimal</td><td>dump registers values in hexadecimal</td></tr>";
-  msg += "<tr><td>j</td><td>js</td><td>toggle javascript calls from asm on/off</td></tr>";
-  msg += "<tr><td>m</td><td>mem</td><td>show memory stats</td></tr>";
-  msg += "<tr><td>o</td><td>step over</td><td>step over instruction while tracing</td></tr>";
-  msg += "<tr><td>p</td><td>pause</td><td>toggle pause on/off</td></tr>";
-  msg += "<tr><td>shift + p</td><td>paranoid mode</td><td>toggle paranoid mode on/off</td></tr>";
-  msg += "<tr><td>r</td><td>run</td><td>exit trace mode</td></tr>";
-  msg += "<tr><td>shift + r</td><td>restart</td><td>reloads the page and restarts the same FX, and restores breakpoints, pause and zoom</td></tr>";
-  msg += "<tr><td>t</td><td>trace</td><td>step into (while tracing)</td></tr>";
-  msg += "<tr><td>shift + t</td><td>Toolbox</td><td>Toggle Toolbox</td></tr>";
-  msg += "<tr><td>alt + v</td><td>break vbl update</td><td>trigger breakpoint at the beginning of vbl update (on/off)</td></tr>";
-  msg += "<tr><td>w</td><td>Where am I?</td><td>shows current instruction info + callstack and latest branches</td></tr>";
+    msg += "<tr><td>shift + c</td><td><b>c</b>opperlist</td><td>shows current copperlist (OCS only)</td></tr>";
+  msg += "<tr><td>shift + d</td><td><b>d</b>ecimal</td><td>dump registers values in decimal (on/off)</td></tr>";
+  msg += "<tr><td>e</td><td><b>e</b>xit</td><td>executes code util RTS is reached</td></tr>";
+  msg += "<tr><td>shift + e</td><td>show last <b>e</b>rror</td><td>Shows again the latest error dialog box</td></tr>";
+  msg += "<tr><td>f</td><td><b>f</b>ocus</td><td>set focus on current executed instruction</td></tr>";
+  msg += "<tr><td>h</td><td><b>h</b>elp</td><td>show this help</td></tr>";
+  msg += "<tr><td>shift + h</td><td><b>h</b>exadecimal</td><td>dump registers values in hexadecimal</td></tr>";
+  msg += "<tr><td>j</td><td><b>j</b>s</td><td>toggle javascript calls from asm on/off</td></tr>";
+  msg += "<tr><td>m</td><td><b>m</b>em</td><td>show memory stats</td></tr>";
+  msg += "<tr><td>o</td><td>step <b>o</b>ver</td><td>step over instruction while tracing</td></tr>";
+  msg += "<tr><td>p</td><td><b>p</b>ause</td><td>toggle pause on/off</td></tr>";
+  msg += "<tr><td>shift + p</td><td><b>p</b>aranoid mode</td><td>toggle paranoid mode on/off</td></tr>";
+  msg += "<tr><td>r</td><td><b>r</b>un</td><td>exit trace mode</td></tr>";
+  msg += "<tr><td>shift + r</td><td><b>r</b>estart</td><td>reloads the page and restarts the same FX, and restores breakpoints, pause and zoom</td></tr>";
+  msg += "<tr><td>t</td><td><b>t</b>race</td><td>step into (while tracing)</td></tr>";
+  msg += "<tr><td>shift + t</td><td><b>t</b>oolbox</td><td>Toggle Toolbox</td></tr>";
+  msg += "<tr><td>alt + v</td><td>break <b>v</b>bl update</td><td>trigger breakpoint at the beginning of vbl update (on/off)</td></tr>";
+  msg += "<tr><td>w</td><td><b>w</b>here am I?</td><td>shows current instruction info + callstack and latest branches</td></tr>";
   msg += "<tr><td>y</td><td>Backwards</td><td>Time Machine go to prev instruction</td></tr>";
   msg += "<tr><td>x</td><td>Forward</td><td>Time Machine go to next instruction</td></tr>";
-  msg += "<tr><td>shift + z</td><td>zap</td><td>clears default FX and breakpoint data and relods page</td></tr>";
+  msg += "<tr><td>shift + z</td><td><b>z</b>ap</td><td>clears default FX and breakpoint data and relods page</td></tr>";
 
   msg += "</table>";
   msg += "<br><center><img src='images/SNDYICON_TRANSP.png' width=20%></center><br>";
@@ -2073,6 +2081,7 @@ function debug(_alertMessage = null, _useContext = false) {
 //  if (_alertMessage) {
 //    DEBUGGER_AdditionalDbgMsg = _alertMessage;
 //  }
+  DEBUGGER_lastError = msg;
   showHTMLError(msg, false);
   setTraceMode(true);
   DEBUGGER_traceTillRTS = false;
