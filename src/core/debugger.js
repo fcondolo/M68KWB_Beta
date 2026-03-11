@@ -53,6 +53,9 @@ var DEBUGGER_AdditionalDbgMsg = "";
 var DEBUGGER_NeedReload = false;
 var DEBUGGER_justHitRun = false;
 var PARSER_lines = [];
+var DEBUGGER_ALLTAGS = [];
+const DEBUGGER_TAG_ENABLED = 1;
+const DEBUGGER_TAG_DISABLED = 2;
 
 function DebugCtx_reset(_defaultMsg = null) {
   DBGCTX = [];
@@ -727,6 +730,60 @@ function DEBUGGER_AllowJSCommands(_s) {
 }
 
 
+/**
+   * Stops console-logging for all tags passed in arg1
+   * @param   {object} _tagList  - array of strings containing the tags to stop logging. If null, all previously known tags will be disabled
+  */
+  function DEBUGGER_StopLogTags(_tagList = null) {
+  if (_tagList) {
+    for (let tagId = 0; tagId < _tagList.length; tagId++) {
+      DEBUGGER_ALLTAGS[_tagList[tagId]] = DEBUGGER_TAG_DISABLED;
+    }
+  } else {
+    for (let i = 0; i < DEBUGGER_ALLTAGS.length; i++) {
+      DEBUGGER_ALLTAGS[i] = DEBUGGER_TAG_DISABLED;
+    }
+  }  
+}
+
+/**
+   * Starts console-logging for all tags passed in arg1
+   * @param   {object} _tagList  - array of strings containing the tags to start logging. If null, all tag will be enabled
+   * @param   {boolean} _exclusive  - if true, all tags that are not in the list will be stopped
+  */
+function DEBUGGER_StartLogTags(_tagList = null, _exclusive = false) {
+  if (_tagList) {
+    if (_exclusive) { // if exclusive, start disabling all tags
+      for (let i = 0; i < DEBUGGER_ALLTAGS.length; i++) {
+        DEBUGGER_ALLTAGS[i] = DEBUGGER_TAG_DISABLED;
+      }
+    }
+    for (let tagId = 0; tagId < _tagList.length; tagId++) {
+      DEBUGGER_ALLTAGS[_tagList[tagId]] = DEBUGGER_TAG_ENABLED;
+    }
+  } else {
+    for (let i = 0; i < DEBUGGER_ALLTAGS.length; i++) {
+      DEBUGGER_ALLTAGS[i] = DEBUGGER_TAG_ENABLED;
+    }
+  }
+}
+
+/**
+   * Logs a string to the console if its tag is enabled
+   * @param   {string} _msg  - the string to log
+   * @param   {string} _tag  - the tag for this message. Can be null
+  */
+function DEBUGGER_LOG(_msg, _tag = null) {
+  if (_tag) {
+    if (DEBUGGER_ALLTAGS[_tag]) { // existing tag
+      if (DEBUGGER_ALLTAGS[_tag] == DEBUGGER_TAG_DISABLED)
+        return;
+    } else { // new tag, enabled by default
+      DEBUGGER_ALLTAGS[_tag] = DEBUGGER_TAG_ENABLED;
+    }
+  }
+  console.log(_msg);
+}
 
 function DEBUGGER_help() {
   let msg = "<center><b>M68KWB Help</b></center><br>";

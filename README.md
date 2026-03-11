@@ -1,3 +1,6 @@
+FULL DOCUMENTATION: 
+https://docs.google.com/document/d/1i6zIOkM04BQYd01RhZDmI46WqM0ksqOJCn-yL5lC0GA/edit?usp=sharing
+
 M68KWB is an Amiga and Atari ST/STe development tool that allows you to smoothly go from javascript prototyping to asm implementation.
 It’s also useful if you only need to develop in pure assembly from scratch.
 It features:
