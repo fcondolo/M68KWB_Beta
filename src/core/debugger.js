@@ -1464,21 +1464,28 @@ function syntaxColoring(_s, _ln) {
     const file = document.getElementById("jumpToFile").value;
     const line = parseInt(document.getElementById("jumpToLine").value);
     let af = ALLLINES_FILES[file];
-    let ln = null;
+    let IP = 0;
     if (af) {
-      ln = af[line];
-      if (!ln) {
+      for (let f = line; f < Math.min(line+5,af.length); f++) {
+        ln = af[f];
+        if (ln) {
+          if (ln.assembledIP)
+            IP = ln.assembledIP;
+          else if (ln.codeSectionOfs)
+            IP = ln.codeSectionOfs;
+        }
+        if (!isNaN(IP) && (IP != 0))
+          break;
+      }
+      if ((IP == 0) || (isNaN(IP))) {
         return;
       }
     } else {
       return;
     }
-    let IP = 0;
-    if (ln) {
-      if (ln.assembledIP) {
-        focusOnCodeLine(ln.assembledIP);
-        return;
-      }
+    if (!isNaN(IP) && (IP != 0)) {
+      focusOnCodeLine(IP);
+      return;
     }
   }
 
