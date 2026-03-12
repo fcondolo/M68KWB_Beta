@@ -325,7 +325,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
       event.stopPropagation();
       e.preventDefault(); // avoid fucking scrollng when pressing space
       modal.style.display = "none";
-      MODAL_closeCallback();
+      if (MODAL_closeCallback) MODAL_closeCallback();
       MODAL_closeCallback = null;
     }
     return;
