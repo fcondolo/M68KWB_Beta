@@ -192,7 +192,7 @@ var lockDataD = [null,null,null,null,null,null,null,null];
 var lockDataA = [null,null,null,null,null,null,null,null];
 
 
-function runtimeError68k(_e) {
+function runtimeError68k(_e, _canSurvive = false) {
   const lineIndex = ASMBL_ADRSTOLINE[M68K_IP];
   let lineStr = null;
   if (lineIndex) {
@@ -227,6 +227,8 @@ function runtimeError68k(_e) {
   //main_Alert(_e, true);
   _e = _e.replaceAll("\n","<br>");
   debug(_e);
+  if (_canSurvive)
+    return;
   MACHINE.stop = true;
   //DEBUGGER_showContext();
   debugger;
@@ -238,7 +240,7 @@ function lock(_reg, _mask, _reason) {
   _reg = _reg.toUpperCase();
   let reg = registerFromName(_reg);
   if (!reg) {
-    runtimeError68k('lock: bad register name: ' + _reg);
+    runtimeError68k('lock: bad register name: ' + _reg, true);
     return;
   }
 
@@ -249,7 +251,7 @@ function lock(_reg, _mask, _reason) {
     data = lockDataD;
 
   if (data[reg.ind]) {
-    runtimeError68k(_reg + ' already locked');
+    runtimeError68k(_reg + ' already locked', true);
   }
 
   data[reg.ind] = { val: reg.tab[reg.ind] & _mask, mask: _mask, reason: _reason};
@@ -297,7 +299,7 @@ function unlock(_reg, _check = true) {
   _reg = _reg.toUpperCase();
   let reg = registerFromName(_reg);
   if (!reg) {
-    runtimeError68k('unlock: bad register name: ' + _reg);
+    runtimeError68k('unlock: bad register name: ' + _reg, true);
     return;
   }
 
@@ -306,7 +308,7 @@ function unlock(_reg, _check = true) {
 
   if (_check) {
     if (clrTab[reg.ind] == null)
-      runtimeError68k("can't unlock " + _reg + " : register is not locked");
+      runtimeError68k("can't unlock " + _reg + " : register is not locked", true);
   }
   clrTab[reg.ind] = null;
 }
@@ -1163,7 +1165,7 @@ function I_DIVS(_source, _dest, _e) {
     if ((quo < -32768) || (quo > 32767)) {
       regs.v = true;
       if (CPU_CONFIG.check_div_overflow && _e) {
-        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ERRORIMMUNE_COMMENT);
+        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ERRORIMMUNE_COMMENT, true);
       }
     }
     var rem = Math.abs(Math.floor(d % s));
@@ -1194,7 +1196,7 @@ function I_DIVU(_source, _dest, _e = true) {
     if (quo > 0xffff) {
       regs.v = true;
       if (CPU_CONFIG.check_div_overflow && _e) {
-        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ERRORIMMUNE_COMMENT);
+        runtimeError68k("DIVISION OVERFLOW: " + Math.floor(d) + " / " + Math.floor(s) + " = "  + quo + ERRORIMMUNE_COMMENT, true);
       }
     } else {
       var rem = d % s;
@@ -2662,15 +2664,15 @@ function BRA(_line) {
   if (!isNaN(_line.branchAx)) {
     M68K_NEXTIP = regs.a[_line.branchAx]; 
     if (!_line.isErrorImmune && DEBUGGER_isParanoid()) {
-      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
-      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
+      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT, true);
+      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT, true);
     }  
   }
   else if (_line.branchAnRn != null) {
     M68K_NEXTIP = regs.a[_line.branchAnRn.An] + TOOLS.toInt16(_line.branchAnRn.rTab[_line.branchAnRn.rInd]);
     if (!_line.isErrorImmune && DEBUGGER_isParanoid()) {
-      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
-      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
+      if (M68K_NEXTIP < M68K_VECTORS_ZONE_SIZE) runtimeError68k("Pointing to the wrong address? Instruction jumping below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT, true);
+      if (M68K_NEXTIP > MACHINE.maxCodeAdrs) runtimeError68k("Pointing to the wrong address? Instruction jumping above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT, true);
     }  
   }
   else M68K_NEXTIP = _line.branchIP;
