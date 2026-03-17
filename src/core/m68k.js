@@ -2810,13 +2810,13 @@ function RTS(_line) {
     return 'exit';
   }
   let candidateIP = STACK_POP(4);
-  if (DEBUGGER_isParanoid()) {
+  if (DEBUGGER_isParanoid() && (!_line.isErrorImmune)) {
     if (candidateIP < M68K_VECTORS_ZONE_SIZE) {
-      runtimeError68k("Corrupted stack? RTS instruction popped invalid address from stack: Address below code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+      runtimeError68k("Corrupted stack?<br>RTS instruction popped an invalid address from stack:<br>Address below code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
       return;
     }
     if (candidateIP > MACHINE.maxCodeAdrs) {
-      runtimeError68k("Corrupted stack? RTS instruction popped invalid address from stack: Address above code section: $"  + M68K_NEXTIP.toString(16) + ". If intended (e.g. generated code in data section), disable DEBUGGER_paranoid mode using ';>JS DEBUGGER_paranoid=false' in your code.");
+      runtimeError68k("Corrupted stack?<br>RTS instruction popped an invalid address from stack:<br>Address above code section: $"  + M68K_NEXTIP.toString(16) + ERRORIMMUNE_COMMENT);
       return;
     }
   }
