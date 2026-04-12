@@ -1367,6 +1367,7 @@ class CodeParser {
           condComp.line = i;
           switch (condComp.type) {
             case 'start':
+              condComp.ln = ln;
               t.condCompLst.push({start:condComp});
               lst.push({cond:i});
             break;
@@ -1380,6 +1381,7 @@ class CodeParser {
                     return [];
                   }
                   found = true;
+                  condComp.ln = ln;
                   t.condCompLst[j].mid = condComp;
                   break;
                 }
@@ -1395,6 +1397,7 @@ class CodeParser {
               for (let j = t.condCompLst.length-1; j >= 0; j--) {
                 if (t.condCompLst[j].start.type == 'start' && !t.condCompLst[j].end) {
                   found = true;
+                  condComp.ln = ln;
                   t.condCompLst[j].end = condComp;
                   break;
                 }
@@ -1418,7 +1421,7 @@ class CodeParser {
           }
         }
         ln.isInstr = false;
-        lst.push({w:wrd1, v:i, ofs:ln.ofs, cond:-1});
+        lst.push({ln:ln, w:wrd1, v:i, ofs:ln.ofs, cond:-1});
         t.condCompLst.push({start:{type:'equ',w:wrd1, v:i, ofs:ln.ofs, cond:-1}, end:{type:'equ'}});
       }
     }
@@ -1444,6 +1447,12 @@ class CodeParser {
       let e = _equlst[i];
       if (e.processed)
         continue;
+      if (e.start == null) {
+        if (e.ln) {
+          e.ln.Failed("error defining constant in conditional block");
+          return;
+        }
+      }
       switch (e.start.type) {
         case 'equ': {
           let ln = t.strings.lines[e.start.v];
@@ -1514,6 +1523,18 @@ class CodeParser {
             }
           }
           t.strings.lines[e.start.line].makeComment();
+          if (e.end == null) {
+            let foundLn = null;
+            if (e.start.line != null)
+              foundLn = t.strings.lines[e.start.line];
+            if (foundLn == null)
+              foundLn = e.ln;
+            if (foundLn)
+              foundLn.Failed("can't find the end of the conditional block");
+            else
+              main_Alert("can't find the end of a conditional block");
+            return true;
+          }
           t.strings.lines[e.end.line].makeComment();
           if (e.mid) t.strings.lines[e.mid.line].makeComment();
         }
