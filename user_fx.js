@@ -150,11 +150,11 @@ var user_fx = [
     },
     {
         fxName:     "Tut4: self-modified",
-        classname:  "tut4_automodified", 
+        classname:  "tut4_self_modified", 
         platform:   "STE", 
         rootPath:   "fx/tutorials",
-        source:     "tut4_automodified.asm",
-        js:         'fx/tutorials/tut4_automodified.js'
+        source:     "tut4_self_modified.asm",
+        js:         'fx/tutorials/tut4_self_modified.js'
     },
     {
         fxName:     "Tut5: OCS image",

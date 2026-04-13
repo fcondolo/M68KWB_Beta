@@ -1,4 +1,4 @@
-class tut4_automodified {
+class tut4_self_modified {
   FX_Init() {
     invoke68K("init");
   }

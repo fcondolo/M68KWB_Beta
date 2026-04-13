@@ -2363,7 +2363,7 @@ class CodeParser {
 
     // compile instructions
     let codeSectionOfs = M68K_VECTORS_ZONE_SIZE;
-    if (!ASMBL_ADRSTOLINE) ASMBL_ADRSTOLINE = new Uint32Array(ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES);
+    if (!ASMBL_ADRSTOLINE) ASMBL_ADRSTOLINE = [];
     for (let lnIt = 0; lnIt < lnCount; lnIt++) {
       let line = t.strings.lines[lnIt];
       if (codeSectionOfs >= ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES) {

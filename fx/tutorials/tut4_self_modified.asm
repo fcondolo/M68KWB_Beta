@@ -9,8 +9,8 @@ init:
      dbra      d7,.nextcol    
      ; MODIFIED CODE HERE
      lea        .modify_me,a0
-     move.w     #$4e75,2(a0)           ; insert RTS opcode instead of 0  - M68KWB_NOERROR - 
-     ; in the comments of the above instructions, you can read "M68KWB_NOERROR". If you remove this, you'll get an error telling you you're overwriting the code section
+     move.w     #$4e75,2(a0)           ; insert RTS opcode instead of 0  - M68KWB_NOERROR -
+     ; in the comments of the above instructions, you can read "M68KWB_NOERROR". If you remove this, you'll get an error telling you're overwriting the code section
 
      ; >JS reAssemble(regs.a[0],1)
      ; the above "reAssemble" instruction asks the system to update its "compiled code cache" as we modified already existing code.     
@@ -48,9 +48,8 @@ set_pix:
      move.l    screens,a0
      add.l     #160*100,a0
      lea       autoCode,a1
-     ;>JS DEBUGGER_paranoid = false   // allow jumping outside of code section
-     jmp      (a1)
-     ;>JS DEBUGGER_paranoid = true  // set memory protection back
+     jmp      (a1) ; M68KWB_NOERROR
+     ; in the comments of the above instructions, you can read "M68KWB_NOERROR". If you remove this, you'll get an error telling you're jumping outside of the code section
 
 
 auto_begin:

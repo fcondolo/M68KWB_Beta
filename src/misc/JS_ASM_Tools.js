@@ -870,7 +870,7 @@ class JS_ASM_Tools {
     _reg = _reg.toUpperCase();
     let reg = registerFromName(_reg);
     if (!reg) {
-      runtimeError68k('nickname: bad register name: ' + _reg);
+      runtimeError68k('nickname: bad register name: ' + _reg, true);
       return;
     }
 

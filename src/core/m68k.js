@@ -2980,13 +2980,15 @@ async function execCPU() {
         return;
       }
     } else {
-      line = null;
-      const l = ASMBL_ADRSTOLINE_GEN.length;
-      for (let i = 0; i < l; i++) {
-        if (ASMBL_ADRSTOLINE_GEN[i].ip == M68K_IP) {
-          lineIndex = ASMBL_ADRSTOLINE_GEN[i].ln;
-          line = PARSER_lines[lineIndex];
-          break;
+      line = reAssemble(M68K_IP,1);
+      if (!line) {
+        const l = ASMBL_ADRSTOLINE_GEN.length;
+        for (let i = 0; i < l; i++) {
+          if (ASMBL_ADRSTOLINE_GEN[i].ip == M68K_IP) {
+            lineIndex = ASMBL_ADRSTOLINE_GEN[i].ln;
+            line = PARSER_lines[lineIndex];
+            break;
+          }
         }
       }
       if (!line) {

@@ -1,5 +1,6 @@
 var ASMBL_INSTRGRP = [];
-var ASMBL_ADRSTOLINE = null;
+var ASMBL_ADRSTOLINE = []; // ASMBL_ADRSTOLINE contains for each address the corresponding line index in CODERPARSER_SINGLETON.strings.lines[]
+
 var ASMBL_ADRSTOLINE_GEN = [];
 var ASSEMBLER_CONTEXT = [];
 var ASSEMBLER_CURLINE = null;
