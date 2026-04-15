@@ -225,10 +225,11 @@ class CodeParser {
     t.showCompilMsg("processing labels (pass2)...");
     t.process_labels(false);
 
+    /*
     if (!t.startPass()) return false;
     t.showCompilMsg("processing incbin...");
     t.process_incbin();
-
+*/
     if (!t.startPass()) return false;
     t.showCompilMsg("processing dc.x...");
     t.collectDC();
@@ -1022,6 +1023,7 @@ class CodeParser {
     return ret;
   }
 
+  /*
   process_incbin() {
     let t = this;
     const lnCount = t.strings.lines.length;
@@ -1059,6 +1061,47 @@ class CodeParser {
       }
     }
     return true;
+  }*/
+
+  checkForIncBin(ln,lnIt) {
+    let t = this;
+    let saveOfs = ln.ofs;
+      const wrd = ln.readNextWord();
+      if (wrd == "INCBIN") {
+        ln.isInstr = false;
+        const prevOfs = ln.ofs;
+        let path = ln.readNextWordBetweenQuotes();
+        if (!path || path.length == 0) {
+          ln.ofs = prevOfs;
+          path = ln.readNextWord();
+        }
+        ln.attachedLabel = t.getNearestLabelUp(lnIt);
+        if (!ln.attachedLabel) {
+          ln.Failed("The system needs 1 label before incbin, otherwise, it does not know to which address it should load it.");
+          ln.ofs = saveOfs;
+          return false;
+        }
+        let pth = t.get_incxx_path(path, FX_INFO.rootPath);
+        if (pth.err) {
+          ln.Failed(pth.err);
+          ln.ofs = saveOfs;
+          return false;
+        }
+        let finalPath  = pth.final;
+        t.showCompilMsg("load binary file: " + finalPath);
+        const err = load_binary_resource(finalPath, ln.attachedLabel, ln);
+        if (err) {
+          let errMsg = "'incbin' failed for file: " + path; 
+          if (FX_INFO.rootPath)
+            errMsg += ", rootPath was set to: " + FX_INFO.rootPath + ", final path is: " + finalPath;
+          ln.Failed(errMsg + ", error is: " + err);
+          ln.ofs = saveOfs;
+          return false;
+        }
+        return true;
+      }
+      ln.ofs = saveOfs;
+      return false;
   }
 
   collectDC() {
@@ -1072,6 +1115,15 @@ class CodeParser {
         continue;
       if (ln.makeDataEven) {
         CODERPARSER_SINGLETON.DxLines.push("MAKEDATAEVEN");
+      }
+
+      const isIncbin = t.checkForIncBin(ln,lnIt);
+      if (isIncbin) {
+        if (!ln.attachedLabel.dcLen)
+          ln.attachedLabel.dcLen = 0;
+        ln.attachedLabel.dcLen += ln.incbinData.length;
+        CODERPARSER_SINGLETON.DxLines.push(ln);
+        continue;
       }
       if (ln.readDx()) {
         ln.collectArgs(false);
@@ -1119,7 +1171,9 @@ class CodeParser {
         if (ln.isDCB)
           lblPrefix = "@DCB.@";
         let align = 1;
-        if (ln.instrSize > 1)
+        if (ln.incbinData)
+          lblPrefix = "@INC.@";
+        else if (ln.instrSize > 1)
           align = 2;
         if ( (i > 0) && (CODERPARSER_SINGLETON.DxLines[i-1] == "MAKEDATAEVEN")) {
           MACHINE.makeDataEven();
@@ -1141,7 +1195,7 @@ class CodeParser {
             return;
           }  
         }
-        ln.attachedLabel.dcData = adrs;  
+        ln.attachedLabel.dcData = adrs;
       }
     }
   }
@@ -1154,40 +1208,57 @@ class CodeParser {
       if (ln == "MAKEDATAEVEN")
         continue;
       if (!ln.isDS) {
-        ln.ofs = ln.DxArgsOfs;
-        ln.collectArgs(true);
+        if (!ln.incbinData) {
+          ln.ofs = ln.DxArgsOfs;
+          ln.collectArgs(true);
+        }
+//        if (ln.attachedLabel.label.toUpperCase().includes("GRADIENT")) {
+//          debugger;
+//        }
         let adrs = ln.attachedLabel.dcData;
-        if (ln.attachedLabel.writtenDCBytes == null)
+        if (!ln.attachedLabel.writtenDCBytes)
           ln.attachedLabel.writtenDCBytes = 0;
         else
           adrs += ln.attachedLabel.writtenDCBytes;
         let iter;
-        if (ln.isDCB)
-          iter = ln.DxArgs[0].v;
-        else
-          iter = ln.DxArgs.length;
-
-        for (let cpy = 0; cpy < iter; cpy++) {
+        if (ln.incbinData) {
           ln.dcAddress = adrs;
-          let val;
-          if (ln.isDCB) {
-            ln.hideDxArgsDbg = true;
-            if (ln.DxArgs.length > 1)
-              val = ln.DxArgs[1].v;
-            else
-              val  = 0;
+          iter = ln.incbinData.length;
+          CODERPARSER_SINGLETON.loadedFiles.push({name:ln.incbinFile.toUpperCase(), size:iter, adrs:adrs});
+          for (let cpi = 0; cpi < iter; ++cpi) {
+            adrs = MACHINE.setRAMValue(ln.incbinData.charCodeAt(cpi) & 0xff, adrs, 1);
           }
-          else
-            val = ln.DxArgs[cpy].v;
-          if (val == null || isNaN(val))
-            ln.Failed("can't evaluate DC.x arg #" + (cpy+1));
-          else {
-            if ((!ln.hideDxArgsDbg) && (ln.DxArgs[cpy].dbg != undefined))
-              ln.filtered += " ($" + ln.DxArgs[cpy].dbg.toString(16) + ")"
-            adrs = MACHINE.setRAMValue(val, adrs, ln.instrSize);
-          }
-          ln.attachedLabel.writtenDCBytes += ln.instrSize;
+          ln.attachedLabel.writtenDCBytes += iter;
+          ln.incbinData = null;
         }
+        else {
+          if (ln.isDCB)
+            iter = ln.DxArgs[0].v;
+          else
+            iter = ln.DxArgs.length;
+
+            for (let cpy = 0; cpy < iter; cpy++) {
+              ln.dcAddress = adrs;
+              let val;
+              if (ln.isDCB) {
+                ln.hideDxArgsDbg = true;
+                if (ln.DxArgs.length > 1)
+                  val = ln.DxArgs[1].v;
+                else
+                  val  = 0;
+              }
+              else
+                val = ln.DxArgs[cpy].v;
+              if (val == null || isNaN(val))
+                ln.Failed("can't evaluate DC.x arg #" + (cpy+1));
+              else {
+                if ((!ln.hideDxArgsDbg) && (ln.DxArgs[cpy].dbg != undefined))
+                  ln.filtered += " ($" + ln.DxArgs[cpy].dbg.toString(16) + ")"
+                adrs = MACHINE.setRAMValue(val, adrs, ln.instrSize);
+              }
+              ln.attachedLabel.writtenDCBytes += ln.instrSize;
+            }
+          }
       }
     }
   }

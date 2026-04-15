@@ -188,7 +188,7 @@ function strReplaceAt(str, index, chr) {
 }
 
 
-function load_binary_resource(_url, _label) {
+function load_binary_resource(_url, _label, _ln) {
   var req = null;
   try {
     const d = new Date();
@@ -212,16 +212,15 @@ function load_binary_resource(_url, _label) {
   if (!CODERPARSER_SINGLETON.loadedFiles) {
     CODERPARSER_SINGLETON.loadedFiles = [];
   }
+  _ln.incbinData = req.responseText;
+  _ln.incbinFile = _url;
+/*
   let byteArray = MACHINE.allocRAM(bytes, 1, "load binary file: " + _url);
-  CODERPARSER_SINGLETON.loadedFiles.push({name:_url.toUpperCase(), size:bytes, adrs:byteArray});
   let w = byteArray;
   for (var i = 0; i < bytes; ++i) {
     w = MACHINE.setRAMValue(req.responseText.charCodeAt(i) & 0xff, w, 1);
   }
-  if ((!_label.dcData) || (byteArray < _label.dcData))
-    _label.dcData = byteArray;
-  if (!_label.dcLen) _label.dcLen = 0;
-  _label.dcLen = Math.max(_label.dcLen, w - _label.dcData);
+*/
   return null;
 }
 

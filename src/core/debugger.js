@@ -713,7 +713,15 @@ function DEBUGGER_memoryStats() {
   if (dsSize > 0) msg += "<tr><td>misc</td><td>$" + dsSize.toString(16) + "</td><td>less than 4096 bytes ds.b/w/l</td></tr>";
   if (unknownSize > 0) msg += "<tr><td>misc</td><td>$" + unknownSize.toString(16) + "</td><td>less than 4096 bytes other allocs</td></tr>";
   msg += "</table>";
-
+  msg += "<br>Data labels:";
+  msg += "<br><table><tr><th>label</th><th>size</th><th>adrs</th></tr>";
+  let xpecedNextAdrs = 0;
+  for (let i = 0; i < CODERPARSER_SINGLETON.labels.length; i++) {
+    const l = CODERPARSER_SINGLETON.labels[i];
+    if (l.dcData) {
+      msg += "<tr><td>" + l.label + "</td><td>$" + l.dcLen.toString(16) + "</td><td>$" + l.dcData.toString(16) + "</td></tr>";
+    }
+  }
   showModalBox(msg, null);
 }
 
