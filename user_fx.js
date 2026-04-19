@@ -220,6 +220,13 @@ var user_fx = [
         js:         'fx/tutorials/testAmigaBlitter.js'
     },
     {
+        fxName:     "OCS Blitter2",
+        classname:  "testAmigaBlitter2", 
+        platform:   "OCS",
+        rootPath:   "fx/tutorials",
+        js:         'fx/tutorials/testAmigaBlitter2.js'
+    },
+    {
         fxName:     "STE Blitter Fill",
         classname:  "AtariSTe_BlitterFill", 
         platform:   "STE", 

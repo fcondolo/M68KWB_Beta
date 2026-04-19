@@ -303,6 +303,14 @@ function AMIGA_cls() {
         MACHINE.setRAMValue(d, adrs, 1);    
     }
     
+    function AMIGA_getPix(_x,_y,_bpl) {
+        const ofs = bplHorizByteCount * _y + Math.floor(_x / 8);
+        const adrs = _bpl + ofs;
+        const d = MACHINE.getRAMValue(adrs, 1, false);
+        const msk = 1<<(7-(_x&7));
+        if ((d & msk) == 0) return 0;
+        return 1;
+    }
     
       function AMIGA_line(_x0,_y0,_x1,_y1,_bpl, _clr = false) {
         const dx = Math.abs(_x1 - _x0);
@@ -326,5 +334,61 @@ function AMIGA_cls() {
           if (e2 <  dx) { err += dx; _y0 += sy; }
         }
       }  
+
+    function AMIGA_SetPalette(_pal) {
+        let reg = COLOR0;
+        for (let i = 0; i < Math.min(_pal.length, 32); i++) {
+            AMIGA_setCustom(reg,_pal[i]);
+            reg += 2;
+        }
+    }
     
+    function AMIGA_fillLine(_helper,_x0,_y0,_x1,_y1,_bpl) {
+        const clip = {minx:0,miny:0,maxx:_helper.width,maxy:_helper.height};
+        if (_y0 == _y1) {
+            AMIGA_pix2Bitplane(_x0,_y0,_bpl, clip, false);
+            AMIGA_pix2Bitplane(_x1,_y1,_bpl, clip, false);
+            return;
+        }
+        if (_y0 > _y1) {
+            let tempx = _x0;
+            let tempy = _y0;
+            _x0 = _x1;
+            _y0 = _y1;
+            _x1 = tempx;
+            _y1 = tempy;
+        }
+        _xslope = (_x1-_x0)/(_y1-_y0);
+        while (_y0 != _y1) {
+            AMIGA_pix2Bitplane(Math.floor(_x0),_y0,_bpl, clip, false);
+            _y0++;
+            _x0 += _xslope;
+        }
+
+    }
+
+    function AMIGA_BLitterFillHW(_helper,_bpl) {
+        const adrs = _bpl+_helper.bplSize-42;
+        AMIGA_getCustom(DMACONR); // pretend we checked for blitter availability
+        AMIGA_setCustom_L(BLTAPTR, adrs);
+        AMIGA_setCustom_L(BLTDPTR, adrs);
+        AMIGA_setCustom(BLTAMOD,0);
+        AMIGA_setCustom(BLTDMOD,0);
+        AMIGA_setCustom(BLTCON0,0x9f0);
+        AMIGA_setCustom(BLTCON1,0x12);
+        AMIGA_setCustom(BLTSIZE,(_helper.height<<6)|(_helper.width/16));
+    }
+    
+    function AMIGA_BLitterFillSW(_helper,_bpl) {
+        const clip = {minx:0,miny:0,maxx:_helper.width,maxy:_helper.height};
+        let v = 0;
+        for (let y = _helper.height-1; y >= 0; y--) {
+            for (let x = _helper.width-1; x >= 0; x--) {
+                const lit = AMIGA_getPix(x,y,_bpl);
+                if (v && !lit)
+                    AMIGA_pix2Bitplane(x,y,_bpl, clip);
+                v ^= lit;
+            }
+        }
+    }
     
