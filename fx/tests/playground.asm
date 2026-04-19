@@ -6,4 +6,6 @@ init:
   rts
 
 update:
+  NOP
+  ;>JS debug("pouet")
   rts

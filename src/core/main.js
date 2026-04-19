@@ -29,7 +29,6 @@ var MODAL_closeCallback = null;
 var PAUSED = false;
 
 var cvs, ctx, smallRenderCtx, smallRenderCvs;
-var REQUEST_ANIMFRAME = true;
 var WAITING_USERINPUT = false;
 
 var play = true;
@@ -44,6 +43,7 @@ var CANVAS_DISPLAY_HEIGHT = PAL_VIDEO_LINES_COUNT;
 var BACKBUF_CVS;
 var BACKBUF_CTX;
 var CANVAS_SCALE = 1;
+var M68KWB_STOPALL = false;
 
 var MYFX = {};  // don't set to null, keep as an empty struct
 
@@ -110,6 +110,9 @@ function main_doInit() {
 }
 
 function main_mainLoop() {
+  if (M68KWB_STOPALL)
+    return;
+
   if (PAUSED || WAITING_USERINPUT) {
     WATCHES.update();
     return;
@@ -226,16 +229,18 @@ function main_startAll() {
       if (deltaTime >= ANIM_FRAME_WAIT*100) {
         ANIM_FRAME_LAST_TIME =  curTime;
       } else {
-        rAF_ID = requestAnimationFrame(rAFCallback);
+        if (!M68KWB_STOPALL)
+          rAF_ID = requestAnimationFrame(rAFCallback);
         return;
       }
     }
     main_mainLoop();
-    if (REQUEST_ANIMFRAME)
+    if (!M68KWB_STOPALL)
       rAF_ID = requestAnimationFrame(rAFCallback);
   }
 
-  rAF_ID = requestAnimationFrame(rAFCallback);
+  if (!M68KWB_STOPALL)
+    rAF_ID = requestAnimationFrame(rAFCallback);
 }
 
 function setTooltipPos(e, d) {
@@ -535,16 +540,26 @@ function main_Alert(_msg, _makeLastMsg = false, _skipAsm = false) {
         msg += "\n- ERROR #" + (i+1).toString() + ": " + MAIN_ALERTS_LIST[i];
       }
       msg += "\n- ERROR #" + (MAIN_ALERTS_LIST.length+1).toString() + ": " + _msg;
-      alert(msg);  
+      if (DEBUGGER_CONFIG.NO_ALERT)
+        console.log(msg);
+      else {
+        if (MACHINE)
+          MACHINE.stop = true;
+        M68KWB_STOPALL = true;
+        alert(msg);  
+      }
     }
     return;
   }
   if (MAIN_ALERTS_ALLLOWED) {
-    let curLine = null;
-    if ((typeof PARSER_lines !== 'undefined') && PARSER_lines && ASMBL_ADRSTOLINE) curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
-    if (curLine && !_skipAsm) {
-      _msg += "<br>in file: " + curLine.path + "<br>at line: " + curLine.line;
-    }    
+    if (!_skipAsm) {
+      let curLine = null;
+      if ((typeof PARSER_lines !== 'undefined') && PARSER_lines && ASMBL_ADRSTOLINE) 
+        curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
+      if (curLine) {
+        _msg += "<br>in file: " + curLine.path + "<br>at line: " + curLine.line;
+      }
+    }
     const l = DBGCTX.length;
     if (l > 0) {
       _msg += "<br>Context:<br>";
@@ -562,7 +577,17 @@ function main_Alert(_msg, _makeLastMsg = false, _skipAsm = false) {
     MAIN_ALERTS_LIST.push(_msg);
     let strippedMsg = _msg.replaceAll("<br>","\n");
     strippedMsg = strippedMsg.replaceAll("\t","\u00A0");
-    alert(strippedMsg);  
+    if (DEBUGGER_CONFIG.NO_ALERT)
+      console.log(strippedMsg);
+    else {
+      const r = confirm(strippedMsg);
+      if (!r) {
+        if (MACHINE)
+          MACHINE.stop = true;
+        M68KWB_STOPALL = true;        
+        throw new Error("Stopping: user clicked cancel<br>Original error:<br>"+strippedMsg);
+      }
+    }
   }
   if (_makeLastMsg) {
     MAIN_ALERTS_ALLLOWED = false;

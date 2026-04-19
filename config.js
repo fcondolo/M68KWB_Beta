@@ -96,7 +96,10 @@ const DEBUGGER_CONFIG = {
         arg_abs_col     : '#c500ff',
         arg_reg_col     : '#889efb',
         arg_ind_col     : '#dda500'
-    }
+    },
+
+    // if set to true, all alert boxes will be directed to the console instead
+    NO_ALERT:false
 };
 
 

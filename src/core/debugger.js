@@ -438,7 +438,6 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
       if (DEBUGGER_tracing) {
         if (DEBUGGER_SHIFT_PRESSED) {
           if (DEBUGGER_lastError)
-          MAIN_ALERTS_LIST = []; // empty main alert list to avoid "too many errors" message wneh hitting a breakpoint frame after frame
           showModalBox("<b style='color:white;'>Last error:</b><br>"+DEBUGGER_lastError,DEBUGGER_OnCloseBreakpointModal);
         } else {
           DEBUGGER_skipNextBP = M68K_IP;
@@ -2161,8 +2160,7 @@ function debug(_alertMessage = null, _useContext = false) {
   DEBUGGER_update();
   DEBUGGER_dumpRegistersValues();
   DEBUGGER_HitBp(M68K_IP);
-  MAIN_ALERTS_LIST = []; // empty main alert list to avoid "too many errors" message wneh hitting a breakpoint frame after frame
-  showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);//main_Alert(msg, false, true);
+  showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);
   //msg = msg.replaceAll("\n","<br>");
 /*  if (DEBUGGER_insideInvoke) {
     setTraceMode(true);
