@@ -467,26 +467,44 @@ function setZoom(_zoom) {
 }
 
 
+function setNewwindowSize(width) {
+    switch (FX_INFO.platform) {
+      case "OCS":
+        width -= 40; // screen bitmap
+        CANVAS_DISPLAY_WIDTH = Math.floor(width);
+        CANVAS_DISPLAY_HEIGHT = Math.floor((width * 470)/483);
+      break;    
+      case "ST":
+        width -= 40; // screen bitmap
+        CANVAS_DISPLAY_WIDTH = Math.floor(width);
+        CANVAS_DISPLAY_HEIGHT = Math.floor((width * 312)/390);
+      break;    
+      case "STE":
+        width -= 40; // screen bitmap
+        CANVAS_DISPLAY_WIDTH = Math.floor(width);
+        CANVAS_DISPLAY_HEIGHT = Math.floor((width * 312)/390);
+      break;    
+    }
+    cvs.width =  CANVAS_DISPLAY_WIDTH;
+    cvs.height =  CANVAS_DISPLAY_HEIGHT;
+    CANVAS_SCALE = Math.floor(CANVAS_DISPLAY_WIDTH*100/483);
+}
+
 function onNewOutputResolution() {
   // default resolution: 100
   let rez = document.getElementById("outpuResolution").value;
   CANVAS_SCALE = rez;
   switch (FX_INFO.platform) {
     case "OCS":
-      CANVAS_DISPLAY_WIDTH = Math.floor((rez * 483)/100);
-      CANVAS_DISPLAY_HEIGHT = Math.floor((rez * 470)/100);
+      setNewwindowSize(Math.floor((rez * 483)/100));
     break;    
     case "ST":
-      CANVAS_DISPLAY_WIDTH = Math.floor((rez * 390)/100);
-      CANVAS_DISPLAY_HEIGHT = Math.floor((rez * 312)/100);
+      setNewwindowSize(Math.floor((rez * 390)/100));
     break;    
     case "STE":
-      CANVAS_DISPLAY_WIDTH = Math.floor((rez * 390)/100);
-      CANVAS_DISPLAY_HEIGHT = Math.floor((rez * 312)/100);
+      setNewwindowSize(Math.floor((rez * 390)/100));
     break;    
   }
-  cvs.width =  CANVAS_DISPLAY_WIDTH;
-  cvs.height =  CANVAS_DISPLAY_HEIGHT;
 }
 
 
@@ -768,6 +786,12 @@ function main_onFXJSLoaded() {
     GLOBAL_MOUSEY = event.pageY;
   });
 
+  window.addEventListener('resize', () => {
+    const width = window.innerWidth;
+    //const height = window.innerHeight;
+    setNewwindowSize(width);
+  });
+
   // Create canvases
   cvs = document.getElementById("mycvs");
   ctx = get2DContext(cvs);
@@ -840,6 +864,9 @@ function main_onFXJSLoaded() {
   }
   onNewOutputResolution();  
   onNewRunningSpeed();
+  if (window.innerWidth<500)
+    setNewwindowSize(window.innerWidth);
+
   if (CODERPARSER_SINGLETON)  // some FX have no asm
     invoke68K("M68KWB_TargetPlatformInit");
 
