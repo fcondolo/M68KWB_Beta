@@ -325,12 +325,12 @@ function OperandToString(_operands, _index) {
             }
             break;
         /// Just a displacement (skipping the base register), e.g. `123(d0)`
-        case OperandType.DISP: debugger; alert("OperandToString - DISP not yet implemented"); break;
+        case OperandType.DISP: debugger; main_Info("OperandToString - DISP not yet implemented"); break;
         /// A data register pair, used for 64-bit multiply/divide results.
-        case OperandType.DPAIR: debugger; alert("OperandToString - DPAIR not yet implemented"); break;
+        case OperandType.DPAIR: debugger; main_Info("OperandToString - DPAIR not yet implemented"); break;
         /// A floating point register pair, used for `FSINCOS`. First register receives the sine, the
         /// other the cosine.
-        case OperandType.FPAIR: debugger; alert("OperandToString - FPAIR not yet implemented"); break;
+        case OperandType.FPAIR: debugger; main_Info("OperandToString - FPAIR not yet implemented"); break;
         /// A register bitmask for `MOVEM` or `FMOVEM`. The order of registers is reversed depending on
         /// whether the address register is pre-decremented or post-incremented.
         case OperandType.REGLIST:
@@ -385,7 +385,7 @@ function OperandToString(_operands, _index) {
                 ret += aRet;
             break;
         /// A control register
-        case OperandType.CONTROLRE: debugger; alert("OperandToString - CONTROLRE not yet implemented");
+        case OperandType.CONTROLRE: debugger; main_Info("OperandToString - CONTROLRE not yet implemented");
             break;
     }
     return ret;

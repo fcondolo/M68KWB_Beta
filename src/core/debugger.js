@@ -484,9 +484,9 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     break;
     case 74: // j
       if (DEBUGGER_AllowJS) 
-        {DEBUGGER_AllowJS = false; alert("Inline Javascript: OFF");} 
+        {DEBUGGER_AllowJS = false; main_Info("Inline Javascript: OFF");} 
       else
-        {DEBUGGER_AllowJS = true; alert("Inline Javascript: ON");}
+        {DEBUGGER_AllowJS = true; main_Info("Inline Javascript: ON");}
     break;
     case 77: // m
       DEBUGGER_memoryStats();
@@ -505,7 +505,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     case 80: // p
       if (DEBUGGER_SHIFT_PRESSED) {
         DEBUGGER_setParanoid(!DEBUGGER_isParanoid());
-        alert("debugger paranoid mode: " + DEBUGGER_isParanoid());
+        main_Info("debugger paranoid mode: " + DEBUGGER_isParanoid());
       }
       else SET_PAUSE(!PAUSED);
     break;
@@ -517,7 +517,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         window.location.reload();
       }
       if (!TIME_MACHINE.isPresent()) {
-        alert("restore present");
+        main_Info("restore present");
         TIME_MACHINE.restorePresent();
       }
       DEBUGGER_justHitRun = true;
@@ -545,13 +545,13 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
       if (TIME_MACHINE)
         TIME_MACHINE.traceForwards();
       else
-        alert("Time Machine is not available. Make sure 'time_machine' is set in ASSEMBLER_CONFIG (config.js)");
+        main_Info("Time Machine is not available. Make sure 'time_machine' is set in ASSEMBLER_CONFIG (config.js)");
     break;
     case 89: // y
       if (TIME_MACHINE)
         TIME_MACHINE.traceBackwards();
       else
-        alert("Time Machine is not available. Make sure 'time_machine' is set in ASSEMBLER_CONFIG (config.js)");
+        main_Info("Time Machine is not available. Make sure 'time_machine' is set in ASSEMBLER_CONFIG (config.js)");
     break;
     case 90: // z
     if (DEBUGGER_SHIFT_PRESSED) { // zap
@@ -1184,7 +1184,7 @@ function focusOnLabel(_name) {
 }
 
 function DEBUGGER_onHWBreakpointReached(_index) {
-  alert("Hit HW Breakpiont #" + _index); // don't use main_Alert() here, otherwise a fatal error will be raised after too many breakpint hits
+  main_Info("Hit HW Breakpiont #" + _index); // don't use main_Alert() here, otherwise a fatal error will be raised after too many breakpint hits
   DEBUGGER_lastJSExecLog = "hardware breakpoint reached";
   DEBUGGER_AdditionalDbgMsg = "hardware Breakpoint reached";
   DEBUGGER_traceTillRTS = false;
@@ -1195,7 +1195,7 @@ function DEBUGGER_onHWBreakpointReached(_index) {
 }
 
 function DEBUGGER_onValueBreakpointReached() {
-  main_Alert("Hit Value Breakpiont");
+  main_Info("Hit Value Breakpiont");
     DEBUGGER_lastJSExecLog = "value Breakpoint reached";
   DEBUGGER_AdditionalDbgMsg = "value Breakpoint reached";
   showHTMLError("value Breakpoint reached");
@@ -1210,7 +1210,7 @@ function DEBUGGER_onValueBreakpointReached() {
 function DEBUGGER_ValueBreakpoint(adrs, val, size) {  
   if (size < 1 || size > 4)
   { 
-    alert("Can't set value breakpoint: size should be 1,2 or 4. found: " + size);
+    main_Info("Can't set value breakpoint: size should be 1,2 or 4. found: " + size);
     return false; 
   }
   DEBUGGER_VBpt[0] = adrs;
@@ -1265,20 +1265,20 @@ function DEBUGGER_JSCommand(cmd, args) {
 
 
 function DEBUGGER_jump(args) {
-  if (args.length !== 1) { alert("j command expects 1 param"); return; }
+  if (args.length !== 1) { main_Info("j command expects 1 param"); return; }
   let index = parseInt(args[0],16);
   if (isNaN(index)) {
-    alert(args[0] + " is not an hexadecimal number to me");
+    main_Info(args[0] + " is not an hexadecimal number to me");
     return;
   }
   if (index < 0) {
-    alert(index + ": negative numbers are not allowed");
+    main_Info(index + ": negative numbers are not allowed");
     return;
   }
   const oldIP = M68K_IP;
   M68K_IP = index;
   if (M68K_IP < 0 || M68K_IP >= MACHINE.ram.length) {
-    alert("jump failed");
+    main_Info("jump failed");
     M68K_IP = oldIP;
     return;
   }
@@ -1288,12 +1288,12 @@ function DEBUGGER_jump(args) {
 
 function DEBUGGER_HWBreakpoint(index, adrs, size) {
   if (index  >= DEBUGGER_CONFIG.MAX_HW_BPT) {
-    alert("can't set HW brealkpoint: index too high, expeted 0.." + (DEBUGGER_CONFIG.MAX_HW_BPT-1).toString());
+    main_Info("can't set HW brealkpoint: index too high, expeted 0.." + (DEBUGGER_CONFIG.MAX_HW_BPT-1).toString());
     return false;
   }
   if (size < 1 || size > 4)
   { 
-    alert("can't set HW brealkpoint: size should be 1,2 or 4. found: " + size);
+    main_Info("can't set HW brealkpoint: size should be 1,2 or 4. found: " + size);
     return false; 
   }
 
@@ -1304,9 +1304,9 @@ function DEBUGGER_HWBreakpoint(index, adrs, size) {
 
 
 function DEBUGGER_viewMem(args) {
-  if (args.length !== 1) { alert("m command expects 1 param"); return; }
+  if (args.length !== 1) { main_Info("m command expects 1 param"); return; }
   let adrs = parseInt(args[0], 16);
-  if (isNaN(adrs)) { alert("arg 1 : should be a number (address). found: " + args[0]); return; }
+  if (isNaN(adrs)) { main_Info("arg 1 : should be a number (address). found: " + args[0]); return; }
   DEBUGGER_customWatch = adrs;
   DEBUGGER_update(true);
 }
@@ -1337,30 +1337,30 @@ function DEBUGGER_onNewCommand() {
   cmd.word = cmd.word.toUpperCase();
   switch (cmd.word) {
     case "W": {
-      if (args.length !== 3) { alert("w command expects 3 params"); return; }
+      if (args.length !== 3) { main_Info("w command expects 3 params"); return; }
       let index = parseInt(args[0], 16);
-      if (isNaN(index) || (index < 0) || (index >= DEBUGGER_CONFIG.MAX_HW_BPT)) { alert("arg 1 : should be a number between 0 and " + (DEBUGGER_CONFIG.MAX_HW_BPT-1) + ". found: " + args[0]); return; }
+      if (isNaN(index) || (index < 0) || (index >= DEBUGGER_CONFIG.MAX_HW_BPT)) { main_Info("arg 1 : should be a number between 0 and " + (DEBUGGER_CONFIG.MAX_HW_BPT-1) + ". found: " + args[0]); return; }
       let adrs = parseInt(args[1], 16);
-      if (isNaN(adrs)) { alert("arg 2 : should be a number (address). found: " + args[1]); return; }
+      if (isNaN(adrs)) { main_Info("arg 2 : should be a number (address). found: " + args[1]); return; }
       let size = parseInt(args[2], 16);
-      if (isNaN(size)) { alert("arg 3 : should be a number (size). found: " + args[2]); return; }
+      if (isNaN(size)) { main_Info("arg 3 : should be a number (size). found: " + args[2]); return; }
       if (DEBUGGER_HWBreakpoint(index, adrs, size))
-        alert("set hardware breakpoint #" + index + " at address $" + adrs.toString(16) + " and $" + size.toString(16) + " bytes.");
+        main_Info("set hardware breakpoint #" + index + " at address $" + adrs.toString(16) + " and $" + size.toString(16) + " bytes.");
     }
     break;
     case "V": {
       if (args.length !== 3) {
-        alert("v command expects 3 params");
+        main_Info("v command expects 3 params");
         return;
       } 
       let adrs = parseInt(args[0], 16);
-      if (isNaN(adrs)) { alert("arg 1 : should be a hexadecimal number (address, without '$'). found: " + args[0]); return; }
+      if (isNaN(adrs)) { main_Info("arg 1 : should be a hexadecimal number (address, without '$'). found: " + args[0]); return; }
       let val = parseInt(args[1], 16);
-      if (isNaN(val)) { alert("arg 2 : should be a hexadecimal number (value, without '$'). found: " + args[1]); return; }
+      if (isNaN(val)) { main_Info("arg 2 : should be a hexadecimal number (value, without '$'). found: " + args[1]); return; }
       let size = parseInt(args[2], 16);
-      if (isNaN(size)) { alert("arg 3 : should be a hexadecimal number (size, without '$'). found: " + args[2]); return; }
+      if (isNaN(size)) { main_Info("arg 3 : should be a hexadecimal number (size, without '$'). found: " + args[2]); return; }
       if (DEBUGGER_ValueBreakpoint(adrs, val, size))
-          alert("set hardware breakpoint if address $" + adrs.toString(16) + " reaches value $" + val.toString(16) + " size: " + size.toString() + " bytes.");
+          main_Info("set hardware breakpoint if address $" + adrs.toString(16) + " reaches value $" + val.toString(16) + " size: " + size.toString() + " bytes.");
     }
     break;
     case "M": DEBUGGER_viewMem(args); break;

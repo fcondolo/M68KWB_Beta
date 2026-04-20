@@ -375,7 +375,7 @@ function Blitter_Draw()
     dbgStr += "\nHog="+Blit.Hog;
     dbgStr += "\nOp="+Blit.getOp() +": " + Blit.getOpString();
     dbgStr += "\nHop="+Blit.getHop()+": " + Blit.getHopString() + "\n";
-    if (DEBUGGER_tracing && Blit.getXCount()>0) alert("This is NOT an error, this is info as you are tracing:\n" + dbgStr);
+    if (DEBUGGER_tracing && Blit.getXCount()>0) main_Info("This is NOT an error, this is info as you are tracing:\n" + dbgStr);
     dbgStr = dbgStr.replaceAll("\n", "<br>");
     Blitter_Notify_Start(dbgStr);
 

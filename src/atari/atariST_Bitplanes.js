@@ -138,7 +138,7 @@ function ST_bitplanes_updateValues() {
 		break;
 		
 		default:
-			alert("'ST_MODEL' is invalid. Please call 'ST_start();' or 'STE_start();' first");
+			main_Alert("'ST_MODEL' is invalid. Please call 'ST_start();' or 'STE_start();' first");
 		return;
 	}
 

@@ -1601,7 +1601,7 @@ function getArg(_arg, _size, _signed, _isLEA = false, _memOfs = 0) {
     case 1: mask = MASK_8BIT; break;
     case 2: mask = MASK_16BIT; break;
     case 4: mask = MASK_32BIT; break;
-    default: main_Alert('fuck'); break;
+    default: main_Alert('let Soundy know: m68k.js, getArg, wrong mask'); break;
   }
   if (_arg.type == 'imm') _isLEA = true;
 
@@ -1678,7 +1678,7 @@ function setArg(_arg, _value, _size, _signed, _ofs) {
     case 1: mask = MASK_8BIT; break;
     case 2: mask = MASK_16BIT; break;
     case 4: mask = MASK_32BIT; break;
-    default: main_Alert('fuck'); break;
+    default: main_Alert('let Soundy know: m68k.js, setArg, wrong mask'); break;
   }
   _value &= mask;
   ret.val = _value;
@@ -1999,7 +1999,7 @@ function MOVEM(_instr) {
       _source.tab[_source.ind] = restoreSource;
     return null;
   }
-  main_Alert("fucked up movem");
+  main_Alert("let Soundy know: fucked up movem");
   return null;
 }
 
@@ -3083,7 +3083,7 @@ async function execCPU() {
           else if (DEBUGGER_tracing && !DEBUGGER_canStep && !DEBUGGER_runTillIP) {
             await canExecuteNextInstr();
           }
-          alert("RTS + out = " + out);
+          main_Alert("RTS + out = " + out);
           LAST_GETARG = [];
           LAST_SETARG = [];
           return;
@@ -3126,7 +3126,7 @@ async function execCPU() {
 
 function invoke68K(_label, _trace) {
   if (MACHINE.super) {
-    main_Alert("Not sure how the JS could invoke anything if the CPU is executin an interruption. contact Soundy (if possible, send the browser's call stack)");
+    main_Alert("Not sure how the JS could invoke anything if the CPU is executing an interruption. contact Soundy (if possible, send the browser's call stack)");
     debugger;
     return;
   } else {

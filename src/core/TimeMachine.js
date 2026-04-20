@@ -104,7 +104,7 @@ class M68K_TimeMachine {
     traceForwards() {
         let t = this;
         if (t.isPresent()) {
-            alert("Time machine: can't go further in the future");
+            main_Info("Time machine: can't go further in the future");
             return;
         }
         t.curReplayIndex = (t.curReplayIndex + 1) % t.len;
@@ -140,7 +140,7 @@ class M68K_TimeMachine {
     jump(target) {
         let t = this;
         if (target == t.nextWriteIndex) {
-            alert("Time machine: can't go there");
+            main_Info("Time machine: can't go there");
             return;
         }
         t.curReplayIndex = target;
@@ -168,13 +168,13 @@ class M68K_TimeMachine {
                         MACHINE.ram[a + 3] = v & 0xff;
                     break;
                     default:
-                        alert("Time machine: inconsistent data");
+                        main_Info("Time machine: inconsistent data");
                     return;
                 }
             }
             break;
             default:
-                alert("Time machine: reached uninitialized point");
+                main_Info("Time machine: reached uninitialized point");
             return;
         }
         t.restoreRegs(e.val);

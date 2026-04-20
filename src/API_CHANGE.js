@@ -5,7 +5,7 @@
     const err = new Error();
     msg += "\ncall stack:\n" + err.stack;
     //s = filterStack(err.stack);
-    alert(msg);
+    main_Alert(msg);
     throw err;
   }
 

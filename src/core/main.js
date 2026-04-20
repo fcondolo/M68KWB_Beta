@@ -10,6 +10,7 @@ var SIMU_DEFAULT_WIDTH, PAL_VIDEO_LINES_COUNT, PAL_PLAYFIELD_LINES_COUNT;
 var SIMU_START_BITPLANE, SIMU_END_BITPLANE;
 var PLAYFIELD_LINES_COUNT;
 
+var showModalBox_count = 0;
 var MAIN_ALERTS_LIST = [];
 var MAIN_ALERTS_ALLLOWED = true;
 
@@ -133,7 +134,7 @@ function main_mainLoop() {
         //console.log("main_updateAsmOnly - waiting for the user to trace. don't execute further");
         return; // just waiting for the user to trace. don't execute further
       }
-      alert("Exception occurred while tracing assembler: " + err.message);
+      main_Alert("Exception occurred while tracing assembler: " + err.message);
     }
     WATCHES.update();
     return;
@@ -206,14 +207,14 @@ function main_startAll() {
     try {
       setZoom(FX_INFO.zoom);
     } catch(e) {
-      alert("REGISTER_FX: zoom failed:\n" + e);
+      main_Alert("REGISTER_FX: zoom failed:\n" + e);
     }
   }
   if (FX_INFO.hasAudio) {
     try {
       new Audio();
     } catch(e) {
-      alert("Could not create Audio:\n" + e);
+      main_Alert("Could not create Audio:\n" + e);
     }
   }
 
@@ -319,7 +320,7 @@ function main_startChosenFx(_fxName) {
   try {
     FX_INFO = user_fx[_index];
   } catch(_err) {
-    alert(_err);
+    main_Alert(_err);
     return failedStartingFX(_fxName);
   }
   if (!FX_INFO) {
@@ -388,7 +389,7 @@ function updateFxList() {
     if (name.includes(search)) {
       const name = user_fx[i].fxName;
       if (!name) {
-        alert("error parsing 'user_fx'. Index '" + i + "' has no 'fxName' field.");
+        main_Alert("error parsing 'user_fx'. Index '" + i + "' has no 'fxName' field.");
         continue;
       }
       let objOption = document.createElement("option");
@@ -411,7 +412,7 @@ function main_onload() {
         user_fx[i].fxName = user_fx[i].classname;
       }
       else {
-        alert("user_fx: entry #" + i + " has no 'fxName' or 'classname' field");
+        main_Alert("user_fx: entry #" + i + " has no 'fxName' or 'classname' field");
         return;
       }
     }
@@ -421,7 +422,7 @@ function main_onload() {
       case "STE":
       break;
       default:
-        alert("user_fx: entry #" + i + " has no or bad 'platform' field");
+        main_Alert("user_fx: entry #" + i + " has no or bad 'platform' field");
       return;
     }
   }
@@ -570,6 +571,13 @@ function showDebugCanvas() {
   showModalBox(null, null);
 }
 
+function main_Info(_msg) {
+  if (DEBUGGER_CONFIG.NO_ALERT) {
+    console.log(_msg);
+    return;
+  }
+  showModalBox(_msg);
+}
 
 function main_Alert(_msg, _makeLastMsg = false, _skipAsm = false) {
   if (MAIN_ALERTS_LIST.length >= 3) {
@@ -672,8 +680,20 @@ function getDebugLogString() {
 
 function showModalBox(_content, _closeCallback=null) {
   // Get the modal
-  MODAL_closeCallback = _closeCallback;
   var modal = document.getElementById("myModal");
+  if (modal.style.display == "block") { // already shown? ==> append message
+    if (showModalBox_count > 2)
+      return;
+    if (_content) // content may already be filled outside of this function (by the caller)
+      document.getElementById("modalContent").innerHTML += "<br>"+_content;
+    showModalBox_count++;
+    if (showModalBox_count > 2) {
+      main_Alert("Too many info messages:<br>"+document.getElementById("modalContent").innerHTML, false, true);
+    }
+    return;
+  }
+  showModalBox_count = 0;
+  MODAL_closeCallback = _closeCallback;
   if (_content) // content may already be filled outside of this function (by the caller)
     document.getElementById("modalContent").innerHTML = _content;
 
@@ -791,7 +811,7 @@ function main_onFXJSLoaded() {
     try {
       eval("MYFX = new " + className + "();");
     } catch (e) {
-      alert("could not create FX class: " + className + ". Error: " + e);
+      main_Alert("could not create FX class: " + className + ". Error: " + e);
       return;
     }
   } else {
@@ -834,7 +854,7 @@ function main_onFXJSLoaded() {
     case "OCS" : AMIGA_start(); backbufw = 483; backbufh = 470; break;
     case "ST" : ST_start(); backbufw = 390; backbufh = 312; break;
     case "STE" : STE_start(); backbufw = 390; backbufh = 312; break;
-    default: alert("'platform' field must be 'OCS', 'ST', or 'STE'"); break;
+    default: main_Alert("'platform' field must be 'OCS', 'ST', or 'STE'"); break;
   }
   
   if (!TOOLS) new JS_ASM_Tools();
@@ -872,7 +892,7 @@ function main_onFXJSLoaded() {
     let cp = new CodeParser();
     if (!cp.ascii68k_loadfile(finalPath)) {
       if (MAIN_ALERTS_LIST.length == 0)
-        alert("could not load/process asm file: " + finalPath);
+        main_Alert("could not load/process asm file: " + finalPath);
       return failedStartingFX(_fxName);
     }
   }
@@ -910,7 +930,7 @@ function loadScript(file) {
   };
 
   newScript.onerror = () => {
-    alert(`Error loading script: ${file}`, 'error');
+    main_Alert(`Error loading script: ${file}`, 'error');
   };
 
   document.head.appendChild(newScript);

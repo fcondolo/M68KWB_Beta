@@ -23,7 +23,7 @@ class M68K_Watches {
         t.format[t.WATCH_LONG]  = {b:4,s:false};
         
         if (!_jsOnly) {
-            if (!CODERPARSER_SINGLETON) alert("Create WATCHES singleton after CODERPARSER_SINGLETON");
+            if (!CODERPARSER_SINGLETON) main_Alert("Create WATCHES singleton after CODERPARSER_SINGLETON");
             CODERPARSER_SINGLETON.constants.push({ name: "WATCH_BYTE", value: t.WATCH_BYTE, path: "", line: "" });
             CODERPARSER_SINGLETON.constants.push({ name: "WATCH_WORD", value: t.WATCH_WORD, path: "", line: "" });
             CODERPARSER_SINGLETON.constants.push({ name: "WATCH_LONG", value: t.WATCH_LONG, path: "", line: "" });

@@ -7,5 +7,4 @@ init:
 
 update:
   NOP
-  ;>JS debug("pouet")
   rts

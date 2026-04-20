@@ -1,10 +1,10 @@
 20/04/2026
 ==========
 - Auto resize and re-organization of the page's elements for smaller screens
-  Below a given width  (seee DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE):
+  Below a given width  (see DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE):
   ==> the elements are re-organized vertically (no more left-right parts of the screen)
   ==> the render scales to fit the maximum available width.
-  
+
 - Added keyboard shortcuts to set the focus on different page elements:
   alt + 1 ==> show rendering
   alt + 2 ==> show registers

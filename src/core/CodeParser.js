@@ -1611,7 +1611,7 @@ class CodeParser {
         }
         break;
         default:
-          alert("bad EQU/IFD start type. No further info sorry. Contact Soundy");
+          main_Alert("bad EQU/IFD start type. No further info sorry. Contact Soundy");
           debugger;
         break;
       }
@@ -1987,7 +1987,7 @@ class CodeParser {
 /*        if (_arg.movem) {
           let msg = "arg:" + _arg.str + ", regs: ";
           for (let i = 0; i < _arg.movem.length; i++) msg += _arg.movem[i].reg + ", "; 
-          alert(msg);
+          main_Alert(msg);
         } */
         return;
       }

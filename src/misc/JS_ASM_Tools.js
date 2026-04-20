@@ -79,7 +79,7 @@ class JS_ASM_Tools {
       }
       const quo = Math.floor(_dest / _source);
       if ((quo < -32768) || (quo > 32767)) {
-          alert("DIVISION OVERFLOW: " + Math.floor(_dest) + " / " + Math.floor(_source) + " = "  + quo);
+          main_Alert("DIVISION OVERFLOW: " + Math.floor(_dest) + " / " + Math.floor(_source) + " = "  + quo);
           debugger;
       }
       return quo;
@@ -154,7 +154,7 @@ class JS_ASM_Tools {
   */
   getLabelAdrs(_label, _canFail = false, _canBeCode = true) {
     if (!CODERPARSER_SINGLETON || !CODERPARSER_SINGLETON.labels) {
-      alert("calling TOOLS.getLabelAdrs too soon: asm file not yet read. Don't call from your FX class constructor, do it at init");
+      main_Alert("calling TOOLS.getLabelAdrs too soon: asm file not yet read. Don't call from your FX class constructor, do it at init");
       return NaN;
     }
     if (CODERPARSER_SINGLETON.fastLabels.length > 0) {
@@ -557,7 +557,7 @@ class JS_ASM_Tools {
     for (let i = 0; i < _count; i++) {
       const v = MACHINE.getRAMValue(adrs + i * 2, 2, true);
       if (_verify && (_array[i] != v)) {
-        alert("LabelToIn16Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
+        main_Info("LabelToIn16Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
         console.error("index: " + i + ", expected: " + _array[i] + ", got: " + v);
         debugger;
       }
@@ -583,7 +583,7 @@ class JS_ASM_Tools {
     for (let i = 0; i < _count; i++) {
       const v = MACHINE.getRAMValue(adrs + i * 2, 2, false);
       if (_verify && (_array[i] != v)) {
-        alert("LabelToUIn16Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
+        main_Info("LabelToUIn16Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
         console.log("index: " + i + ", expected: " + _array[i] + ", got: " + v);
         debugger;
       }
@@ -609,7 +609,7 @@ class JS_ASM_Tools {
     for (let i = 0; i < _count; i++) {
       const v = MACHINE.getRAMValue(adrs + i, 1, true);
       if (_verify && (_array[i] != v)) {
-        alert("LabelToIn8Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
+        main_Info("LabelToIn8Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
         console.log("index: " + i + ", expected: " + _array[i] + ", got: " + v);
         debugger;
       }
@@ -635,7 +635,7 @@ class JS_ASM_Tools {
     for (let i = 0; i < _count; i++) {
       const v = MACHINE.getRAMValue(adrs + i, 1, false);
       if (_verify && (_array[i] != v)) {
-        alert("LabelToUIn8Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
+        main_Info("LabelToUIn8Array verification failed.\nindex: " + i + ", expected: " + _array[i] + ", got: " + v);
         console.log("index: " + i + ", expected: " + _array[i] + ", got: " + v);
         debugger;
       }
@@ -679,7 +679,7 @@ class JS_ASM_Tools {
     for (let i = 0; i < _count; i++)
       view.setUint8(i, MACHINE.ram[_adrs + i]);
     TOOLS.downloadView(view, _outputFileName);
-    if (_showDoneMsg) alert("saved " + _outputFileName);
+    if (_showDoneMsg) main_Info("saved " + _outputFileName);
   }
 
   /**

@@ -389,7 +389,7 @@ class M68K_Machine {
                     if (CODERPARSER_SINGLETON)
                         CODERPARSER_SINGLETON.stopGlobalCompilation = true;                    
                     const msg = "Error seems to come from Javascript, or while assembling code, not asm execution. ";
-                    alert(msg);
+                    main_Alert(msg);
                     debugger;
                     throw new Error(msg);
                 }
@@ -453,7 +453,7 @@ class M68K_Machine {
                         CODERPARSER_SINGLETON.stopGlobalCompilation = true;
                     const msg = "Error seems to come from Javascript, or while assembling code, not asm execution. ";
                     debugger;
-                    alert(msg);
+                    main_Alert(msg);
                     throw new Error(msg);
                 }
             }

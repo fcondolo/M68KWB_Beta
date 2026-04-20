@@ -46,7 +46,7 @@ function Check_Chain() {
     } else  {
       localStorage.setItem(LOCALSTORAGE_CHAININDEX, null);
       localStorage.clear();
-      alert("CHAIN DONE!");
+      main_Info("CHAIN DONE!");
       window.location.reload(true);
     }
   }

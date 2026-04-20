@@ -306,7 +306,7 @@ class Toolbox {
                     if (value != `null`) {
                         const adrs = TOOLS.getLabelAdrs(value, true , true);
                         if (!adrs || isNaN(adrs) || (adrs == undefined)) {
-                            alert("could not find adrs for label " + value + ", sorry");
+                            main_Alert("could not find adrs for label " + value + ", sorry");
                         } else {
                             let elm2 = document.getElementById(id+'_ADRS');
                             elm2.value = adrs;
@@ -325,7 +325,7 @@ class Toolbox {
                     jsVal = jsVal.replaceAll('%', '0b');
                     const adrs = parseInt(jsVal);
                     if (isNaN(adrs)) {
-                        alert("could not parse number: " + jsVal);
+                        main_Alert("could not parse number: " + jsVal);
                         document.getElementById("HWBKPT_"+i+'_CHECK').checked = false;
                     } else {
                         DEBUGGER_HWBpts[i*2] = adrs;
