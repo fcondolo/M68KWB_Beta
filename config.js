@@ -99,7 +99,14 @@ const DEBUGGER_CONFIG = {
     },
 
     // if set to true, all alert boxes will be directed to the console instead
-    NO_ALERT:false
+    NO_ALERT:false,
+
+    // the preview canvas will automatically fill the whole width of the browser's window
+    // whenever the browser's window width is lower than MAX_PREVIEW_AUOTOSCALE.
+    // The other ways around, the render canvas will automatically scale whenever the
+    // browser's window width is below MAX_PREVIEW_AUOTOSCALE.
+    // The web page's elements also re-organize to fit a more vertical display
+    MAX_PREVIEW_AUOTOSCALE:800
 };
 
 

@@ -212,16 +212,20 @@ function AMIGA_getCustomFromPtr_L(_p) {
 
 
 /**
-AMIGA_onCustomWrite(_index_, _value)
+AMIGA_onCustomWrite(_index_, _value, _fromCopper)
 Checks if a write to a custom register should trigger a reaction from the Amiga
-@param      _index  :   custom register index (relative to $dff000)
-@param      _value  :   written value
+@param      _index  	:   custom register index (relative to $dff000)
+@param      _value  	:   written value
+@param      _fromCopper	:   true if this function is called by the copper's MOVE instructions
 */
-function AMIGA_onCustomWrite(_index, _value) {
+function AMIGA_onCustomWrite(_index, _value, _fromCopper = false) {
 	switch (_index) {
 		case BLTSIZE:
 			let showErr = true;
-			if (M68K_CURLINE && M68K_CURLINE.isErrorImmune) showErr = false;
+			if (M68K_CURLINE && M68K_CURLINE.isErrorImmune) 
+				showErr = false;
+			if (_fromCopper)
+				showErr = false;
 			if (AMIGA_NEED_WAIT_BLT && OCS_CONFIG.force_blitter_wait) {
 				if (showErr && AMIGA_LASTBLIT_LINE) {
 					debug("Seems like you did not check DMACONR since you last invoked the Blitter.\nBlitter previously invoked in file: " + AMIGA_LASTBLIT_LINE.path + "\nat line: " + AMIGA_LASTBLIT_LINE.line + "\nAdd comment '; M68KWB_NOERROR' at the end of the current line to disable this error, or set OCS_CONFIG.force_blitter_wait to false.");
@@ -270,15 +274,15 @@ function AMIGA_onCustomWrite(_index, _value) {
 }
 
 /**
-AMIGA_setCustom(_index_, _value)
+AMIGA_setCustom(_index_, _value, _fromCopper)
 Sets the current 16 bit value of a custom register
-This function is called by the copper's MOVE instructions
-@param      _index  :   custom register index (relative to $dff000)
-@param      _value  :   value to set
+@param      _index  	:   custom register index (relative to $dff000)
+@param      _value  	:   value to set
+@param      _fromCopper	:   true if this function is called by the copper's MOVE instructions
 */
-function AMIGA_setCustom(_index, _value) {
+function AMIGA_setCustom(_index, _value, _fromCopper = false) {
 	AMIGA_customregs[_index/2] = _value;
-	AMIGA_onCustomWrite(_index, _value);
+	AMIGA_onCustomWrite(_index, _value, _fromCopper);
 }
 
 /**

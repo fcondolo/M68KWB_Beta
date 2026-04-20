@@ -468,19 +468,41 @@ function setZoom(_zoom) {
 
 
 function setNewwindowSize(width) {
+  let elm1 = document.getElementById("debugger-left");
+  let elm2 = document.getElementById("rightPane");
+  let elm3 = document.getElementById("smallrender");
+  let elm4 = document.getElementById("layoutlab");
+  let elm5 = document.getElementById("layout");
+  
+  if (width > DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE) {
+    elm1.className = "col_8 column";
+    elm2.className = "col_4 column";
+    elm3.style.visibility = "visible";
+    elm4.style.visibility = "visible";
+    elm5.style.visibility = "visible";
+  } else {
+    elm1.className = "col_12 column";
+    elm2.className = "col_12 column";
+    elm3.style.visibility = "hidden";
+    elm4.style.visibility = "hidden";
+    elm5.style.visibility = "hidden";
+  }
+    
+    if (width > DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE)
+      return;
     switch (FX_INFO.platform) {
       case "OCS":
-        width -= 40; // screen bitmap
+        width -= 40; // screen bitmap borders
         CANVAS_DISPLAY_WIDTH = Math.floor(width);
         CANVAS_DISPLAY_HEIGHT = Math.floor((width * 470)/483);
       break;    
       case "ST":
-        width -= 40; // screen bitmap
+        width -= 40; // screen bitmap borders
         CANVAS_DISPLAY_WIDTH = Math.floor(width);
         CANVAS_DISPLAY_HEIGHT = Math.floor((width * 312)/390);
       break;    
       case "STE":
-        width -= 40; // screen bitmap
+        width -= 40; // screen bitmap borders
         CANVAS_DISPLAY_WIDTH = Math.floor(width);
         CANVAS_DISPLAY_HEIGHT = Math.floor((width * 312)/390);
       break;    
@@ -864,8 +886,7 @@ function main_onFXJSLoaded() {
   }
   onNewOutputResolution();  
   onNewRunningSpeed();
-  if (window.innerWidth<500)
-    setNewwindowSize(window.innerWidth);
+  setNewwindowSize(window.innerWidth);
 
   if (CODERPARSER_SINGLETON)  // some FX have no asm
     invoke68K("M68KWB_TargetPlatformInit");

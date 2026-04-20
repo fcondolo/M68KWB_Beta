@@ -175,7 +175,7 @@ function copper_processOneInstr(_x, _y, _breakIfWait = false) {
 	}
 	else { // move
 		cper_cur += 4; // increment before calling AMIGA_setCustom, because AMIGA_setCustom might execute a copjmp
-		AMIGA_setCustom(word1,word2);
+		AMIGA_setCustom(word1,word2,true);
 		if ((bitpane_bplCount < 5) || (_x < DisplayDataFetchFirstPix) || (_x > DisplayDataFetchLastPix))
 			copperExecMove = 8; // See note 5 & tests
 		else if (bitpane_bplCount == 5) {

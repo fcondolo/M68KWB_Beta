@@ -395,6 +395,20 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
       }
       $("tr[tabindex=" + idx + "]").focus();
     break;
+    case 49: // 1
+      if (DEBUGGER_ALT_PRESSED) showElement("mycvs");
+    break;
+    case 50: // 2
+      if (DEBUGGER_ALT_PRESSED) showElement("registersDump");
+    break;    
+    case 51: // 3
+      if (DEBUGGER_ALT_PRESSED) showElement("debugger-left");
+      if (DEBUGGER_tracing && M68K_IP)
+        focusOnCodeLine(M68K_IP);
+    break;
+    case 52: // 4
+      if (DEBUGGER_ALT_PRESSED) showElement("debugger-right");
+    break;
     case 65: // a
       DEBUGGER_ToggleCard();
     break;
@@ -795,6 +809,11 @@ function DEBUGGER_LOG(_msg, _tag = null) {
 function DEBUGGER_help() {
   let msg = "<center><b>M68KWB Help</b></center><br>";
   msg += "<table><tr><th><b>KEY(s)</b></th><th><b>COMMAND</b></th><th><b>DESCRIPTION</b></th></tr>";
+  msg += "<tr><td>alt + 1</td><td>rendering</td><td>show rendering</td></tr>";
+  msg += "<tr><td>alt + 2</td><td>registers</td><td>show registers window</td></tr>";
+  msg += "<tr><td>alt + 3</td><td>disassembly</td><td>show disassembly</td></tr>";
+  msg += "<tr><td>alt + 4</td><td>memory</td><td>show memory dump (while tracing only)</td></tr>";
+ 
   msg += "<tr><td>a</td><td><b>a</b>nchors</td><td>Show anchors / test card</td></tr>";
   msg += "<tr><td>b</td><td><b>b</b>itplanes visibility</td><td>Switch bitplanes on/off</td></tr>";
   msg += "<tr><td>alt + b</td><td><b>b</b>reak update</td><td>trigger breakpoint at the beginning of update (on/off)</td></tr>";
@@ -1108,6 +1127,13 @@ function getPrevLineID(_IP, _maxOffset) {
   return null;
 }
 
+
+function showElement(_id) {
+  let elm = document.getElementById(_id);
+  elm.focus();
+  elm.scrollIntoView();
+  elm.scrollTo();
+}
 
 function focusOnCodeLine(_IP) {
 

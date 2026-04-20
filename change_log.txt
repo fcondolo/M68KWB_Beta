@@ -1,3 +1,22 @@
+20/04/2026
+==========
+- Auto resize and re-organization of the page's elements for smaller screens
+  Below a given width  (seee DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE):
+  ==> the elements are re-organized vertically (no more left-right parts of the screen)
+  ==> the render scales to fit the maximum available width.
+  
+- Added keyboard shortcuts to set the focus on different page elements:
+  alt + 1 ==> show rendering
+  alt + 2 ==> show registers
+  alt + 3 ==> show disassembly
+  alt + 4 ==> show memory dump (while tracing only)
+  Useful when working on narrow windows to avoid scrolling up and down to acess different elements
+
+19/04/2026
+==========
+- Added a "cancel" button for alerts to avoid forever repetition of the same messages
+- Allowed redirection of alert boxes to the log (see  DEBUGGER_CONFIG.NO_ALERT)
+
 09/03/2026
 ==========
 - Added "jump to file/line" option
