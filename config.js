@@ -168,3 +168,11 @@ const STE_CONFIG = {
     // ticks per second is used to trigger VBL interrupts
     M68K_TICKS_PER_SECOND   : 8000000
 }
+
+// -----------------------------------------------------------------------
+// --------------------- VSCODE PLUGIN SETTINGS --------------------------
+// -----------------------------------------------------------------------
+const VSCODE_CONFIG = {
+    AUTO_CONNECT    : true,
+    URL             : 'ws://localhost:9229'
+}

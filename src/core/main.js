@@ -406,6 +406,10 @@ function updateFxList() {
 
 
 function main_onload() {
+  if (VSCODE_CONFIG.AUTO_CONNECT) {
+    if (pluginInterfaceSingleton == null) new PluginInterface();
+    pluginInterfaceSingleton.connect();
+  }
   for (let i = 0; i < user_fx.length; i++) {
     if (!user_fx[i].fxName) {
       if (user_fx[i].classname) {
