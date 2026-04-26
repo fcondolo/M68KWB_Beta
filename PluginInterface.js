@@ -34,18 +34,79 @@
     return p.replace(/\\/g, '/').toLowerCase();
   }
 
+  getLocalPath(_fullPath, _startFolder) {
+    _fullPath = _fullPath.toLowerCase();
+    _startFolder = _startFolder.toLowerCase();
+    const full = _fullPath.replace(/\\/g, '/');
+    const base = _startFolder.replace(/\\/g, '/');
+
+    const index = full.indexOf(base);
+
+    if (index === -1) {
+        return full; // Or handle as an error if the folder isn't found
+    }
+
+    // 3. Extract the part after the base folder
+    let relative = full.substring(index + base.length);
+
+    // 4. Clean up leading slashes so we don't get "/subfolder/file.js"
+    if (relative.startsWith('/')) {
+        relative = relative.substring(1);
+    }
+
+    return relative;
+  }
+
+  getFileName(_path) {
+    _path = _path.toLowerCase();
+    return _path.replace(/\\/g, '/').split('/').pop();
+  }
+
+  getDirectoryPath(_path) {
+    // Normalize slashes to forward slashes
+    const normalizedPath = _path.replace(/\\/g, '/');
+    
+    // Find the last slash
+    const lastSlashIndex = normalizedPath.lastIndexOf('/');
+
+    // If no slash is found, there is no directory part
+    if (lastSlashIndex === -1) return '';
+
+    // Return everything up to (but not including) the last slash
+    return normalizedPath.substring(0, lastSlashIndex);
+  }
 
   // ─── Your emulator hooks ─────────────────────────────────────────────────
   // Replace these STUBS with real calls into your emulator.
 
   emulatorLoad(programPath) {
-    debugger;
-    let t = this;;
+    let t = this;
     t.printLog(`[STUB] load: ${programPath}`);
     // TODO: your emulator: fetch/load the assembled program
     // TODO: load source map (PC → file,line)
     // After loading, report "stopped at entry":
-    reportStopped(t.normalizePath(programPath), 1, 'entry');
+    t.reportStopped(t.normalizePath(programPath), 1, 'entry');
+    let localPath = t.getLocalPath(programPath, "m68kwb_beta");    
+    let fileName = t.getFileName(localPath);
+    let folder = t.getDirectoryPath(localPath);
+    if (folder[folder.length-1] !== '/') folder += '/';
+    debugger;
+    for (let i = 0; i < user_fx.length; i++) {
+      let p  = user_fx[i].rootPath;
+      if (p) {
+        p = p.replace(/\\/g, '/');
+        p = p.toLowerCase();
+        if (p[p.length-1] !== '/') p += '/';
+        if (p == folder) {
+          const name = user_fx[i].fxName;
+          if (MYFX.fxName != name) {
+            localStorage.setItem(LOCALSTORAGE_FX_NAME, name);
+            window.location.reload();
+          }
+          break;
+        }
+      }
+    }
   }
 
   emulatorRunUntilBreakOrEnd() {
@@ -57,7 +118,7 @@
     for (let i = 0; i < 100; i++) {
       t.currentLine++;
       if (bps.has(t.currentLine)) {
-        reportStopped(t.currentFile, t.currentLine, 'breakpoint');
+        t.reportStopped(t.currentFile, t.currentLine, 'breakpoint');
         return;
       }
     }
@@ -68,15 +129,22 @@
     let t = this;
     t.printLog('[STUB] step');
     t.currentLine++;
-    reportStopped(t.currentFile, t.currentLine, 'step');
+    t.reportStopped(t.currentFile, t.currentLine, 'step');
   }
 
   fakeRegisters() {
+      let d = [];
+      let a = [];
+      for (let i = 0; i < 8; i++) {
+        d[i] = regs.d[i];
+        a[i] = regs.a[i];
+      }
+
     return {
-      d: [0x11111111, 0x22222222, 0, 0, 0, 0, 0, 0],
-      a: [0x00100000, 0, 0, 0, 0, 0, 0, 0x00FF0000],
-      pc: 0x00001000 + t.currentLine * 2,
-      sr: 0x2000,
+      d: d,
+      a: a,
+      pc: M68K_IP,
+      sr: regs.sr,
     };
   }
 
@@ -87,7 +155,7 @@
     t.currentFile = file;
     t.currentLine = line;
     t.printCurrent("file: " + file + ", line: " + line);
-    send({ event: 'stopped', reason, file, line, registers: fakeRegisters() });
+    t.send({ event: 'stopped', reason, file, line, registers: t.fakeRegisters() });
   }
 
   send(obj) {
@@ -102,22 +170,21 @@
     t.printLog(`<< ${msg.cmd}`);
     switch (msg.cmd) {
       case 'load':
-        alert("load:" + msg.program);
-        emulatorLoad(msg.program);
+        t.emulatorLoad(msg.program);
         break;
       case 'setBreakpoints':
         t.breakpoints.set(t.normalizePath(msg.file), new Set(msg.lines));
         t.printLog(`  breakpoints for ${t.normalizePath(msg.file)}: [${msg.lines.join(', ')}]`);
         break;
       case 'continue':
-        emulatorRunUntilBreakOrEnd();
+        t.emulatorRunUntilBreakOrEnd();
         break;
       case 'stepOver':
       case 'stepIn':
-        emulatorStepOne();
+        t.emulatorStepOne();
         break;
       case 'pause':
-        reportStopped(t.currentFile, t.currentLine, 'pause');
+        t.reportStopped(t.currentFile, t.currentLine, 'pause');
         break;
     }
   }
@@ -140,7 +207,7 @@
     };
     t.ws.onclose = () => {
       console.log('[ws] closed, retrying in 1s');
-      setTimeout(connect, 1000);
+      setTimeout(pluginInterfaceSingleton.connect, 1000);
     };
     t.ws.onerror = (e) => {
       console.log('[ws] error', e);
