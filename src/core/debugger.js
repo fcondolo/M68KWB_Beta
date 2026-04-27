@@ -2186,7 +2186,19 @@ function debug(_alertMessage = null, _useContext = false) {
   DEBUGGER_update();
   DEBUGGER_dumpRegistersValues();
   DEBUGGER_HitBp(M68K_IP);
-  showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);
+  let doModal = true;
+  if (pluginInterfaceSingleton) {
+    let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
+    if (curLine && curLine.path) {
+      doModal = false;
+      let file = curLine.path;
+      let line = curLine.line;
+      pluginInterfaceSingleton.reportStopped(file, line, "Breakpoint reached: " + msg);
+    }
+  } 
+  if (doModal) {
+    showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);
+  }
   //msg = msg.replaceAll("\n","<br>");
 /*  if (DEBUGGER_insideInvoke) {
     setTraceMode(true);

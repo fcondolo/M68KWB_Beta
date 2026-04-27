@@ -580,7 +580,7 @@ class CodeParser {
     }
   }
 
-  push_error(_err) {
+  push_error(_err, _l = null) {
     let t = this;
     const l = t.errors.length;
     if (l > 0) {
@@ -588,6 +588,11 @@ class CodeParser {
         return;
     }
     t.errors.push(_err);
+    if (_l && pluginInterfaceSingleton) {
+      let file = _l.path;
+      let line = _l.line;
+      pluginInterfaceSingleton.reportStopped(file, line, _err);
+    }
   }
 
   process_oneInclude(finalPath, ln = null, i = null) {

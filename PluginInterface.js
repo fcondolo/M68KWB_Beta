@@ -8,6 +8,7 @@
     }
     pluginInterfaceSingleton = this;
     let t = this;
+    t.ROOTFOLDER = "m68kwb_beta";
     t.ws = null;
     t.breakpoints = new Map();   // file → Set<number>
     t.currentFile = '';
@@ -16,17 +17,19 @@
   }
 
   printStatus(_msg) {
-    console.log("pluginInterface STATUS msg: " + _msg,);
+    console.log("pluginInterface STATUS msg: " + _msg);
+    ShowDebugLog(_msg);
 
   }
 
   printCurrent(_msg) {
     console.log("pluginInterface CURRENT msg: " + _msg,);
-
+    ShowDebugLog(_msg);
   }
 
   printLog(_msg) {
     console.log("pluginInterface LOG msg: " + _msg,);
+    ShowDebugLog(_msg);
   }
 
 
@@ -43,7 +46,8 @@
     const index = full.indexOf(base);
 
     if (index === -1) {
-        return full; // Or handle as an error if the folder isn't found
+        alert("can't debug a file that is not a child of '" + t.ROOTFOLDER + "' folder");
+        return full;
     }
 
     // 3. Extract the part after the base folder
@@ -53,6 +57,8 @@
     if (relative.startsWith('/')) {
         relative = relative.substring(1);
     }
+
+    this.workingDirectory = full.slice(0,index);
 
     return relative;
   }
@@ -76,6 +82,23 @@
     return normalizedPath.substring(0, lastSlashIndex);
   }
 
+  findAllFXInThisFolder(folder) {
+    let ret = [];
+    for (let i = 0; i < user_fx.length; i++) {
+      let p  = user_fx[i].rootPath;
+      if (p) {
+        p = p.replace(/\\/g, '/');
+        p = p.toLowerCase();
+        if (p[p.length-1] !== '/') p += '/';
+        if (p == folder) {
+          ret.push(user_fx[i]);
+        }
+      }
+    }
+    return ret;
+  }
+
+
   // ─── Your emulator hooks ─────────────────────────────────────────────────
   // Replace these STUBS with real calls into your emulator.
 
@@ -85,28 +108,53 @@
     // TODO: your emulator: fetch/load the assembled program
     // TODO: load source map (PC → file,line)
     // After loading, report "stopped at entry":
-    t.reportStopped(t.normalizePath(programPath), 1, 'entry');
-    let localPath = t.getLocalPath(programPath, "m68kwb_beta");    
+    try {
+      console.log('[emulator] onLoad called, program=', programPath);
+      console.log('[emulator] about to call reportStopped');
+      t.reportStopped(t.normalizePath(programPath), 1, 'entry');
+      console.log('[emulator] reportStopped returned');
+    } catch (err) {
+      console.error('[emulator] onLoad threw:', err);
+    }    
+    let localPath = t.getLocalPath(programPath, t.ROOTFOLDER);    
     let fileName = t.getFileName(localPath);
     let folder = t.getDirectoryPath(localPath);
     if (folder[folder.length-1] !== '/') folder += '/';
-    debugger;
-    for (let i = 0; i < user_fx.length; i++) {
-      let p  = user_fx[i].rootPath;
-      if (p) {
-        p = p.replace(/\\/g, '/');
-        p = p.toLowerCase();
-        if (p[p.length-1] !== '/') p += '/';
-        if (p == folder) {
-          const name = user_fx[i].fxName;
-          if (MYFX.fxName != name) {
-            localStorage.setItem(LOCALSTORAGE_FX_NAME, name);
-            window.location.reload();
-          }
+    let sameFolder = t.findAllFXInThisFolder(folder);
+    let foundName = null;
+    // if there's only 1 fx in the same folder, launch the fx
+    if (sameFolder.length == 1) {
+      foundName = sameFolder[0].fxName;
+    }
+    if (foundName == null) {
+      // if there's several fx in the same folder, launch the one with the same asm source file
+      for (let i = 0; i < sameFolder.length; i++) {
+        let source = t.getFileName(sameFolder[i].source);
+        if (sameFolder[i].fxName == fileName) {
+          foundName = sameFolder[i].fxName;
           break;
         }
       }
     }
+    if (foundName == null) {
+      // if the folder could not be found, launch the one with the same asm source file, no matter the folder
+      for (let i = 0; i < user_fx.length; i++) {
+        let source = t.getFileName(user_fx[i].source);
+        if (source == fileName) {
+          if (user_fx[i].fxName)
+            foundName = user_fx[i].fxName;
+          else if (user_fx[i].classname)
+            foundName = user_fx[i].classname;
+          break;
+        }
+      }
+    }
+
+    if ((foundName != null) && (MYFX.fxName != foundName)) {
+      localStorage.setItem(LOCALSTORAGE_FX_NAME, foundName);
+      main_startChosenFx(foundName);
+      //window.location.reload();
+    } else alert("fx not found");
   }
 
   emulatorRunUntilBreakOrEnd() {
@@ -152,16 +200,27 @@
 
   reportStopped(file, line, reason) {
     let t = this;
-    t.currentFile = file;
-    t.currentLine = line;
+    if ((t.workingDirectory) && (!file.includes(t.workingDirectory))) {
+      file = t.workingDirectory + t.ROOTFOLDER + "/" + file;
+    }
+    t.currentFile = file; // full path, normalized
+    t.currentLine = line+1; // 1st line is 1, not 0
     t.printCurrent("file: " + file + ", line: " + line);
     t.send({ event: 'stopped', reason, file, line, registers: t.fakeRegisters() });
   }
 
   send(obj) {
+    console.log('[PluginInterface] readyState:', this.ws?.readyState,
+    '(0=CONNECTING, 1=OPEN, 2=CLOSING, 3=CLOSED)');    
     let t = this;
+
+    const payload = JSON.stringify(obj);
+    console.log('[PluginInterface] sending:', payload);
+
     if (t.ws && t.ws.readyState === WebSocket.OPEN) {
-      t.ws.send(JSON.stringify(obj));
+      t.ws.send(payload);
+    } else {
+      console.warn('[PluginInterface] cannot send, ws not open');
     }
   }
 
@@ -190,6 +249,34 @@
   }
 
 
+    connect() {
+    let t =this;
+    if (t.ws && (t.ws.readyState === WebSocket.CONNECTING || t.ws.readyState === WebSocket.OPEN)) {
+      console.log('[bridge] connect() called but already connecting/open, skipping');
+      return;
+    }
+
+    console.log('[bridge] creating new WebSocket');
+    this.ws = new WebSocket(VSCODE_CONFIG.URL);
+
+    t.ws.onopen = () => {
+      console.log('[bridge] open');
+      pluginInterfaceSingleton.printStatus('VSCode Plugin connected to debug adapter<br>Start debugging a .s or .asm file.');
+    };
+    t.ws.onmessage = (ev) => {
+      try { pluginInterfaceSingleton.handleCommand(JSON.parse(ev.data)); }
+      catch (err) { pluginInterfaceSingleton.printLog('Parse error: ' + err); }
+    };
+    t.ws.onclose = () => {
+      console.log('[bridge] closed, retrying in 1s');
+      setTimeout(() => this.connect(), 1000);
+    };
+    t.ws.onerror = (e) => {
+      console.log('[ws] error', e);
+    };
+
+  }
+/*
   connect() {
     let t =this;
     if (t.ws && (t.ws.readyState === WebSocket.CONNECTING || t.ws.readyState === WebSocket.OPEN)) {
@@ -197,22 +284,24 @@
       return;
     }
 
+    console.log('[bridge] connect() called, current ws state:', this.ws?.readyState);
     t.ws = new WebSocket(VSCODE_CONFIG.URL);
     t.ws.onopen = () => {
-      pluginInterfaceSingleton.printStatus('Connected to debug adapter');
+      pluginInterfaceSingleton.printStatus('VSCode Plugin connected to debug adapter<br>Start debugging a .s or .asm file.');
     };
     t.ws.onmessage = (ev) => {
       try { pluginInterfaceSingleton.handleCommand(JSON.parse(ev.data)); }
       catch (err) { pluginInterfaceSingleton.printLog('Parse error: ' + err); }
     };
     t.ws.onclose = () => {
+      console.log('[bridge] ws closed:', ev.code, ev.reason, '(was open?)');
       console.log('[ws] closed, retrying in 1s');
       setTimeout(pluginInterfaceSingleton.connect, 1000);
     };
     t.ws.onerror = (e) => {
       console.log('[ws] error', e);
     };
-  }
+  }*/
 
 
   disconnect() {

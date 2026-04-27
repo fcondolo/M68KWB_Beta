@@ -51,7 +51,7 @@ function asmbl_syntaxError(_l, _e, _syntax) {
         ce += '\n' + _syntax[i];
     }  
   }
-  CODERPARSER_SINGLETON.push_error(ce);
+  CODERPARSER_SINGLETON.push_error(ce,_l);
   console.error(ce);
   showHTMLError(he);
   debugger;  

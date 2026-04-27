@@ -270,6 +270,8 @@ function showMouseCoord(event) {
 
 
 function failedStartingFX(_fxName) {
+  if (pluginInterfaceSingleton)
+    return;
   MYFX.couldStart = false;
   // could not instanciate FX: show a modal box to choose from a list
   if (CODERPARSER_SINGLETON && CODERPARSER_SINGLETON.stopGlobalCompilation) {
@@ -408,7 +410,9 @@ function updateFxList() {
 function main_onload() {
   if (VSCODE_CONFIG.AUTO_CONNECT) {
     if (pluginInterfaceSingleton == null) new PluginInterface();
-    pluginInterfaceSingleton.connect();
+      pluginInterfaceSingleton.connect();
+    ShowDebugLog("Plugin mode: Start debugging a .s or .asm file");
+    return;
   }
   for (let i = 0; i < user_fx.length; i++) {
     if (!user_fx[i].fxName) {
@@ -897,7 +901,7 @@ function main_onFXJSLoaded() {
     if (!cp.ascii68k_loadfile(finalPath)) {
       if (MAIN_ALERTS_LIST.length == 0)
         main_Alert("could not load/process asm file: " + finalPath);
-      return failedStartingFX(_fxName);
+      return failedStartingFX();
     }
   }
 
