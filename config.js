@@ -173,6 +173,6 @@ const STE_CONFIG = {
 // --------------------- VSCODE PLUGIN SETTINGS --------------------------
 // -----------------------------------------------------------------------
 const VSCODE_CONFIG = {
-    AUTO_CONNECT    : true,
+    AUTO_CONNECT    : false,
     URL             : 'ws://localhost:9229'
 }
