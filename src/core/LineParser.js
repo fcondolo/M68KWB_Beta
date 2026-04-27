@@ -31,7 +31,8 @@ class LineParser {
     t.lastFoundNumberIndex = NaN;
     t.IP = NaN;
     t.updateImmunityflag();
-    const shortPath =  _path.split(/[/\\]/).pop();
+    let shortPath =  _path.split(/[/\\]/).pop();
+    shortPath = shortPath.toLowerCase();
     if (!ALLLINES_FILES[shortPath])
       ALLLINES_FILES[shortPath] = [];
     let af = ALLLINES_FILES[shortPath];
@@ -259,7 +260,7 @@ class LineParser {
       if (t.path) {
         let file = t.path;
         let line = t.line;
-        pluginInterfaceSingleton.reportStopped(file, line, _err);
+        pluginInterfaceSingleton.reportStopped(file, line+1, 'exception', _err, _err);
       }
     } 
 

@@ -14,22 +14,19 @@
     t.currentFile = '';
     t.currentLine = 1;
     t.manualDisconnect = false;
+    t.m68kwbBreakpts = [];
   }
 
   printStatus(_msg) {
     console.log("pluginInterface STATUS msg: " + _msg);
-    ShowDebugLog(_msg);
-
   }
 
   printCurrent(_msg) {
     console.log("pluginInterface CURRENT msg: " + _msg,);
-    ShowDebugLog(_msg);
   }
 
   printLog(_msg) {
     console.log("pluginInterface LOG msg: " + _msg,);
-    ShowDebugLog(_msg);
   }
 
 
@@ -159,24 +156,19 @@
 
   emulatorRunUntilBreakOrEnd() {
     let t = this;
-    t.printLog('[STUB] continue');
-    // TODO: real emulator: run instructions in a loop, checking breakpoints.
-    // For now, a dumb stub that advances 5 lines then halts.
-    const bps = t.breakpoints.get(t.currentFile) ?? new Set();
-    for (let i = 0; i < 100; i++) {
-      t.currentLine++;
-      if (bps.has(t.currentLine)) {
-        t.reportStopped(t.currentFile, t.currentLine, 'breakpoint');
-        return;
-      }
-    }
-    send({ event: 'terminated' });
+    DEBUGGER_run();
+    //t.send({ event: 'terminated' });
   }
 
   emulatorStepOne() {
     let t = this;
-    t.printLog('[STUB] step');
-    t.currentLine++;
+    DEBUGGER_traceOneInstr();
+    let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
+    if (curLine && curLine.path) {
+      doModal = false;
+      t.currentFile = t.makeFullPath(curLine.path);
+      t.currentLine = curLine.line+1;
+    } else t.currentLine++;
     t.reportStopped(t.currentFile, t.currentLine, 'step');
   }
 
@@ -198,15 +190,97 @@
 
   // ─── Bridge plumbing ─────────────────────────────────────────────────────
 
-  reportStopped(file, line, reason) {
+ makeFullPath(path) {
+  let t = this;
+  path = path.toLowerCase();
+  path = t.normalizePath(path);
+  if ((t.workingDirectory) && (!path.includes(t.workingDirectory))) {
+    path = t.workingDirectory + t.ROOTFOLDER + "/" + path;
+  }
+  return path;
+ }
+
+ getStack() {
     let t = this;
-    if ((t.workingDirectory) && (!file.includes(t.workingDirectory))) {
-      file = t.workingDirectory + t.ROOTFOLDER + "/" + file;
+    let stack = [];
+    let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
+    if (curLine && curLine.path) {
+      let file = t.makeFullPath(curLine.path);
+      let line = curLine.line;
+      stack.push({name:curLine.filtered, file:file, line:line+1, pc:curLine.codeSectionOfs});
     }
+
+    let index = M68K_lastBranchIndex - 1;
+    let tab = M68K_lastBranches;
+    if (M68K_INTERRUPT_STATE != null) {
+      index = M68K_lastBranchIndexInterrupt - 1;
+      tab = M68K_lastBranchesInterrupt;
+    }
+
+    for (let i = 0; i < 32; i++) {
+      if (index < 0) index = 1023;
+      const adrs = tab[index];
+      let count = 1;
+      if (adrs > 0) {
+        let next = i + 1;
+        let nextIndex = index - 1;
+        while (next < 1024) {
+          if (nextIndex < 0) nextIndex = 1023;
+          const nextAdrs = tab[nextIndex];
+          if (nextAdrs == adrs) {
+            next++;
+            nextIndex--;  
+            count++;
+            i++;
+            index--;
+            if (index < 0) index = 1023;
+          }
+          else break;
+        }
+      let entry = {name:'unknown', file:'unknown', line:1, pc:0};
+      entry.pc = adrs;
+      const lineIndex = ASMBL_ADRSTOLINE[adrs];
+      if (lineIndex !== null) {
+        const ln = PARSER_lines[lineIndex];
+        entry.name = ln.filtered;
+        if (count > 1) {
+          entry.name += "\t(x" + count + ")";
+        }
+        entry.file = t.makeFullPath(ln.path);
+        entry.line = ln.line + 1;
+      }
+      stack.push(entry);
+    }
+    index--;
+    }
+
+  return stack;
+}
+
+  reportStopped(file, line, reason, description = null, text = null) {
+    let t = this;
+    file = t.makeFullPath(file);
     t.currentFile = file; // full path, normalized
-    t.currentLine = line+1; // 1st line is 1, not 0
+    t.currentLine = line; // 1st line is 1, not 0
     t.printCurrent("file: " + file + ", line: " + line);
-    t.send({ event: 'stopped', reason, file, line, registers: t.fakeRegisters() });
+    if (!text) text = reason;
+    if (!description) description = reason;
+    text = text.replaceAll("<br>","\n");
+    description = description.replaceAll("<br>","\n");
+    
+    // get call stack
+    let stack = t.getStack();
+
+    t.send({ 
+      event: 'stopped',
+      reason,
+      file,
+      line,
+      description,
+      text,
+      registers: t.fakeRegisters(),
+      stack:stack,
+    });
   }
 
   send(obj) {
@@ -224,6 +298,34 @@
     }
   }
 
+  delteBreakpoints() {
+    let t = this;
+    for (let i = 0; i < t.m68kwbBreakpts.length; i++) {
+      t.m68kwbBreakpts[i].breakpoint = false;
+    }
+    t.m68kwbBreakpts = [];
+  }
+
+  addBreakpoints(breakpoints) {
+    let t = this;
+    let bpt = Array.from(breakpoints);
+    for (let i = 0; i < bpt.length; i++) {
+      const bp = bpt[i];
+      const file = this.getFileName(bp[0]);
+      const lines = Array.from(bp[1]);
+      let af = ALLLINES_FILES[file];
+      if (af) {
+        for (let j = 0; j < lines.length; j++) {
+          let ln = af[lines[j]-1];
+          if (ln) {
+            ln.breakpoint = true;
+            t.m68kwbBreakpts.push(ln);
+          }
+        }
+      }
+    }
+  }
+
   handleCommand(msg) {
     let t = this;
     t.printLog(`<< ${msg.cmd}`);
@@ -232,7 +334,9 @@
         t.emulatorLoad(msg.program);
         break;
       case 'setBreakpoints':
+        t.delteBreakpoints(t.breakpoints);
         t.breakpoints.set(t.normalizePath(msg.file), new Set(msg.lines));
+        t.addBreakpoints(t.breakpoints);
         t.printLog(`  breakpoints for ${t.normalizePath(msg.file)}: [${msg.lines.join(', ')}]`);
         break;
       case 'continue':

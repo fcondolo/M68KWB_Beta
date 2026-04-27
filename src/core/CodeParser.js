@@ -591,7 +591,7 @@ class CodeParser {
     if (_l && pluginInterfaceSingleton) {
       let file = _l.path;
       let line = _l.line;
-      pluginInterfaceSingleton.reportStopped(file, line, _err);
+      pluginInterfaceSingleton.reportStopped(file, line+1, 'exception', _err, _err);
     }
   }
 

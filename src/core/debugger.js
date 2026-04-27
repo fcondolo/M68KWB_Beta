@@ -268,6 +268,18 @@ function filterStack(_s) {
   return ret;
 }
 
+function DEBUGGER_run() {
+  if (!TIME_MACHINE.isPresent()) {
+    main_Info("restore present");
+    TIME_MACHINE.restorePresent();
+  }
+  DEBUGGER_justHitRun = true;
+  DEBUGGER_tracing = false;
+  DEBUGGER_traceTillRTS = false;
+  DEBUGGER_runTillIP = null;
+}
+
+
 function checkKeyUP(e) { // https://css-tricks.com/snippets/javascript/javascript-keycodes/
   var event = window.event ? window.event : e;
   if (event.keyCode == 16) { // shift
@@ -516,14 +528,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
         console.log("RELOADING PAGE...");
         window.location.reload();
       }
-      if (!TIME_MACHINE.isPresent()) {
-        main_Info("restore present");
-        TIME_MACHINE.restorePresent();
-      }
-      DEBUGGER_justHitRun = true;
-      DEBUGGER_tracing = false;
-      DEBUGGER_traceTillRTS = false;
-      DEBUGGER_runTillIP = null;
+      DEBUGGER_run();
     break;
     case 83: // s
     break;
@@ -1494,7 +1499,7 @@ function syntaxColoring(_s, _ln) {
 
 
   function DEBUGGER_jumpToFileLine() {
-    const file = document.getElementById("jumpToFile").value;
+    const file = document.getElementById("jumpToFile").value.toLowerCase();
     const line = parseInt(document.getElementById("jumpToLine").value);
     let af = ALLLINES_FILES[file];
     let IP = 0;
@@ -1604,7 +1609,7 @@ function DEBUGGER_initFile(_refreshCyclesOnly = false) {
 
   str = "";
   for (let i = 0; i < CODERPARSER_SINGLETON.includes.length; i++) {
-    let name = CODERPARSER_SINGLETON.includes[i];
+    let name = CODERPARSER_SINGLETON.includes[i].toLowerCase();
     name = name.split(/[/\\]/).pop();
     let af = ALLLINES_FILES[name];
     if (af && af.length)
@@ -2160,11 +2165,13 @@ function debug(_alertMessage = null, _useContext = false) {
   
   if (DEBUGGER_insideInvoke) {
     MACHINE.setFileLineContext();
-    if (MACHINE.errorContext.file) {
-      msg += "<br>file: " + MACHINE.errorContext.file;
-      msg += "<br>line: " + MACHINE.errorContext.line;
-    } else {
-      msg += "<br>no asm file/line found";
+    if (!pluginInterfaceSingleton) {
+      if (MACHINE.errorContext.file) {
+        msg += "<br>file: " + MACHINE.errorContext.file;
+        msg += "<br>line: " + MACHINE.errorContext.line;
+      } else {
+        msg += "<br>no asm file/line found";
+      }
     }
   } else {
       const err = new Error();
@@ -2193,7 +2200,7 @@ function debug(_alertMessage = null, _useContext = false) {
       doModal = false;
       let file = curLine.path;
       let line = curLine.line;
-      pluginInterfaceSingleton.reportStopped(file, line, "Breakpoint reached: " + msg);
+      pluginInterfaceSingleton.reportStopped(file, line+1,  'exception', msg, msg);
     }
   } 
   if (doModal) {

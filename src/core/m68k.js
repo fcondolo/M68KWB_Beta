@@ -3137,13 +3137,13 @@ function invoke68K(_label, _trace) {
     }
   
     if (DEBUGGER_insideInvoke) {
-      debugger;
+      //debugger;
       if (DEBUGGER_insideInvoke == _label) {
         if (DEBUGGER_tracing) {
           return; // Already tracing this function. The main loop will call CPU update on this function, we're good
         }
       }  
-      main_Alert("error: can't invoke68K '" + _label + "' while already executing '" + DEBUGGER_insideInvoke + "'. You probably need to use execution lists.");
+      //main_Alert("error: can't invoke68K '" + _label + "' while already executing '" + DEBUGGER_insideInvoke + "'. You probably need to use execution lists.");
       return;
     }
     M68K_IP = CODERPARSER_SINGLETON.getLabelCodeSectionOffset(_label);
