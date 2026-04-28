@@ -180,6 +180,7 @@ function main_mainLoop() {
       if (M68K_MAXCYCLES == -1 || M68K_CYCLES > M68K_MAXCYCLES) M68K_MAXCYCLES = M68K_CYCLES;
       ShowDebugLog("cycles: " + M68K_CYCLES + "<br>min: " + M68K_MINCYCLES + "<br>max: " + M68K_MAXCYCLES);
     }
+    BENCHMARKS.update();
 
     ctx.restore();
     MACHINE.customUpdate();
@@ -202,6 +203,8 @@ function main_mainLoop() {
 function main_startAll() {
   if (!WATCHES)
     new M68K_Watches(true); // in case no asm files
+  if (!BENCHMARKS)
+    new M68K_Benchmark(true); // in case no asm files
   if (!TOOLBOX) new Toolbox();
   if (FX_INFO.zoom) {
     try {

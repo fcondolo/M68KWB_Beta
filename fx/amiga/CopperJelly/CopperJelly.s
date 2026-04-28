@@ -47,6 +47,7 @@ COPFILL
 	MOVE.W	COLOUR1(PC),COL1
 	MOVE.W	COLOUR2(PC),COL2
 
+
 	MOVE.W	#SIZE,CCOUNT
 	MOVE.W	CCOFF(PC),D0
 	EXT.L	D0
@@ -55,6 +56,7 @@ COPFILL
 	CMP.W	D3,D0
 	BNE.B	NORESET
 	MOVE.W	#0,CCOFF
+
 NORESET	
 	ADDQ.W	#2,CCOFF
 	LEA.L	CCNEW(PC),A3
@@ -208,11 +210,18 @@ COPINIT:
 *******************************************************************************
 
 update:
+	;>JS BENCHMARKS.start("update");
+
 	MOVEM.L	D0-A6,-(A7)
+
+	;>JS BENCHMARKS.start("copfill");
 
 	JSR	COPFILL
 
+	;>JS BENCHMARKS.stop("copfill");
+
 	MOVEM.L	(A7)+,D0-A6 		
+	;>JS BENCHMARKS.stop("update");
 	rts
 
 ** ABSOLUTES ******************************************************************

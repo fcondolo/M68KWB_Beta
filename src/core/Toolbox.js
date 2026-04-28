@@ -11,26 +11,49 @@ class Toolbox {
     toggleShow() {
         let t = this;
         let elm = document.getElementById("draggable");
-        if (elm.style.display == "none") {
-            t.refresh();
-            elm.style.display = null;
-            $("#draggable").draggable();   
-            $("#draggable").css({
-            position: "absolute",
-            top: GLOBAL_MOUSEY.toString()+"px",
-            left: GLOBAL_MOUSEX.toString()+"px",
-            width: "30%",
-            height: "50%",
-            overflowY: "auto",   // Scrollbar when needed
-            overflowX: "hidden", // Optional
-            padding: "10px",
-            border: "1px solid #ccc",
-            background: "rgba(130,130,150,0.9"
-            });
-            //$('body').scrollTo('#draggable');  
-        }  
-        else {
-            elm.style.display = "none";
+        if (window.innerWidth < DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE) {
+            if (elm.style.display == "none") {
+                t.refresh();
+                elm.style.display = null;
+                $("#draggable").draggable();   
+                $("#draggable").css({
+                position: "absolute",
+                top: "0%",
+                left: "0%",
+                width: "100%",
+                height: "50%",
+                overflowY: "auto",   // Scrollbar when needed
+                overflowX: "hidden", // Optional
+                padding: "10px",
+                border: "1px solid #ccc",
+                background: "rgba(130,130,150,0.9"
+                });
+            }  
+            else {
+                elm.style.display = "none";
+            }
+        } else {
+            if (elm.style.display == "none") {
+                t.refresh();
+                elm.style.display = null;
+                $("#draggable").draggable();   
+                $("#draggable").css({
+                position: "absolute",
+                top: GLOBAL_MOUSEY.toString()+"px",
+                left: GLOBAL_MOUSEX.toString()+"px",
+                width: "30%",
+                height: "50%",
+                overflowY: "auto",   // Scrollbar when needed
+                overflowX: "hidden", // Optional
+                padding: "10px",
+                border: "1px solid #ccc",
+                background: "rgba(130,130,150,0.9"
+                });
+                //$('body').scrollTo('#draggable');  
+            }  
+            else {
+                elm.style.display = "none";
+            }
         }
     }
 
@@ -172,6 +195,21 @@ class Toolbox {
         }
     }
 
+    createBenchmarkString() {
+        let t = this;
+        if (!t.data["tlbx_tglBench"]) t.data["tlbx_tglBench"] = {checked:false};
+        let checked = t.getCheckbox("tlbx_tglBench");
+        let col = checked ? "background-color: rgba(166, 221, 218, 0.8);" : null;
+        t.watchContent = t.addCheckbox("Benchmark", "tlbx_tglBench", ["TOOLBOX.toggleBench","TOOLBOX.refresh"], checked, col);
+    }
+
+    toggleBench(_toggle) {
+        if (_toggle)
+            document.getElementById('tbox_bench').style.display = null; 
+        else 
+            document.getElementById('tbox_bench').style.display = 'none';
+    }
+
     createWatchesString() {
         let t = this;
         if (!t.data["tlbx_tglWatch"]) t.data["tlbx_tglWatch"] = {checked:false};
@@ -215,6 +253,7 @@ class Toolbox {
             break;
         }
         t.createWatchesString();
+        t.createBenchmarkString();
 
         document.getElementById("toolbox_contents").innerHTML = t.bplContent + t.palContent + t.cpuContent + t.blitterContent + t.watchContent;
     }

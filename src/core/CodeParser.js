@@ -109,6 +109,7 @@ class CodeParser {
       t.constants.push({ name: MACHINE.constants[ic].name, value: MACHINE.constants[ic].value, path: "MACHINE", line: "" });
     }    
     new M68K_Watches(); // important here to push the proper constants
+    new M68K_Benchmark();
 
 
     // includes are done first
