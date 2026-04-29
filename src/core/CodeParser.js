@@ -329,6 +329,9 @@ class CodeParser {
     }
 */
     //document.getElementById("log").innerHTML = log;
+    if (pluginInterfaceSingleton) {
+      pluginInterfaceSingleton.applyBreakpoints();
+    }
     return true;
   }
 

@@ -15,6 +15,7 @@
     t.currentLine = 1;
     t.manualDisconnect = false;
     t.m68kwbBreakpts = [];
+    t.breakPointsToApply = [];
   }
 
   printStatus(_msg) {
@@ -129,8 +130,8 @@
     try {
       console.log('[emulator] onLoad called, program=', programPath);
       console.log('[emulator] about to call reportStopped');
-      t.reportStopped(t.normalizePath(programPath), 1, 'entry');
-      console.log('[emulator] reportStopped returned');
+    // don't stop on entry  t.reportStopped(t.normalizePath(programPath), 1, 'entry');
+    //  console.log('[emulator] reportStopped returned');
     } catch (err) {
       console.error('[emulator] onLoad threw:', err);
     }    
@@ -397,14 +398,16 @@
     }
     t.m68kwbBreakpts = [];
   }
-
-  addBreakpoints(breakpoints) {
+  
+  applyBreakpoints() {
     let t = this;
-    let bpt = Array.from(breakpoints);
-    for (let i = 0; i < bpt.length; i++) {
-      const bp = bpt[i];
-      const file = this.getFileName(bp[0]);
-      const lines = Array.from(bp[1]);
+    for (let i = 0; i < t.m68kwbBreakpts.length; i++) {
+      t.m68kwbBreakpts[i].breakpoint = false;
+    }
+    t.m68kwbBreakpts = [];
+    for (let i = 0; i < t.breakPointsToApply.length; i++) {
+      const file = t.breakPointsToApply[i].file;
+      const lines = t.breakPointsToApply[i].lines;
       let af = ALLLINES_FILES[file];
       if (af) {
         for (let j = 0; j < lines.length; j++) {
@@ -415,6 +418,18 @@
           }
         }
       }
+    }
+  }
+
+  addBreakpoints(breakpoints) {
+    let t = this;
+    let bpt = Array.from(breakpoints);
+    for (let i = 0; i < bpt.length; i++) {
+      let bptLst = {};
+      const bp = bpt[i];
+      const file = this.getFileName(bp[0]);
+      const lines = Array.from(bp[1]);
+      t.breakPointsToApply.push({file:file, lines:lines});
     }
   }
 

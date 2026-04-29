@@ -2207,7 +2207,7 @@ function debug(_alertMessage = null, _useContext = false) {
   DEBUGGER_update();
   DEBUGGER_dumpRegistersValues();
   DEBUGGER_HitBp(M68K_IP);
-  if (!Plugin_GotoCurIP('breakpoint', msg)) {
+  if (!Plugin_GotoCurIP('exception', msg)) { // don0t use 'breakpoint' instead of 'exception' otherwise no message will be shown
     showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);
   }
   //msg = msg.replaceAll("\n","<br>");

@@ -414,7 +414,7 @@ function main_onload() {
   if (VSCODE_CONFIG.AUTO_CONNECT) {
     if (pluginInterfaceSingleton == null) new PluginInterface();
       pluginInterfaceSingleton.connect();
-    ShowDebugLog("Plugin mode: Start debugging a .s or .asm file");
+    ShowDebugLog("<b>VSCode Extension mode</b><br>Start debugging a .s or .asm file");
     return;
   }
   for (let i = 0; i < user_fx.length; i++) {
