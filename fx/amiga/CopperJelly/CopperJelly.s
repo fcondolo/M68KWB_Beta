@@ -215,13 +215,14 @@ update:
 	MOVEM.L	D0-A6,-(A7)
 
 	;>JS BENCHMARKS.start("copfill");
-
 	JSR	COPFILL
 
 	;>JS BENCHMARKS.stop("copfill");
 
 	MOVEM.L	(A7)+,D0-A6 		
 	;>JS BENCHMARKS.stop("update");
+	moveq #0,d0
+	;>JS debug();
 	rts
 
 ** ABSOLUTES ******************************************************************

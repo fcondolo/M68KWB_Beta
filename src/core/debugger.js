@@ -1707,6 +1707,7 @@ function DEBUGGER_onTimeMachine() {
       cursorItem.classList.add('timeMachine_row');
   }        
   focusOnCodeLine(M68K_IP);
+  Plugin_GotoCurIP('step',"");
 }
 
 function DEBUGGER_dumpRegistersValues() {
@@ -2160,6 +2161,19 @@ function breakpoint(_alertMessage) {
   return debug(_alertMessage);
 }
 
+function Plugin_GotoCurIP(_reason, _msg) {
+  if (pluginInterfaceSingleton) {
+    let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
+    if (curLine && curLine.path) {
+      let file = curLine.path;
+      let line = curLine.line;
+      pluginInterfaceSingleton.reportStopped(file, line+1,  _reason, _msg, _msg);
+      return true;
+    }
+  } 
+  return false;
+}
+
 function debug(_alertMessage = null, _useContext = false) {
   let msg = "";
   
@@ -2193,17 +2207,7 @@ function debug(_alertMessage = null, _useContext = false) {
   DEBUGGER_update();
   DEBUGGER_dumpRegistersValues();
   DEBUGGER_HitBp(M68K_IP);
-  let doModal = true;
-  if (pluginInterfaceSingleton) {
-    let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
-    if (curLine && curLine.path) {
-      doModal = false;
-      let file = curLine.path;
-      let line = curLine.line;
-      pluginInterfaceSingleton.reportStopped(file, line+1,  'exception', msg, msg);
-    }
-  } 
-  if (doModal) {
+  if (!Plugin_GotoCurIP('breakpoint', msg)) {
     showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);
   }
   //msg = msg.replaceAll("\n","<br>");

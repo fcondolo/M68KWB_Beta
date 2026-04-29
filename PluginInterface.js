@@ -31,10 +31,26 @@
 
 
   normalizePath(p) {
+    if (!p) {
+      alert("PluginInterface: can't normalize null path");
+      debugger;
+      return null;
+    }
     return p.replace(/\\/g, '/').toLowerCase();
   }
 
   getLocalPath(_fullPath, _startFolder) {
+    if (!_fullPath) {
+      alert("PluginInterface: getLocalPath : null _fullPath");
+      debugger;
+      return null;
+    }
+    if (!_startFolder) {
+      alert("PluginInterface: getLocalPath : null _startFolder");
+      debugger;
+      return null;
+    }
+
     _fullPath = _fullPath.toLowerCase();
     _startFolder = _startFolder.toLowerCase();
     const full = _fullPath.replace(/\\/g, '/');
@@ -61,6 +77,11 @@
   }
 
   getFileName(_path) {
+    if (!_path) {
+      alert("PluginInterface: getFileName : null _path");
+      debugger;
+      return null;
+    }
     _path = _path.toLowerCase();
     return _path.replace(/\\/g, '/').split('/').pop();
   }
@@ -126,23 +147,29 @@
     if (foundName == null) {
       // if there's several fx in the same folder, launch the one with the same asm source file
       for (let i = 0; i < sameFolder.length; i++) {
-        let source = t.getFileName(sameFolder[i].source);
-        if (sameFolder[i].fxName == fileName) {
-          foundName = sameFolder[i].fxName;
-          break;
+        let src = sameFolder[i].source;
+        if (src) {
+          let source = t.getFileName(src);
+          if (sameFolder[i].fxName == fileName) {
+            foundName = sameFolder[i].fxName;
+            break;
+          }
         }
       }
     }
     if (foundName == null) {
       // if the folder could not be found, launch the one with the same asm source file, no matter the folder
       for (let i = 0; i < user_fx.length; i++) {
-        let source = t.getFileName(user_fx[i].source);
-        if (source == fileName) {
-          if (user_fx[i].fxName)
-            foundName = user_fx[i].fxName;
-          else if (user_fx[i].classname)
-            foundName = user_fx[i].classname;
-          break;
+        let src = user_fx[i].source;
+        if (src) {
+          let source = t.getFileName(src);
+          if (source == fileName) {
+            if (user_fx[i].fxName)
+              foundName = user_fx[i].fxName;
+            else if (user_fx[i].classname)
+              foundName = user_fx[i].classname;
+            break;
+          }
         }
       }
     }
@@ -151,7 +178,7 @@
       localStorage.setItem(LOCALSTORAGE_FX_NAME, foundName);
       main_startChosenFx(foundName);
       //window.location.reload();
-    } else alert("fx not found");
+    } else alert("The FX you want to debug must be declared in 'user_fx.js', and have a 'source' property.\n Currently trying to debug '" + programPath + "' but no matching entry could be found in 'user_fx.js'");
   }
 
   emulatorRunUntilBreakOrEnd() {
@@ -184,7 +211,11 @@
       d: d,
       a: a,
       pc: M68K_IP,
-      sr: regs.sr,
+      x: regs.x,
+      n: regs.n,
+      z: regs.z,
+      v: regs.v,
+      c: regs.c
     };
   }
 
@@ -192,6 +223,11 @@
 
  makeFullPath(path) {
   let t = this;
+  if (!path) {
+    alert("PluginInterface: makeFullPath : null path");
+    debugger;
+    return null;
+  }
   path = path.toLowerCase();
   path = t.normalizePath(path);
   if ((t.workingDirectory) && (!path.includes(t.workingDirectory))) {
@@ -258,6 +294,18 @@
 }
 
   reportStopped(file, line, reason, description = null, text = null) {
+    /*
+    POSSIBLE VALUES FOR 'reason' :
+"step" — Paused after a step operation. Yellow arrow on the gutter. Call Stack shows "Paused on step".
+"breakpoint" — Paused at a breakpoint. Yellow arrow. Call Stack shows "Paused on breakpoint".
+"exception" — A runtime fault. Red arrow on the gutter, floating overlay with description/text. Most attention-grabbing. Use this for divide-by-zero, illegal instruction, etc.
+"pause" — User clicked the pause button. Yellow arrow. "Paused on pause".
+"entry" — Stopped at program entry (the very first instruction). Yellow arrow. "Paused on entry".
+"goto" — Paused after a "Jump to Cursor" / "Set Next Statement" operation. Rare.
+"function breakpoint" — Paused at a function-name breakpoint (you'd need setFunctionBreakpoints support). Yellow arrow.
+"data breakpoint" — Paused at a memory/data watchpoint (you'd need dataBreakpoints support). Yellow arrow.
+"instruction breakpoint" — Paused at an instruction-address breakpoint (disassembly view feature). Yellow arrow.    
+    */
     let t = this;
     file = t.makeFullPath(file);
     t.currentFile = file; // full path, normalized
@@ -271,6 +319,49 @@
     // get call stack
     let stack = t.getStack();
 
+
+  let execme = null;
+  let vars = null;
+  if (BENCHMARKS && BENCHMARKS.entries) {
+    execme = "vars = [";
+    for (let i = 0; i < BENCHMARKS.entries.length; i++) {
+        const e = BENCHMARKS.entries[i];
+        execme += '{name:"'+e.name + '",value:';
+        if (e.error)
+            execme += e.error;
+        else
+            execme += e.last_measured.toString();
+        execme += ",type:'long'},";
+    }
+  }
+
+  if (WATCHES && WATCHES.entries) {
+    if (!execme) execme = "vars = [";
+    for (let i = 0; i < WATCHES.entries.length; i++) {
+        const e = WATCHES.entries[i];
+        const f = WATCHES.format[e.type];
+        let val = MACHINE.getRAMValue(e.adrs, f.b, f.s);
+        const id = "watchval"+i.toString();
+        execme += '{name:"'+e.name + '",value:';
+        switch (e.base) {
+            case t.WATCH_BIN: execme += '%'; break;
+            case t.WATCH_HEX: execme += '$'; break;
+        }
+        execme += val.toString(e.base);
+        switch (f.b) {
+            case 1: execme += ",type:'byte'},"; break;
+            case 2: execme += ",type:'word'},"; break;
+            case 4: execme += ",type:'long'},"; break;
+        }
+    }
+  }
+  if (execme) {
+    if (execme[execme.length-1] == ',')
+      execme = execme.substring(0, execme.length - 1);
+    execme += "]"
+    eval(execme);
+  } 
+
     t.send({ 
       event: 'stopped',
       reason,
@@ -280,6 +371,7 @@
       text,
       registers: t.fakeRegisters(),
       stack:stack,
+      symbols: vars
     });
   }
 
