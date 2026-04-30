@@ -412,9 +412,9 @@ function updateFxList() {
 
 function main_onload() {
   if (VSCODE_CONFIG.AUTO_CONNECT) {
+    ShowDebugLog("<b>VSCode Extension mode</b><br>Start debugging a .s or .asm file<br>or set VSCODE_CONFIG.AUTO_CONNECT to false in <i>config.js</i> to exit that mode.");
     if (pluginInterfaceSingleton == null) new PluginInterface();
       pluginInterfaceSingleton.connect();
-    ShowDebugLog("<b>VSCode Extension mode</b><br>Start debugging a .s or .asm file");
     return;
   }
   for (let i = 0; i < user_fx.length; i++) {
@@ -525,6 +525,8 @@ function setNewwindowSize(width) {
 }
 
 function onNewOutputResolution() {
+  setNewwindowSize(window.innerWidth);
+  /*
   // default resolution: 100
   let rez = document.getElementById("outpuResolution").value;
   CANVAS_SCALE = rez;
@@ -538,7 +540,7 @@ function onNewOutputResolution() {
     case "STE":
       setNewwindowSize(Math.floor((rez * 390)/100));
     break;    
-  }
+  }*/
 }
 
 
