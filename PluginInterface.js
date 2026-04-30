@@ -129,17 +129,23 @@
     }
   }
 
-  findExactSameFX(_path) {
+  findExactSameFX(_path, _ext) {
     for (let i = 0; i < user_fx.length; i++) {
       const fx = user_fx[i];
-      const src = fx.source;
+      let src ;
+      if (_ext == 'js')
+        src = fx.js;
+      else
+        src = fx.source;
       if (src) {
         let p  = "";
-        if (fx.rootPath) p += fx.rootPath;
+        if (fx.rootPath && !src.includes(fx.rootPath)) 
+          p += fx.rootPath;
         if (p.length > 0 && p[p.length-1] != '/' && p[p.length-1] != '\\') {
           p += "/";
         }
         p += src;
+        p = p.toLowerCase(); // useful at least for js
         if (p == _path)
           return fx.fxName;
       }
@@ -187,14 +193,16 @@
     diagnosis += "\nlocalPath: " + localPath; 
     let fileName = t.getFileName(localPath);
     diagnosis += "\nfileName: " + fileName; 
+    let fileExt =  (fileName.split('.').pop()).toLowerCase();
     let folder = t.getDirectoryPath(localPath);
     if (folder[folder.length-1] !== '/') folder += '/';
     diagnosis += "\nfolder: " + folder; 
-    let foundName = t.findExactSameFX(localPath);
+    let foundName = t.findExactSameFX(localPath,fileExt);
+    let sameFolder = [];
     if (foundName)
       diagnosis += "\nexact same file found in user_fx.js for FX: " + foundName; 
     else {
-      let sameFolder = t.findAllFXInThisFolder(folder);
+      sameFolder = t.findAllFXInThisFolder(folder);
       // if there's only 1 fx in the same folder, launch the fx
       if (sameFolder.length == 1) {
         foundName = sameFolder[0].fxName;
@@ -242,7 +250,7 @@
     if (canLoad) {
       localStorage.setItem(LOCALSTORAGE_FX_NAME, foundName);
       main_startChosenFx(foundName);
-    } else alert("The FX you want to debug must be declared in 'user_fx.js', and have a 'source' property.\n Currently trying to debug '" + programPath + "' but no matching entry could be found in 'user_fx.js'\nFull diagnosis og what happened:\n" + diagnosis);
+    } else alert("The FX you want to debug must be declared in 'user_fx.js', and have a 'source' property.\n Currently trying to debug '" + programPath + "' but no matching entry could be found in 'user_fx.js'\nFull diagnosis of what happened:\n" + diagnosis);
   }
 
   emulatorContinue() {
@@ -253,6 +261,7 @@
     } 
     t.stopped = false;
     DEBUGGER_run();
+    WAITING_USERINPUT = false;
     t._resume('continue');
   }
 
@@ -262,6 +271,7 @@
       return;
     t.stopped = false;
     DEBUGGER_traceOneInstr();
+    WAITING_USERINPUT = false;
     t._resume('step');
     t.reportStopped(t.currentFile, t.currentLine, 'step');
   }
@@ -559,7 +569,7 @@
 
     t.ws.onopen = () => {
       console.log('[bridge] open');
-      pluginInterfaceSingleton.printStatus('VSCode Plugin connected to debug adapter<br>Start debugging a .s or .asm file.');
+      pluginInterfaceSingleton.printStatus('VSCode Plugin connected to debug adapter<br>Start debugging a .js, .s or .asm file.');
     };
     t.ws.onmessage = (ev) => {
       try { pluginInterfaceSingleton.handleCommand(JSON.parse(ev.data)); }

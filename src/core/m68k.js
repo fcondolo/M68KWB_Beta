@@ -2926,26 +2926,6 @@ function CPU_EvaluateVBL(_nextInstr) {
   DEBUGGER_restoreParanoid();
 }
 
-async function waitForPlugin() {
-  const resumeMode = await pluginInterfaceSingleton.waitForResume();
-  if (resumeMode === 'step') {
-  } else {
-  }
-}
-
-function canExecuteNextInstr() {
-  return new Promise((resolve) => {
-    document.addEventListener('keydown', onKeyHandler);
-    function onKeyHandler(e) {
-      if (!DEBUGGER_tracing || DEBUGGER_canStep || DEBUGGER_traceTillRTS || DEBUGGER_runTillIP) {
-        document.removeEventListener('keydown', onKeyHandler);
-        resolve();
-      }
-    }
-  });
-}
-
-
 
 async function execCPU() {
   if (!DEBUGGER_insideInvoke) {
@@ -3031,13 +3011,19 @@ async function execCPU() {
 
     if (DEBUGGER_tracing && !DEBUGGER_canStep && !DEBUGGER_traceTillRTS && !DEBUGGER_runTillIP) {
         WAITING_USERINPUT = true;
-        if (pluginInterfaceSingleton) {
-          await waitForPlugin();
+        if (!pluginInterfaceSingleton) {
+          document.addEventListener('keydown', onKeyHandler);
+          function onKeyHandler(e) {
+            if (!DEBUGGER_tracing || DEBUGGER_canStep || DEBUGGER_traceTillRTS || DEBUGGER_runTillIP) {
+              document.removeEventListener('keydown', onKeyHandler);
+              WAITING_USERINPUT = false;
+            }
+          }
         }
-        else {
-          await canExecuteNextInstr();
+        if (WAITING_USERINPUT) {
+          // tracing asm? skip the rest on the FX update and jump back to the main loop
+          throw new Error("WAITING_USERINPUT");
         }
-        WAITING_USERINPUT = false;
     }
 
     if (line.isInstr) { // if actual 68k code

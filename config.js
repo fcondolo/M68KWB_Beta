@@ -175,7 +175,7 @@ const STE_CONFIG = {
 const VSCODE_CONFIG = {
     // if true, will connect to the VSCode plugin's debuger
     // if false, will run in standalone mode without counting on vscode for debugging
-    AUTO_CONNECT    : false,
+    AUTO_CONNECT    : true,
     // if true, will keep the focus on the render window
     // if false, will scroll to show the current instruction whie debugging
     RENDER_FOCUS    : true,
