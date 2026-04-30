@@ -1026,6 +1026,7 @@ function DEBUGGER_BeforeInstr() {
       if (DEBUGGER_skipNextBP == M68K_IP) {
         DEBUGGER_skipNextBP = -1;
       } else {
+        Plugin_GotoCurIP('breakpoint',"");
         DEBUGGER_traceTillRTS = false;
         DEBUGGER_runTillIP = null;
         setTraceMode(true);
@@ -1141,6 +1142,8 @@ function showElement(_id) {
 }
 
 function focusOnCodeLine(_IP) {
+  if (pluginInterfaceSingleton && VSCODE_CONFIG.RENDER_FOCUS)
+    return;
 
   if (DEBUGGER_PrevFocus)
     DEBUGGER_PrevFocus.classList.remove('highlight_row');
@@ -1197,6 +1200,7 @@ function DEBUGGER_onHWBreakpointReached(_index) {
   setTraceMode(true);
   DEBUGGER_update(false); // don't set _force to true or no combo boxy is selectable while tracing because ofconstant refresh
   DEBUGGER_dumpRegistersValues();
+  Plugin_GotoCurIP('exception',"Hit HW Breakpiont #" + _index);
 }
 
 function DEBUGGER_onValueBreakpointReached() {
@@ -1209,6 +1213,7 @@ function DEBUGGER_onValueBreakpointReached() {
   setTraceMode(true);
   DEBUGGER_update(false); // don't set _force to true or no combo boxy is selectable while tracing because ofconstant refresh
   DEBUGGER_dumpRegistersValues();
+  Plugin_GotoCurIP('exception',"Hit Value Breakpiont");
 }
 
 
@@ -2165,9 +2170,9 @@ function Plugin_GotoCurIP(_reason, _msg) {
   if (pluginInterfaceSingleton) {
     let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
     if (curLine && curLine.path) {
-      let file = curLine.path;
-      let line = curLine.line;
-      pluginInterfaceSingleton.reportStopped(file, line+1,  _reason, _msg, _msg);
+      pluginInterfaceSingleton.currentFile = pluginInterfaceSingleton.makeFullPath(curLine.path);
+      pluginInterfaceSingleton.currentLine = curLine.line+1;
+      pluginInterfaceSingleton.reportStopped(pluginInterfaceSingleton.currentFile, pluginInterfaceSingleton.currentLine,  _reason, _msg, _msg);
       return true;
     }
   } 

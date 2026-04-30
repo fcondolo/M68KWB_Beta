@@ -2926,15 +2926,19 @@ function CPU_EvaluateVBL(_nextInstr) {
   DEBUGGER_restoreParanoid();
 }
 
+async function waitForPlugin() {
+  const resumeMode = await pluginInterfaceSingleton.waitForResume();
+  if (resumeMode === 'step') {
+  } else {
+  }
+}
 
 function canExecuteNextInstr() {
-  WAITING_USERINPUT = true;
   return new Promise((resolve) => {
     document.addEventListener('keydown', onKeyHandler);
     function onKeyHandler(e) {
       if (!DEBUGGER_tracing || DEBUGGER_canStep || DEBUGGER_traceTillRTS || DEBUGGER_runTillIP) {
         document.removeEventListener('keydown', onKeyHandler);
-        WAITING_USERINPUT = false;
         resolve();
       }
     }
@@ -3026,7 +3030,14 @@ async function execCPU() {
     DEBUGGER_BeforeInstr();
 
     if (DEBUGGER_tracing && !DEBUGGER_canStep && !DEBUGGER_traceTillRTS && !DEBUGGER_runTillIP) {
-      await canExecuteNextInstr();
+        WAITING_USERINPUT = true;
+        if (pluginInterfaceSingleton) {
+          await waitForPlugin();
+        }
+        else {
+          await canExecuteNextInstr();
+        }
+        WAITING_USERINPUT = false;
     }
 
     if (line.isInstr) { // if actual 68k code
@@ -3103,6 +3114,10 @@ async function execCPU() {
 
     M68K_PREVIP = M68K_IP;
     M68K_IP = M68K_NEXTIP;
+
+    if (pluginInterfaceSingleton && DEBUGGER_tracing) {
+      Plugin_GotoCurIP('step',"");
+    }
 
     CPU_EvaluateVBL(M68K_IP);
 

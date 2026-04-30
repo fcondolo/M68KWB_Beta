@@ -330,7 +330,7 @@ class CodeParser {
 */
     //document.getElementById("log").innerHTML = log;
     if (pluginInterfaceSingleton) {
-      pluginInterfaceSingleton.applyBreakpoints();
+      pluginInterfaceSingleton.codeParserIsReady();
     }
     return true;
   }

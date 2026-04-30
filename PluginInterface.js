@@ -16,6 +16,11 @@
     t.manualDisconnect = false;
     t.m68kwbBreakpts = [];
     t.breakPointsToApply = [];
+    t.callsWhenReady = [];
+    t.stopped = false;
+    t._waitForResume = null;
+    t._resumeResolve = null;
+    t.ready = false;
   }
 
   printStatus(_msg) {
@@ -101,6 +106,47 @@
     return normalizedPath.substring(0, lastSlashIndex);
   }
 
+    // Called by the main loop when it pauses; returns a promise
+  // that resolves when the user clicks Continue or Step.
+  waitForResume() {
+    // If a previous resume is still pending, return it. Otherwise create a new one.
+    if (!this._waitForResume) {
+      this._waitForResume = new Promise(resolve => {
+        this._resumeResolve = resolve;
+      });
+    }
+    return this._waitForResume;
+  }
+
+
+  // Called by the bridge's onContinue / onStep handlers
+  _resume(mode) {
+    if (this._resumeResolve) {
+      const resolve = this._resumeResolve;
+      this._waitForResume = null;
+      this._resumeResolve = null;
+      resolve(mode);   // 'continue' or 'step'
+    }
+  }
+
+  findExactSameFX(_path) {
+    for (let i = 0; i < user_fx.length; i++) {
+      const fx = user_fx[i];
+      const src = fx.source;
+      if (src) {
+        let p  = "";
+        if (fx.rootPath) p += fx.rootPath;
+        if (p.length > 0 && p[p.length-1] != '/' && p[p.length-1] != '\\') {
+          p += "/";
+        }
+        p += src;
+        if (p == _path)
+          return fx.fxName;
+      }
+    }
+    return null;
+  }
+
   findAllFXInThisFolder(folder) {
     let ret = [];
     for (let i = 0; i < user_fx.length; i++) {
@@ -123,6 +169,7 @@
 
   emulatorLoad(programPath) {
     let t = this;
+    t.stopped = false;
     t.printLog(`[STUB] load: ${programPath}`);
     // TODO: your emulator: fetch/load the assembled program
     // TODO: load source map (PC → file,line)
@@ -134,16 +181,29 @@
     //  console.log('[emulator] reportStopped returned');
     } catch (err) {
       console.error('[emulator] onLoad threw:', err);
-    }    
-    let localPath = t.getLocalPath(programPath, t.ROOTFOLDER);    
+    }
+    let diagnosis = "started debugging file: " + programPath;
+    let localPath = t.getLocalPath(programPath, t.ROOTFOLDER);
+    diagnosis += "\nlocalPath: " + localPath; 
     let fileName = t.getFileName(localPath);
+    diagnosis += "\nfileName: " + fileName; 
     let folder = t.getDirectoryPath(localPath);
     if (folder[folder.length-1] !== '/') folder += '/';
-    let sameFolder = t.findAllFXInThisFolder(folder);
-    let foundName = null;
-    // if there's only 1 fx in the same folder, launch the fx
-    if (sameFolder.length == 1) {
-      foundName = sameFolder[0].fxName;
+    diagnosis += "\nfolder: " + folder; 
+    let foundName = t.findExactSameFX(localPath);
+    if (foundName)
+      diagnosis += "\nexact same file found in user_fx.js for FX: " + foundName; 
+    else {
+      let sameFolder = t.findAllFXInThisFolder(folder);
+      // if there's only 1 fx in the same folder, launch the fx
+      if (sameFolder.length == 1) {
+        foundName = sameFolder[0].fxName;
+        diagnosis += "\nExact same file not found in user_fx.js but found 1 FX in the same folder: " + foundName; 
+      } else if (sameFolder.length == 0) {
+        diagnosis += "\nExact same file not found in user_fx.js, and no FX in the same folder"; 
+      } else {
+        diagnosis += "\nExact same file not found in user_fx.js, but multiple FX were found in the same folder"; 
+      }
     }
     if (foundName == null) {
       // if there's several fx in the same folder, launch the one with the same asm source file
@@ -153,12 +213,14 @@
           let source = t.getFileName(src);
           if (sameFolder[i].fxName == fileName) {
             foundName = sameFolder[i].fxName;
+            diagnosis += "\nSame asm file name found in user_fx.js: " + foundName; 
             break;
           }
         }
       }
     }
     if (foundName == null) {
+      diagnosis += "\nCould not find the file in the same folder. Trying to find the file in another folder"; 
       // if the folder could not be found, launch the one with the same asm source file, no matter the folder
       for (let i = 0; i < user_fx.length; i++) {
         let src = user_fx[i].source;
@@ -175,28 +237,32 @@
       }
     }
 
-    if ((foundName != null) && (MYFX.fxName != foundName)) {
+    let canLoad = false;
+    if (foundName != null) canLoad = true;
+    if (canLoad) {
       localStorage.setItem(LOCALSTORAGE_FX_NAME, foundName);
       main_startChosenFx(foundName);
-      //window.location.reload();
-    } else alert("The FX you want to debug must be declared in 'user_fx.js', and have a 'source' property.\n Currently trying to debug '" + programPath + "' but no matching entry could be found in 'user_fx.js'");
+    } else alert("The FX you want to debug must be declared in 'user_fx.js', and have a 'source' property.\n Currently trying to debug '" + programPath + "' but no matching entry could be found in 'user_fx.js'\nFull diagnosis og what happened:\n" + diagnosis);
   }
 
-  emulatorRunUntilBreakOrEnd() {
+  emulatorContinue() {
     let t = this;
+    if (!t.ready) {
+      t.callsWhenReady.push('emulatorContinue');
+      return;
+    } 
+    t.stopped = false;
     DEBUGGER_run();
-    //t.send({ event: 'terminated' });
+    t._resume('continue');
   }
 
   emulatorStepOne() {
     let t = this;
+    if (!t.ready) 
+      return;
+    t.stopped = false;
     DEBUGGER_traceOneInstr();
-    let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
-    if (curLine && curLine.path) {
-      doModal = false;
-      t.currentFile = t.makeFullPath(curLine.path);
-      t.currentLine = curLine.line+1;
-    } else t.currentLine++;
+    t._resume('step');
     t.reportStopped(t.currentFile, t.currentLine, 'step');
   }
 
@@ -308,6 +374,7 @@
 "instruction breakpoint" — Paused at an instruction-address breakpoint (disassembly view feature). Yellow arrow.    
     */
     let t = this;
+    t.stopped = true;
     file = t.makeFullPath(file);
     t.currentFile = file; // full path, normalized
     t.currentLine = line; // 1st line is 1, not 0
@@ -372,7 +439,7 @@
       text,
       registers: t.fakeRegisters(),
       stack:stack,
-      symbols: vars
+      variables: vars
     });
   }
 
@@ -399,6 +466,20 @@
     t.m68kwbBreakpts = [];
   }
   
+  codeParserIsReady() {
+    let t = this;
+    t.ready = true;
+    t.applyBreakpoints();
+    for (let i = 0; i < t.callsWhenReady.length; i++) {
+      switch(t.callsWhenReady[i]) {
+        case 'emulatorContinue':
+          t.emulatorContinue();
+        break;
+      }
+    }
+    t.callsWhenReady = [];
+  }
+
   applyBreakpoints() {
     let t = this;
     for (let i = 0; i < t.m68kwbBreakpts.length; i++) {
@@ -419,6 +500,7 @@
         }
       }
     }
+    t.breakPointsToApply = [];
   }
 
   addBreakpoints(breakpoints) {
@@ -439,23 +521,28 @@
     switch (msg.cmd) {
       case 'load':
         t.emulatorLoad(msg.program);
-        break;
+      break;
       case 'setBreakpoints':
         t.delteBreakpoints(t.breakpoints);
         t.breakpoints.set(t.normalizePath(msg.file), new Set(msg.lines));
         t.addBreakpoints(t.breakpoints);
+        if (t.ready)
+          t.applyBreakpoints();
         t.printLog(`  breakpoints for ${t.normalizePath(msg.file)}: [${msg.lines.join(', ')}]`);
-        break;
+      break;
       case 'continue':
-        t.emulatorRunUntilBreakOrEnd();
-        break;
+        t.emulatorContinue();
+      break;
       case 'stepOver':
       case 'stepIn':
         t.emulatorStepOne();
-        break;
+      break;
       case 'pause':
         t.reportStopped(t.currentFile, t.currentLine, 'pause');
-        break;
+      break;
+      case 'stop':
+        window.location.reload();
+      break;            
     }
   }
 
@@ -518,6 +605,7 @@
   disconnect() {
     let t = this;
     t.manualDisconnect = true;
+    t.stopped = false;
     t.ws.close();
   }
 }
