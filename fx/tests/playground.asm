@@ -1,10 +1,8 @@
 init:
-  IFD TOTO
-  nop
-  ;>JS alert("nope")
-  ENDC
+  moveq #0,d0
   rts
 
 update:
-  NOP
+  addq.l #1,d0
+  ;>JS ShowDebugLog("d0: " + regs.d[0]); 
   rts

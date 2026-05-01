@@ -351,7 +351,12 @@ function findFxIndexFromName(_name) {
 }
 
 function onFxChosen() {
-  if (document.getElementById("searchfx").value.toUpperCase() == "CHAIN") {
+  let isChain = false;
+  if (TEST_CONFIG && TEST_CONFIG.RUN_CHAIN)
+    isChain = true;
+  if (document.getElementById("searchfx").value.toUpperCase() == "CHAIN")
+    isChain = true;
+  if (isChain) {
     localStorage.setItem(LOCALSTORAGE_CHAININDEX, 1);
     window.location.reload(true);
   }
@@ -411,6 +416,11 @@ function updateFxList() {
 
 
 function main_onload() {
+  if (TEST_CONFIG && TEST_CONFIG.RUN_CHAIN) {
+    VSCODE_CONFIG.AUTO_CONNECT = false;
+    pluginInterfaceSingleton = null;
+  }
+
   if (VSCODE_CONFIG.AUTO_CONNECT) {
     ShowDebugLog("<b>VSCode Extension mode</b><br>Start debugging a .js, .s or .asm file<br>or set VSCODE_CONFIG.AUTO_CONNECT to false in <i>config.js</i> to exit that mode.");
     if (pluginInterfaceSingleton == null) new PluginInterface();
@@ -485,6 +495,10 @@ function setNewwindowSize(width) {
   let elm3 = document.getElementById("smallrender");
   let elm4 = document.getElementById("layoutlab");
   let elm5 = document.getElementById("layout");
+  let elm6 = document.getElementById("outpuResolution"); // zoom slider
+  let elm7 = document.getElementById("zoomLabel"); // zoom label
+  
+  
   
   if (width > DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE) {
     elm1.className = "col_8 column";
@@ -492,16 +506,21 @@ function setNewwindowSize(width) {
     elm3.style.visibility = "visible";
     elm4.style.visibility = "visible";
     elm5.style.visibility = "visible";
+    elm6.style.visibility = "visible";
+    elm7.style.visibility = "visible";
+    // update width for canvas rendering
+    width = Math.floor(width * document.getElementById("outpuResolution").value / 300);
+    width = Math.min(width, DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE);
   } else {
     elm1.className = "col_12 column";
     elm2.className = "col_12 column";
     elm3.style.visibility = "hidden";
     elm4.style.visibility = "hidden";
     elm5.style.visibility = "hidden";
+    elm6.style.visibility = "hidden";
+    elm7.style.visibility = "hidden";
   }
     
-    if (width > DEBUGGER_CONFIG.MAX_PREVIEW_AUOTOSCALE)
-      return;
     switch (FX_INFO.platform) {
       case "OCS":
         width -= 40; // screen bitmap borders

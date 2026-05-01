@@ -96,8 +96,9 @@
     <canvas id="backBuffer" width="483" height="470" style="display:none;"></canvas>
     <br>
     <!-- <button onclick="if (play) play=false; else play = true;">></button> -->
-    Zoom: <input type="range" min="100" max="200" value="100" class="slider" id="outpuResolution"
-      onChange="onNewOutputResolution();" onInput="onNewOutputResolution();">
+    <label for="outpuResolution" id="zoomLabel">Zoom:</label>
+    <input type="range" min="100" max="200" value="100" class="slider" id="outpuResolution"
+      onChange="onNewOutputResolution();" onInput="onNewOutputResolution();"><br>
     Speed: <input type="range" min="0" max="100" value="100" class="slider" id="runningSpeed"
       onChange="onNewRunningSpeed();" onInput="onNewRunningSpeed();">
     <br>

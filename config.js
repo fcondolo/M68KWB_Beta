@@ -175,9 +175,17 @@ const STE_CONFIG = {
 const VSCODE_CONFIG = {
     // if true, will connect to the VSCode plugin's debuger
     // if false, will run in standalone mode without counting on vscode for debugging
-    AUTO_CONNECT    : true,
+    AUTO_CONNECT    : false,
     // if true, will keep the focus on the render window
     // if false, will scroll to show the current instruction whie debugging
     RENDER_FOCUS    : true,
-    URL             : 'ws://localhost:9229'
+    URL             : 'ws://localhost:9229',
+}
+
+// -----------------------------------------------------------------------
+// ------------------------------ DEV SETTINGS ---------------------------
+// -----------------------------------------------------------------------
+// Used only by Soundy for temp tests, you don't need that
+const TEST_CONFIG = {
+    RUN_CHAIN    : false,
 }
