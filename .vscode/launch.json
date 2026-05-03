@@ -1,0 +1,12 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "m68k",
+      "request": "launch",
+      "name": "Debug current M68K file",
+      "program": "${file}",
+      "stopOnEntry": false
+    }
+  ]
+}
