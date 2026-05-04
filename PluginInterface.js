@@ -8,7 +8,7 @@
     }
     pluginInterfaceSingleton = this;
     let t = this;
-    t.ROOTFOLDER = "m68kwb_beta";
+    t.ROOTFOLDER = VSCODE_CONFIG.ROOT_FOLDER;
     t.ws = null;
     t.breakpoints = new Map();   // file → Set<number>
     t.currentFile = '';
@@ -37,6 +37,7 @@
 
 
   normalizePath(p) {
+    let t = this;
     if (!p) {
       alert("PluginInterface: can't normalize null path");
       debugger;
@@ -46,6 +47,7 @@
   }
 
   getLocalPath(_fullPath, _startFolder) {
+    let t = this;
     if (!_fullPath) {
       alert("PluginInterface: getLocalPath : null _fullPath");
       debugger;
@@ -83,6 +85,7 @@
   }
 
   getFileName(_path) {
+    let t = this;
     if (!_path) {
       alert("PluginInterface: getFileName : null _path");
       debugger;
@@ -93,6 +96,7 @@
   }
 
   getDirectoryPath(_path) {
+    let t = this;
     // Normalize slashes to forward slashes
     const normalizedPath = _path.replace(/\\/g, '/');
     
@@ -109,6 +113,7 @@
     // Called by the main loop when it pauses; returns a promise
   // that resolves when the user clicks Continue or Step.
   waitForResume() {
+    let t = this;
     // If a previous resume is still pending, return it. Otherwise create a new one.
     if (!this._waitForResume) {
       this._waitForResume = new Promise(resolve => {
@@ -121,6 +126,7 @@
 
   // Called by the bridge's onContinue / onStep handlers
   _resume(mode) {
+    let t = this;
     if (this._resumeResolve) {
       const resolve = this._resumeResolve;
       this._waitForResume = null;
@@ -130,6 +136,7 @@
   }
 
   findExactSameFX(_path, _ext) {
+    let t = this;
     for (let i = 0; i < user_fx.length; i++) {
       const fx = user_fx[i];
       let src ;
@@ -154,6 +161,7 @@
   }
 
   findAllFXInThisFolder(folder) {
+    let t = this;
     let ret = [];
     for (let i = 0; i < user_fx.length; i++) {
       let p  = user_fx[i].rootPath;

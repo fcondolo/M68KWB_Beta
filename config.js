@@ -180,6 +180,8 @@ const VSCODE_CONFIG = {
     // if false, will scroll to show the current instruction whie debugging
     RENDER_FOCUS    : true,
     URL             : 'ws://localhost:9229',
+    // changing this one can make some fx become not debuggable
+    ROOT_FOLDER     : "m68kwb_beta"    
 }
 
 // -----------------------------------------------------------------------
