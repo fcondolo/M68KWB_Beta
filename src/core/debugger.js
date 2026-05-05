@@ -1066,6 +1066,7 @@ function DEBUGGER_BeforeInstr() {
       DEBUGGER_update(true);
       DEBUGGER_canStep = false;
       DEBUGGER_dumpRegistersValues();
+      Plugin_GotoCurIP('step',"");
     }
   }
   if (DEBUGGER_runTillIP) {

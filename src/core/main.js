@@ -416,6 +416,12 @@ function updateFxList() {
 
 
 function main_onload() {
+  window.addEventListener('beforeunload', () => {
+    if (pluginInterfaceSingleton) {
+      pluginInterfaceSingleton.reportTerminated();
+    }
+  });
+
   if (TEST_CONFIG && TEST_CONFIG.RUN_CHAIN) {
     VSCODE_CONFIG.AUTO_CONNECT = false;
     pluginInterfaceSingleton = null;

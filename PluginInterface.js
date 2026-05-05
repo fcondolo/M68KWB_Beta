@@ -135,6 +135,11 @@
     }
   }
 
+  reportTerminated() {
+    let t = this;
+    t.send({ event: 'terminated' });
+  }
+
   findExactSameFX(_path, _ext) {
     let t = this;
     for (let i = 0; i < user_fx.length; i++) {
@@ -533,12 +538,36 @@
     }
   }
 
+emulatorStepBack() {
+  WAITING_USERINPUT = false;
+  if (TIME_MACHINE)
+    TIME_MACHINE.traceBackwards();
+}
+
+emulatorReverseContinue() {
+  WAITING_USERINPUT = false;
+  if (TIME_MACHINE)
+    TIME_MACHINE.traceForwards();
+}
+
+emulatorStepOut() {
+  WAITING_USERINPUT = false;
+  DEBUGGER_skipNextBP = M68K_IP;
+  DEBUGGER_traceTillRTS = true;
+  DEBUGGER_canStep = true;
+  setTraceMode(false);
+  this.mode = 'running';
+}
+
   handleCommand(msg) {
     let t = this;
     t.printLog(`<< ${msg.cmd}`);
     switch (msg.cmd) {
       case 'load':
         t.emulatorLoad(msg.program);
+      break;
+      case 'stepOut':
+        t.emulatorStepOut();
       break;
       case 'setBreakpoints':
         t.delteBreakpoints(t.breakpoints);
@@ -561,6 +590,46 @@
       case 'stop':
         window.location.reload();
       break;            
+      case 'readMemory': {
+        const bytes = [];
+        let adrs = msg.addr;
+        for (let i = 0; i < msg.count; i++, adrs++) {
+          let v = 0;
+          if (CPU_isCustomAdrs(adrs))
+            v = CPU_getCustom_B(adrs - CPU_CUSTOM_START);
+          else
+            v = MACHINE.ram[adrs];
+          bytes.push(v ?? 0);
+        }
+        this.send({
+          event: 'reply',
+          requestId: msg.requestId,
+          bytes,
+        });
+        break;
+      }
+
+      case 'stepBack':
+        this.emulatorStepBack();
+        break;
+      case 'reverseContinue':
+        this.emulatorReverseContinue();
+        break;
+
+      case 'writeMemory': {
+        let adrs = msg.addr;
+        for (let i = 0; i < msg.bytes.length; i++, adrs++) {
+          if (CPU_isCustomAdrs(adrs))
+            CPU_setCustom_B(adrs - CPU_CUSTOM_START, msg.bytes[i]);
+          else
+            MACHINE.ram[adrs] =  msg.bytes[i];
+        }
+        this.send({
+          event: 'reply',
+          requestId: msg.requestId,
+        });
+        break;
+      }
     }
   }
 
