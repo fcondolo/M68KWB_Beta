@@ -102,6 +102,9 @@
     Speed: <input type="range" min="0" max="100" value="100" class="slider" id="runningSpeed"
       onChange="onNewRunningSpeed();" onInput="onNewRunningSpeed();">
     <br>
+    <button title="Time machine:  back" class="inset" onclick="TIME_MACHINE.traceBackwards();"><-<i class="fa fa-clock-o"></i></button>
+    <button title="Time machine: forward" class="inset" onclick="TIME_MACHINE.traceForwards();">-><i class="fa fa-clock-o"></i></button>
+    <br>
     <div style="color: #ff00ff;" id="errors" class="col_12"></div>
     <div class="col_12">
       <br>Jump to label (autocomplete): <input class="autocomplete" type="text" id="filterLabel" name="filterLabel" size="30"><br>
