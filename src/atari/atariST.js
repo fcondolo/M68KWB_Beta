@@ -467,6 +467,11 @@ function ST_isCustomAdrs(_p) {
     // blitter
     if ((_p >= 0xff8a28) && (_p <= 0xff8a28+24))
 		return true;
+    switch (_p) {
+        case 0x70 : return true; //VBL
+        case 0x120 : return true; //HBL
+        default: return false;
+    }
 	return false;
 }
 

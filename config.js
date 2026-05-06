@@ -125,7 +125,11 @@ let CPU_CONFIG = {
     // From JS code:
     // CPU_CONFIG.watchdog_maxInstr = 0;
     // Setting this param to 0 disables the watchdog feature
-    watchdog_maxInstr : 400000
+    watchdog_maxInstr : 400000,
+    // if true, will forbid writing outside of fx data or custom regs
+    auto_write_protect : true,
+    // if true, will forbid reading outside of fx data or custom regs
+    auto_read_protect : true
 }
 
 // -----------------------------------------------------------------------

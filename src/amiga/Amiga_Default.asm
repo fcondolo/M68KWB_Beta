@@ -1,4 +1,7 @@
 M68KWB_TargetPlatformInit:
+    ;>JS MACHINE.pauseMemCheck();
+    ; ...
+    ;>JS MACHINE.unpauseMemCheck();
     rts
 
 M68KWB_defaultMainLoop:

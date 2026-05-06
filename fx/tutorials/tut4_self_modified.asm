@@ -29,7 +29,7 @@ init:
        move.w        d6,d5
        lea           auto_begin,a1
 .autogen_copy:
-       move.w        (a1)+,(a0)+
+       move.w        (a1)+,(a0)+        ; M68KWB_NOERROR ==> read & write code section, avaoid warnings
        dbra          d5,.autogen_copy
        dbra          d7,.autogen_iter
 .modify_me:       

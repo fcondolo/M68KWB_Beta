@@ -43,6 +43,14 @@ class M68K_Machine {
         t.bitplaneWeight = [1, 1, 1, 1, 1, 1]; // for debug purposes only. Used to switch on/off bitplanes
         DEBUGGER_AllocsList.push({ label: "Total RAM size", adrs: 0, size: _ramSize });
         t.ramIndex      = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES; // current alloc pointer (below = already allocated mem, above = free ram)
+        if (CPU_CONFIG.auto_write_protect) {
+            CPU_DBG_WRITE_ALLOW_START = t.ramIndex;
+            CPU_DBG_WRITE_ALLOW_END = 9999999;
+        }
+        if (CPU_CONFIG.auto_read_protect) {
+            CPU_DBG_READ_ALLOW_START = t.ramIndex;
+            CPU_DBG_READ_ALLOW_END = 9999999;
+        }
         CPU_CODE_SECTION= t.ram;
         t.allowBlitter = true;
         t.allowBlitterClearOnly = false;
@@ -139,6 +147,7 @@ class M68K_Machine {
             t.ramIndex++;
         let ret = t.ramIndex;
         t.ramIndex += _bytes;
+        CPU_DBG_WRITE_ALLOW_END = t.ramIndex;
         if (t.ramIndex >= t.ram.length) {
             main_Alert("No more RAM! Can't allocate " + _bytes + " bytes.");
             debugger;
@@ -338,11 +347,13 @@ class M68K_Machine {
                     if (_v == regs.a[7] && M68K_CURLINE.isBranchInstr) {
                         // allowed
                     } else if (_v != regs.a[7]) { // movem to stack
-                        let msg = "reading  outside of CPU_DBG_READ_ALLOW_START and CPU_DBG_READ_ALLOW_END ";
-                        msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_READ_ALLOW_START, CPU_DBG_READ_ALLOW_END);
-                        debug(msg, true);
-                        t.stop = true;
-                        return false;
+                        if (!CPU_isCustomAdrs(_v)) {
+                            let msg = "reading  outside of CPU_DBG_READ_ALLOW_START and CPU_DBG_READ_ALLOW_END ";
+                            msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_READ_ALLOW_START, CPU_DBG_READ_ALLOW_END);
+                            debug(msg, true);
+                            t.stop = true;
+                            return false;
+                        }
                     }
                 }    
             }
@@ -356,10 +367,10 @@ class M68K_Machine {
         DBGVAR.memchk2 = CPU_DBG_WRITE_ALLOW_END;
         DBGVAR.memchk3 = CPU_DBG_READ_ALLOW_START;
         DBGVAR.memchk4 = CPU_DBG_READ_ALLOW_END;
-    	CPU_DBG_WRITE_ALLOW_START = -1;
-        CPU_DBG_WRITE_ALLOW_END = -1;
-        CPU_DBG_READ_ALLOW_START = -1;
-        CPU_DBG_READ_ALLOW_END = -1;
+    	CPU_DBG_WRITE_ALLOW_START = 0;
+        CPU_DBG_WRITE_ALLOW_END = 9999999;
+        CPU_DBG_READ_ALLOW_START = 0;
+        CPU_DBG_READ_ALLOW_END = 9999999;
     }
 
     unpauseMemCheck() {

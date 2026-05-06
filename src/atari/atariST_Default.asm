@@ -1,4 +1,5 @@
 M68KWB_TargetPlatformInit:
+    ;>JS MACHINE.pauseMemCheck();
     clr.b       $fffffa07           ; Clear Interrupt Enable for MFP's Timer A and Timer B
     clr.b       $fffffa13           ; Clear Interrupt Mask for MFP's Timer A and Timer B
     clr.b       $fffffa09           ; Clear Interrupt Enable for MFP's Timer C and Timer D
@@ -11,6 +12,7 @@ M68KWB_TargetPlatformInit:
     move.l #M68KWB_defaultRTE,$114  ; MFP's Timer C
     move.l #M68KWB_defaultRTE,$110  ; MFP's Timer D
     move.l #M68KWB_defaultRTE,$118  ; ACIA
+    ;>JS MACHINE.unpauseMemCheck();
     rts
 
 M68KWB_defaultRTE:

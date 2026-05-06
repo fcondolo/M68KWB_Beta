@@ -98,6 +98,7 @@ function AMIGA_cls() {
     MACHINE.ram.fill(0, bpl, bpl + AMIGA_CURHELPER.bplSize * AMIGA_CURHELPER.bplCount);
 }
 
+
     /**
     AMIGA_GetScreenHelper(_params)
     input _params = {
@@ -135,7 +136,7 @@ function AMIGA_cls() {
             _params.alloc *= 2;
         }
         _params.bitplanes = MACHINE.allocRAM(_params.alloc, 2, 'AMIGA_GetScreenHelper: bitplanes');
-        AMIGA_updateScreenHelper(_params);
+        
     
         // default values for 320x180
         let diwStart = 0x4c81;
@@ -193,6 +194,7 @@ function AMIGA_cls() {
         w = MACHINE.setRAMValue(0xfffffffe, w, 4);
         // set copperlist
         AMIGA_setCustom_L(COP1LCH,_params.copperList);
+        AMIGA_updateScreenHelper(_params);
         console.log("starting Amiga helper, bitplanes at $" + _params.bitplanes.toString(16) + ", copperlist at $" + _params.copperList.toString(16));
     
         _params.update = AMIGA_updateScreenHelper;
