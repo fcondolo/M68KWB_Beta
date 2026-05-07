@@ -221,7 +221,7 @@
         foundName = sameFolder[0].fxName;
         diagnosis += "\nExact same file not found in user_fx.js but found 1 FX in the same folder: " + foundName; 
       } else if (sameFolder.length == 0) {
-        diagnosis += "\nExact same file not found in user_fx.js, and no FX in the same folder"; 
+        diagnosis += "\nExact same file not found in user_fx.js, and no FX declared '" + folder + "' as its 'rootPath' property"; 
       } else {
         diagnosis += "\nExact same file not found in user_fx.js, but multiple FX were found in the same folder"; 
       }
