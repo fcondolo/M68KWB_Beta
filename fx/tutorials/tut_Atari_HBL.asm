@@ -16,7 +16,7 @@ start:
 
     ; insall timer b
     clr.b   $fffffa1b                ; disable timer b
-    move.l  #timer_b,$120           ; move in my timer b address
+    move.l  #timer_b,$120           ; M68KWB_NOERROR move in my timer b address
     bset    #0,$fffffa07            ; turn on timer b in enable a
     bset    #0,$fffffa13            ; turn on timer b in mask a
     move.b  #1,$fffffa21            ; number of counts, every scan line

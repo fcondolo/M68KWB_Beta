@@ -268,11 +268,11 @@
 
   emulatorContinue() {
     let t = this;
+    t.stopped = false;
     if (!t.ready) {
       t.callsWhenReady.push('emulatorContinue');
       return;
     } 
-    t.stopped = false;
     DEBUGGER_run();
     WAITING_USERINPUT = false;
     t._resume('continue');
@@ -280,9 +280,9 @@
 
   emulatorStepOne() {
     let t = this;
+    t.stopped = false;
     if (!t.ready) 
       return;
-    t.stopped = false;
     DEBUGGER_traceOneInstr();
     WAITING_USERINPUT = false;
     t._resume('step');

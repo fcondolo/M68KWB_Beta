@@ -271,7 +271,7 @@ class M68K_Machine {
             }
         }
         if (_f == ALLOW_WRITE) {
-            if (!CPU_isCustomAdrs(_v)) {
+            if (!CPU_isCustomAdrs(_v) && !CPU_isVectorAdrs(_v)) {
                 let msg = null;
                 if ((_v + _s) > CPU_DBG_WRITE_FORBID_START && _v < CPU_DBG_WRITE_FORBID_END) {
                     msg = "Writing in forbidden zone at address  = $" + _v.toString(16);
@@ -347,7 +347,7 @@ class M68K_Machine {
                     if (_v == regs.a[7] && M68K_CURLINE.isBranchInstr) {
                         // allowed
                     } else if (_v != regs.a[7]) { // movem to stack
-                        if (!CPU_isCustomAdrs(_v)) {
+                        if (!CPU_isCustomAdrs(_v) && !CPU_isVectorAdrs(_v)) {
                             let msg = "reading  outside of CPU_DBG_READ_ALLOW_START and CPU_DBG_READ_ALLOW_END ";
                             msg += t.getOutsideBoundaryDebugString(_v, _s, _f, CPU_DBG_READ_ALLOW_START, CPU_DBG_READ_ALLOW_END);
                             debug(msg, true);

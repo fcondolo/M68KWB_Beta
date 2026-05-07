@@ -226,6 +226,7 @@ function AMIGA_cls() {
     
         AMIGA_started = true;
         CPU_isCustomAdrs    = custom_isCustomAdrs;
+        CPU_isVectorAdrs    = AMIGA_isVectorAdrs;
         CPU_setCustom_B     = AMIGA_setCustom;
         CPU_setCustom_W     = AMIGA_setCustom;
         CPU_setCustom_L     = AMIGA_setCustom_L;
@@ -249,6 +250,8 @@ function AMIGA_cls() {
         MACHINE.OnVectorWritten = AMIGA_OnVectorWritten;
         AMIGA_BLITTER = new SAEO_Blitter();
         AMIGA_BLITTER.setup();
+
+        MACHINE.sprites = new AMIGA_Sprites();
     }
     
     function AMIGA_OnVectorWritten(_v, _at, _size) {
@@ -260,6 +263,12 @@ function AMIGA_cls() {
     }
     
     
+    function AMIGA_isVectorAdrs(_p) {
+        switch (_p) {
+            case 0x6c: return true;
+            default: return false;
+        }
+    }
     
     function getLabelFromName(_l) {
         const l = CODERPARSER_SINGLETON.labels.length;

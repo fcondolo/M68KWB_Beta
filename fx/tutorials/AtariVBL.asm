@@ -19,7 +19,7 @@ FX_INIT:
 
        ; INSTALL THE VBL INTERRUPT
        move          #$2700,sr
-	move.l 	#myVBL,$70.w
+	move.l 	#myVBL,$70.w      ; M68KWB_NOERROR 
 	move    	#$2300,sr
        rts
 

@@ -161,6 +161,7 @@ function bitplanes_update() {
 	// DRAW PLAYFIELDS
 	let bplY = 0;
 	for (;bplY < PLAYFIELD_LINES_COUNT; bplY++, rasterY++, remainingLines--) {
+		MACHINE.sprites.onNewLine(bplY);
 		let bplReadX = 0;
 		for (let rasterX = 0; rasterX < SIMU_DEFAULT_WIDTH; rasterX++, copperExecMove--) {
 			let xmsk;
@@ -169,6 +170,7 @@ function bitplanes_update() {
 				if (copper_processOneInstr(rasterX, rasterY))
 					bitplanes_updateAllValues(); // in case the just executed copper instruction modified some HW register
 			}
+			MACHINE.sprites.onNewRasterPos(rasterX, rasterY);
 			if (!DMA_Bitplane) {
 				d += 4;
 				continue;

@@ -491,7 +491,8 @@ class CodeParser {
         str += '\n' + t.errors[i];
       }
       hideModalBox();
-      main_Alert("Errors while assembling:" + str);
+      if (!pluginInterfaceSingleton)
+        main_Alert("Errors while assembling:" + str);
       return false;
     }
     // rewind line interpretation values
@@ -951,7 +952,7 @@ class CodeParser {
         for (let i = 0; i < m.lines.length; i++) {
           let l = m.lines[i].clone();
             l.isMacroDef = false;
-          l.fromMacro = {name: wrd, fileLine: ln.getFileLineStr()};
+          l.fromMacro = {name: wrd, fileLine: ln.getFileLineStr(), ln:ln};
           for (let j = 0; j < args.length; j++) {
             l.text = l.text.replaceAll('\\' + (j + 1).toString(), args[j]);
             l.filtered = l.filtered.replaceAll('\\' + (j + 1).toString(), args[j]);

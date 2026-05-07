@@ -929,8 +929,10 @@ function main_onFXJSLoaded() {
 
     let cp = new CodeParser();
     if (!cp.ascii68k_loadfile(finalPath)) {
-      if (MAIN_ALERTS_LIST.length == 0)
-        main_Alert("could not load/process asm file: " + finalPath);
+      if (MAIN_ALERTS_LIST.length == 0) {
+        if (!pluginInterfaceSingleton || (!pluginInterfaceSingleton.stopped))
+          main_Alert("could not load/process asm file: " + finalPath);
+      }
       return failedStartingFX();
     }
   }

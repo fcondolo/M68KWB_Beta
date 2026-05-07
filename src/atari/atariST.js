@@ -122,6 +122,7 @@ function Atari_Common_Start(_ramSize, _stackSize) {
 
     ST_started = true;
     CPU_isCustomAdrs    = ST_isCustomAdrs;
+    CPU_isVectorAdrs    = ST_isVectorAdrs;
     CPU_setCustom_B     = ST_setCustom_B;
     CPU_setCustom_W     = ST_setCustom_W;
     CPU_setCustom_L     = ST_setCustom_L;
@@ -467,12 +468,28 @@ function ST_isCustomAdrs(_p) {
     // blitter
     if ((_p >= 0xff8a28) && (_p <= 0xff8a28+24))
 		return true;
-    switch (_p) {
-        case 0x70 : return true; //VBL
-        case 0x120 : return true; //HBL
-        default: return false;
-    }
 	return false;
+}
+
+function ST_isVectorAdrs(_p) {
+    switch (_p) {
+        case 0x68 : 
+        return true;  // HBL
+        case 0x70 : 
+        return true;  // VBL
+        case 0x110 : 
+        return true; // MFP's Timer D
+        case 0x114 : 
+        return true; // MFP's Timer C
+        case 0x118 : 
+        return true; // ACIA
+        case 0x120 : 
+        return true; // HBL - MFP's Timer B
+        case 0x134 : 
+        return true; // MFP's Timer Q
+        default: 
+        return false;
+    }
 }
 
 // OUT: regs.a[0] ==> backbuffer (to draw in)

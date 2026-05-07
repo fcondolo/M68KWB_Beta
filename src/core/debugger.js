@@ -560,11 +560,7 @@ function checkKeyDOWN(e) { // https://css-tricks.com/snippets/javascript/javascr
     break;
     case 90: // z
     if (DEBUGGER_SHIFT_PRESSED) { // zap
-      console.log("ZAPPING...");
-      let curFx = localStorage.getItem(LOCALSTORAGE_FX_NAME);
-      localStorage.clear();
-      localStorage.setItem(LOCALSTORAGE_FX_PREV, curFx);
-      window.location.reload();
+      DEBUGGER_zap();
     }
     break;
     default:
@@ -889,7 +885,7 @@ function DEBUGGER_showContext() {
       const lineIndex = ASMBL_ADRSTOLINE[adrs];
       if (lineIndex !== null) {
         line = PARSER_lines[lineIndex-1];
-        if (line && (M68K_INTERRUPT_STATE!= null) && (adrs == M68K_INTERRUPT_FROM)) {
+        if (line && (M68K_INTERRUPT_STATE!= null)) {
           msg += "<td>" + line.filtered + " a " + M68K_INTERRUPT_STATE + " interrupt was triggered here</td><td>" + line.getFileLineStr() + "</td>";
         }
         else {
@@ -2253,6 +2249,16 @@ function DBG_setDumpReg(_name) {
   DEBUGGER_update();
 }
 
+ function DEBUGGER_zap(_nextFxName = null) {
+    console.log("ZAPPING...");
+    let curFx = localStorage.getItem(LOCALSTORAGE_FX_NAME);
+    localStorage.clear();
+    localStorage.setItem(LOCALSTORAGE_FX_PREV, curFx);
+    if (_nextFxName) {
+      localStorage.setItem(LOCALSTORAGE_FX_NAME, _nextFxName);
+    }
+    window.location.reload();
+ }
 
 // AUTOCOMPLETE
 function autocomplete(inp, arr) {

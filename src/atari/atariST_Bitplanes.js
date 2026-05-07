@@ -160,7 +160,7 @@ function ST_bitplanes_update() {
     if (ST_MODEL == ATARI_MODEL_ST)
 		ST_PHYSICAL_SCREEN &= ~255;	// aligned on 256 on ST (ignore STE_SCREEN_LOW's value)
     else if (ST_MODEL == ATARI_MODEL_STE && STE_CONFIG.CHECK_VIDEO_BASE_ADRS)
-		if (!(ST_PHYSICAL_SCREEN%2 == 0)) main_Alert("video base is set to an odd address, please update 0xff820d, or set STE_CONFIG.CHECK_VIDEO_BASE_ADRS to false");
+		if (!(ST_PHYSICAL_SCREEN%2 == 0)) debug("video base is set to an odd address, please update 0xff820d, or set STE_CONFIG.CHECK_VIDEO_BASE_ADRS to false");
 
 	ST_PHYSICAL_SCREEN &= ~1; // lowest bit always assumed as 0, even on STe
 	

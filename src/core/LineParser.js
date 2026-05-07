@@ -257,11 +257,20 @@ class LineParser {
       CODERPARSER_SINGLETON.push_error(t.getFileLineStr() + " :<br>" + _err + "<br>" + t.filtered + "<br>");
     CODERPARSER_SINGLETON.Error(t.getFileLineStr() + " :<br>" + _err + "<br>" + t.filtered + "<br>");
     if (pluginInterfaceSingleton) {
+      let file, line;
       if (t.path) {
-        let file = t.path;
-        let line = t.line;
-        pluginInterfaceSingleton.reportStopped(file, line+1, 'exception', _err, _err);
+        file = t.path;
+        line = t.line;
       }
+      if (t.fromMacro) {
+        if (file && line) {
+          _err += "\nmacro included by:\n" + file;
+        }
+        file = t.fromMacro.ln.path;
+        line = t.fromMacro.ln.line;
+      }
+      if (file && line)
+        pluginInterfaceSingleton.reportStopped(file, line+1, 'exception', _err, _err);
     } 
 
   }
