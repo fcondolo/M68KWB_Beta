@@ -21,6 +21,7 @@
     t._waitForResume = null;
     t._resumeResolve = null;
     t.ready = false;
+    t.stopReason = "";
   }
 
   printStatus(_msg) {
@@ -286,6 +287,11 @@
     DEBUGGER_traceOneInstr();
     WAITING_USERINPUT = false;
     t._resume('step');
+    let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
+    if (curLine && curLine.path) {
+      t.currentFile = pluginInterfaceSingleton.makeFullPath(curLine.path);
+      t.currentLine = curLine.line+1; // +1 because lines are 0-based
+    }
     t.reportStopped(t.currentFile, t.currentLine, 'step');
   }
 
@@ -397,7 +403,10 @@
 "instruction breakpoint" — Paused at an instruction-address breakpoint (disassembly view feature). Yellow arrow.    
     */
     let t = this;
+    if (t.stopped && t.stopReason == "exception" && reason == "step")
+      return;
     t.stopped = true;
+    t.stopReason = reason;
     file = t.makeFullPath(file);
     t.currentFile = file; // full path, normalized
     t.currentLine = line; // 1st line is 1, not 0
@@ -515,8 +524,9 @@
       let af = ALLLINES_FILES[file];
       if (af) {
         for (let j = 0; j < lines.length; j++) {
-          let ln = af[lines[j]-1];
+          let ln = af[lines[j]-1]; // -1 because lines are 0 based
           if (ln) {
+            debugger;
             ln.breakpoint = true;
             t.m68kwbBreakpts.push(ln);
           }
@@ -534,12 +544,37 @@
       const bp = bpt[i];
       const file = this.getFileName(bp[0]);
       const lines = Array.from(bp[1]);
-      t.breakPointsToApply.push({file:file, lines:lines});
+      debugger;
+      let filefound = false;
+      for (let j = 0; j < t.breakPointsToApply.length; j++) {
+        filefound = false;
+        if (t.breakPointsToApply[j].file == file) {
+          filefound = true;
+          if (t.breakPointsToApply[j].lines) {
+            for (let l = 0; l < lines.length; l++) {
+              let line = lines[l];
+              let found = false;
+              for (let k = 0; k < t.breakPointsToApply[j].lines.length; k++) {
+                if (t.breakPointsToApply[j].lines[k] == line) {
+                  found = true;
+                  break;
+                }
+              }
+            }
+          }
+          if (!found) {
+            t.breakPointsToApply[j].lines.push(line);
+          }
+        }
+      }
+      if (!filefound)
+        t.breakPointsToApply.push({file:file, lines:lines});
     }
   }
 
 emulatorStepBack() {
   WAITING_USERINPUT = false;
+  this.stopReason = "step";
   if (TIME_MACHINE)
     TIME_MACHINE.traceBackwards();
 }

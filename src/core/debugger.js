@@ -2168,7 +2168,7 @@ function Plugin_GotoCurIP(_reason, _msg) {
     let curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_IP]];
     if (curLine && curLine.path) {
       pluginInterfaceSingleton.currentFile = pluginInterfaceSingleton.makeFullPath(curLine.path);
-      pluginInterfaceSingleton.currentLine = curLine.line+1;
+      pluginInterfaceSingleton.currentLine = curLine.line+1; // +1 because lines are 0 based don't change that.
       pluginInterfaceSingleton.reportStopped(pluginInterfaceSingleton.currentFile, pluginInterfaceSingleton.currentLine,  _reason, _msg, _msg);
       return true;
     }
@@ -2209,7 +2209,7 @@ function debug(_alertMessage = null, _useContext = false) {
   DEBUGGER_update();
   DEBUGGER_dumpRegistersValues();
   DEBUGGER_HitBp(M68K_IP);
-  if (!Plugin_GotoCurIP('exception', msg)) { // don0t use 'breakpoint' instead of 'exception' otherwise no message will be shown
+  if (!Plugin_GotoCurIP('exception', msg)) { // don't use 'breakpoint' instead of 'exception' otherwise no message will be shown
     showModalBox("<b style='color:white;'>Breakpoint reached</b><br>"+msg,DEBUGGER_OnCloseBreakpointModal);
   }
   //msg = msg.replaceAll("\n","<br>");

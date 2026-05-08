@@ -170,6 +170,10 @@ function checkBitOp(_l, _i) {
 
 function assemble_group_0000(_l, w0, _out) {
     let ret = {op : 0, byteData:[]};
+    if (!_l.arg2) {
+        asmbl_syntaxError(_l," expecting 2 arguments, did you forget a comma ',' ?", []);
+        return null;
+    }
     if ((_l.arg1.str == "SR") || (_l.arg2.str == "SR"))
     {
         // SR ==> TRANSFORM TO NOP
