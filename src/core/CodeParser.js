@@ -509,12 +509,18 @@ class CodeParser {
     return this.rewind();
   }
 
-  Error(_str) {
+  Error(_str, _ln = null) {
     let t = this;
     if (t.lastPass) {
       t.push_error(_str);
       console.error(_str);
       t.stopGlobalCompilation = true;
+      if (pluginInterfaceSingleton) {
+        if (_ln)
+          pluginInterfaceSingleton.reportStopped(_ln.path, _ln.line+1, 'exception', _str, _str);
+        else
+          alert(_str);
+      }
     } else {
       console.log("temporary error, will try to fix in another pass: " + _str);
     }
@@ -623,7 +629,7 @@ class CodeParser {
         console.warn(str);
         showHTMLError(str);
         CODERPARSER_SINGLETON.push_error(str);
-        CODERPARSER_SINGLETON.Error(str);
+        CODERPARSER_SINGLETON.Error(str,ln);
         return false;  
       }
     }
@@ -636,7 +642,7 @@ class CodeParser {
         return false;
       } else {
         CODERPARSER_SINGLETON.push_error("failed loading " + finalPath);
-        CODERPARSER_SINGLETON.Error("failed loading " + finalPath);
+        CODERPARSER_SINGLETON.Error("failed loading " + finalPath, ln);
         return false;  
       }
     }

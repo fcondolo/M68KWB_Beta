@@ -544,7 +544,6 @@
       const bp = bpt[i];
       const file = this.getFileName(bp[0]);
       const lines = Array.from(bp[1]);
-      debugger;
       let filefound = false;
       for (let j = 0; j < t.breakPointsToApply.length; j++) {
         filefound = false;
