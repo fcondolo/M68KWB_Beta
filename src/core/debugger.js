@@ -2172,6 +2172,14 @@ function Plugin_GotoCurIP(_reason, _msg) {
       pluginInterfaceSingleton.reportStopped(pluginInterfaceSingleton.currentFile, pluginInterfaceSingleton.currentLine,  _reason, _msg, _msg);
       return true;
     }
+    // if not found, try prev IP (useful for pause)
+    curLine = PARSER_lines[ASMBL_ADRSTOLINE[M68K_PREVIP]];
+    if (curLine && curLine.path) {
+      pluginInterfaceSingleton.currentFile = pluginInterfaceSingleton.makeFullPath(curLine.path);
+      pluginInterfaceSingleton.currentLine = curLine.line+1; // +1 because lines are 0 based don't change that.
+      pluginInterfaceSingleton.reportStopped(pluginInterfaceSingleton.currentFile, pluginInterfaceSingleton.currentLine,  _reason, _msg, _msg);
+      return true;
+    }    
   } 
   return false;
 }

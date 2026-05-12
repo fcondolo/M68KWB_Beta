@@ -619,7 +619,8 @@ emulatorStepOut() {
         t.emulatorStepOne();
       break;
       case 'pause':
-        t.reportStopped(t.currentFile, t.currentLine, 'pause');
+        Plugin_GotoCurIP('pause');
+        debug();
       break;
       case 'stop':
         window.location.reload();
