@@ -1709,6 +1709,8 @@ function DEBUGGER_onTimeMachine() {
       cursorItem.classList.add('timeMachine_row');
   }        
   focusOnCodeLine(M68K_IP);
+  if (pluginInterfaceSingleton)
+    pluginInterfaceSingleton.stopReason = "step";
   Plugin_GotoCurIP('step',"");
 }
 

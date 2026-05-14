@@ -2351,7 +2351,7 @@ class CodeParser {
             line.isRegisterName(_label, 1) && 
             _label[3] == ',' && 
             line.isRegisterName(_label, 4) && 
-            _label[6] == ')'
+            ((_label[6] == ')') || (_label[6] == '.' && _label[7] == 'W' && _label[8] == ')'))
           ) {
             let rTab, rInd;
             if (_label[4] == 'A') rTab = regs.a; else rTab = regs.d;
