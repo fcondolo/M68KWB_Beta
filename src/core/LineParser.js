@@ -255,8 +255,8 @@ class LineParser {
     CODERPARSER_SINGLETON.stopGlobalCompilation = true;
     if (CODERPARSER_SINGLETON.errors.length == 0)
       CODERPARSER_SINGLETON.push_error(t.getFileLineStr() + " :<br>" + _err + "<br>" + t.filtered + "<br>");
-    CODERPARSER_SINGLETON.Error(t.getFileLineStr() + " :<br>" + _err + "<br>" + t.filtered + "<br>");
     if (pluginInterfaceSingleton) {
+      CODERPARSER_SINGLETON.stopGlobalCompilation = true;
       let file, line;
       if (t.path) {
         file = t.path;
@@ -272,7 +272,9 @@ class LineParser {
       if (file && line)
         pluginInterfaceSingleton.reportStopped(file, line+1, 'exception', _err, _err);
     } 
-
+    else {
+      CODERPARSER_SINGLETON.Error(t.getFileLineStr() + " :<br>" + _err + "<br>" + t.filtered + "<br>");
+    }
   }
 
   applyFailBhv(_failBhv, _err, _originalOfs) {

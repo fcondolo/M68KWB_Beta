@@ -1154,10 +1154,10 @@ class CodeParser {
           for (let cpy = 0; cpy < ln.DxArgs.length; cpy++) {
             const argVal = ln.DxArgs[cpy].v;
             if (isNaN(argVal))
-              ln.Failed("DS: can't calculate size to alloc, unsupported argument #" + (cpy+1));
+              return ln.Failed("DS: can't calculate size to alloc, unsupported argument #" + (cpy+1));
             else {
-              if (argVal < 0) ln.Failed("DS: can't calculate size to alloc, negative argument #" + (cpy+1));
-              if ((argVal == 0) && (!ASSEMBLER_CONFIG.allow_ds_0)) ln.Failed("DS: null size for argument #" + (cpy+1) + " (you can allow it in config.js, ASSEMBLER_CONFIG.allow_ds_0)");
+              if (argVal < 0) return ln.Failed("DS: can't calculate size to alloc, negative argument #" + (cpy+1));
+              if ((argVal == 0) && (!ASSEMBLER_CONFIG.allow_ds_0)) return ln.Failed("DS: null size for argument #" + (cpy+1) + " (you can allow it in config.js, ASSEMBLER_CONFIG.allow_ds_0)");
               amount += argVal;
             }
           }
@@ -1265,8 +1265,10 @@ class CodeParser {
               }
               else
                 val = ln.DxArgs[cpy].v;
-              if (val == null || isNaN(val))
+              if (val == null || isNaN(val)) {
                 ln.Failed("can't evaluate DC.x arg #" + (cpy+1));
+                return;
+              }
               else {
                 if ((!ln.hideDxArgsDbg) && (ln.DxArgs[cpy].dbg != undefined))
                   ln.filtered += " ($" + ln.DxArgs[cpy].dbg.toString(16) + ")"
@@ -1300,7 +1302,7 @@ class CodeParser {
           case 'B': ln.instrSize = 1; break;
           case 'W': ln.instrSize = 2; break;
           case 'L': ln.instrSize = 4; break;
-          default: ln.Failed("expected 'B', 'W' or 'L' after '.'"); break;
+          default: return ln.Failed("expected 'B', 'W' or 'L' after '.'"); break;
         }
         ln.isInstr = false;
         ln.ofs += 3;
@@ -1340,7 +1342,7 @@ class CodeParser {
           }
           if (!numberAdded) {
             if (t.lastPass)
-              ln.Failed("unknown number in dc.x/ds.x statement.");
+              return ln.Failed("unknown number in dc.x/ds.x statement.");
             else {
               finishLine = false;
               break;
@@ -1672,7 +1674,7 @@ class CodeParser {
             ln.ofs = 0;
             let name = ln.readNextWord();
             if (name == 'RS.B' || name == 'RS.W' || name == 'RS.L')
-              ln.Failed("'rs.x:' bad name. Please wirte rs.x label and value on the same line");
+              return ln.Failed("'rs.x:' bad name. Please write rs.x label and value on the same line");
             name = "";
             let ofs = 0;
             while (ln.text[ofs] == ' ' || ln.text[ofs] == '\t') ofs++;

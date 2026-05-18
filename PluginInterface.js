@@ -261,10 +261,21 @@
 
     let canLoad = false;
     if (foundName != null) canLoad = true;
+    let allgood = false;
     if (canLoad) {
       localStorage.setItem(LOCALSTORAGE_FX_NAME, foundName);
+      localStorage.setItem(LOCALSTORAGE_LAST_PLUGIN_FX_NAME, foundName);
       main_startChosenFx(foundName);
-    } else alert("The FX you want to debug must be declared in 'user_fx.js', and have a 'source' property.\n Currently trying to debug '" + programPath + "' but no matching entry could be found in 'user_fx.js'\nFull diagnosis of what happened:\n" + diagnosis);
+      allgood = true;
+    } else {
+      let prevName = localStorage.getItem(LOCALSTORAGE_LAST_PLUGIN_FX_NAME);
+      if (prevName) {
+        main_startChosenFx(prevName)
+        allgood = true;
+      }
+    }
+    if (!allgood)
+      alert("The FX you want to debug must be declared in 'user_fx.js', and have a 'source' property.\n Currently trying to debug '" + programPath + "' but no matching entry could be found in 'user_fx.js'\nFull diagnosis of what happened:\n" + diagnosis);
   }
 
   emulatorContinue() {
