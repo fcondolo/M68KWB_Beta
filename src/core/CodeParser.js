@@ -2081,8 +2081,21 @@ class CodeParser {
         if (_isArg1) {
           _l.updateImmunityflag();
           if ((_l.instr != "LEA") && (_l.arg2) && (!_l.isErrorImmune) && (isconst < M68K_VECTORS_ZONE_SIZE)) {
-            this.stopGlobalCompilation = true;
-            return _l.Failed("arg1 is an address, missing '#' ?. Add 'M68KWB_NOERROR' in this line's comments to disable this error");
+            let doError = true;
+            if (FX_INFO && FX_INFO.platform) {
+              switch (FX_INFO.platform) {
+                  case "OCS" : break;
+                  case "ST" : 
+                  case "STE" :
+                  if (ST_isVectorAdrs(isconst))
+                    doError = false;
+                  break;
+              }
+            }
+            if (doError) {
+              this.stopGlobalCompilation = true;
+              return _l.Failed("arg1 is an address, missing '#' ?. Add 'M68KWB_NOERROR' in this line's comments to disable this error");
+            }
           }
         }
         _arg.type = 'adrs';

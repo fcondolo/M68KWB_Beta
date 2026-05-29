@@ -580,12 +580,16 @@ function ST_CheckSoundStart(_index, _value) {
 
 
 function ST_setCustom_B(_index, _value) {
+ //   if (_index == ST_COLOR0-ST_CUSTOM_START)
+ //       debug("changing color0");
 	ST_customregs[_index] = _value;
     ST_CheckBlitterStart(_index, _value);
     ST_CheckSoundStart(_index, _value);
 }
 
 function ST_setCustom_W(_index, _value, _trigger = true) {
+ //   if (_index == ST_COLOR0-ST_CUSTOM_START)
+ //       debug("changing color0");
     const hi = (_value>>>8)&255;
     const lo = _value&255;
 	ST_customregs[_index] = hi;
@@ -600,6 +604,8 @@ function ST_setCustom_W(_index, _value, _trigger = true) {
 }
 
 function ST_setCustom_L(_index, _value) {
+//    if (_index == ST_COLOR0-ST_CUSTOM_START)
+//        debug("changing color0");
 	const v1 = (_value>>>24)&255;
 	const v2 = (_value>>>16)&255;
 	const v3 = (_value>>>8)&255;

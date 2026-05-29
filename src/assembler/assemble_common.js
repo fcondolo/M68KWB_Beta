@@ -32,7 +32,13 @@ function asmbl_error(_e) {
     he += "<br>" + ASSEMBLER_CONTEXT[i];
     ce += "\n" + ASSEMBLER_CONTEXT[i];
     CODERPARSER_SINGLETON.push_error(ASSEMBLER_CONTEXT[i]);
-    CODERPARSER_SINGLETON.stopGlobalCompilation = true;
+  }
+  CODERPARSER_SINGLETON.stopGlobalCompilation = true;
+  if (pluginInterfaceSingleton) {
+    if (ASSEMBLER_CURLINE)
+      pluginInterfaceSingleton.reportStopped(ASSEMBLER_CURLINE.path, ASSEMBLER_CURLINE.line+1, 'exception', ce, ce);
+    else
+      pluginInterfaceSingleton.reportStopped("", 1, 'exception', _e, _e);
   }
   CODERPARSER_SINGLETON.push_error(_e);
   console.error(ce);
@@ -185,6 +191,8 @@ function asmbl_isEffectiveAddress(_arg) {
             ret.byteData.push(0xef);
             ret.op =  _op | (OP_MODE_ABS_L << _sft);
         return ret;
+        default:
+        return asmbl_modeError("can't find argument type for arg: " + _arg.str);
     }
     return asmbl_modeError("illegal addressing mode");
   }

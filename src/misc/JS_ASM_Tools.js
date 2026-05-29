@@ -171,7 +171,17 @@ class JS_ASM_Tools {
               if (!isNaN(ofs)) return ofs;
             } else {
               debugger;
-              main_Alert("TOOLS.getLabelAdrs failed: label " + _label + " is not linked to dc.x data or not linked to code");
+              let done = false;
+              let msg = "TOOLS.getLabelAdrs failed: label " + _label + " is not linked to dc.x data or not linked to code";
+              if (pluginInterfaceSingleton) {
+                  if (Plugin_GotoCurIP('exception', msg)) { // don't use 'breakpoint' instead of 'exception' otherwise no message will be shown
+                    done = true;
+                  debug(msg);
+                  }
+              } 
+              if (!done) {
+                main_Alert(msg);
+              }
               return NaN;    
             }
           }
@@ -192,7 +202,17 @@ class JS_ASM_Tools {
             return NaN;
           } else {
             debugger;
-            main_Alert("TOOLS.getLabelAdrs failed: label " + _label + " is not linked to dc.x data or not linked to code");
+            let done = false;
+            let msg = "TOOLS.getLabelAdrs failed: label " + _label + " is not linked to dc.x data or not linked to code";
+            if (pluginInterfaceSingleton) {
+                if (Plugin_GotoCurIP('exception', msg)) { // don't use 'breakpoint' instead of 'exception' otherwise no message will be shown
+                  done = true;
+                  debug(msg);
+                }
+            } 
+            if (!done) {
+              main_Alert(msg);
+            }
             return NaN;
           }
         }
@@ -200,9 +220,18 @@ class JS_ASM_Tools {
     }
 
     if (!_canFail) {
-      let err = "TOOLS.getLabelAdrs failed: label " + _label + " not found.\n";
-        main_Alert(err);
+      let done = false;
+      let msg = "TOOLS.getLabelAdrs failed: label " + _label + " not found.\n";
+      if (pluginInterfaceSingleton) {
+          if (Plugin_GotoCurIP('exception', msg)) { // don't use 'breakpoint' instead of 'exception' otherwise no message will be shown
+            done = true;
+            debug(msg);
+          }
+      } 
+      if (!done) {
+        main_Alert(msg);
       }
+    }
     return NaN;
   }
 
