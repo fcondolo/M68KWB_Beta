@@ -537,7 +537,6 @@
         for (let j = 0; j < lines.length; j++) {
           let ln = af[lines[j]-1]; // -1 because lines are 0 based
           if (ln) {
-            debugger;
             ln.breakpoint = true;
             t.m68kwbBreakpts.push(ln);
           }
@@ -558,12 +557,13 @@
       let filefound = false;
       for (let j = 0; j < t.breakPointsToApply.length; j++) {
         filefound = false;
+        let found = false;
         if (t.breakPointsToApply[j].file == file) {
           filefound = true;
           if (t.breakPointsToApply[j].lines) {
             for (let l = 0; l < lines.length; l++) {
               let line = lines[l];
-              let found = false;
+              found = false;
               for (let k = 0; k < t.breakPointsToApply[j].lines.length; k++) {
                 if (t.breakPointsToApply[j].lines[k] == line) {
                   found = true;
@@ -696,7 +696,9 @@ emulatorStepOut() {
     };
     t.ws.onmessage = (ev) => {
       try { pluginInterfaceSingleton.handleCommand(JSON.parse(ev.data)); }
-      catch (err) { pluginInterfaceSingleton.printLog('Parse error: ' + err); }
+      catch (err) { 
+        pluginInterfaceSingleton.printLog('Parse error: ' + err); 
+      }
     };
     t.ws.onclose = () => {
       console.log('[bridge] closed, retrying in 1s');
