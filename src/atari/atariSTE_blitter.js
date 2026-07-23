@@ -396,9 +396,11 @@ function Blitter_Draw()
 
 function ATARI_bltStart() {
   if (!MACHINE.allowBlitter) {
-    MACHINE.errorContext.blitter = null;
-    ST_setCustomFromPtr_B(BLT_MISC_1, 0);
-    return;
+    if (!MACHINE.allowBlitterClearOnly) {
+      MACHINE.errorContext.blitter = null;
+      ST_setCustomFromPtr_B(BLT_MISC_1, 0);
+      return;
+    }
   }
 
   /* Half Tone Patterns 0..15 */

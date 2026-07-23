@@ -425,9 +425,9 @@ class M68K_Machine {
         r = r32[0]; 
         if (_signed) {
             switch (_size) {
-                case 1: if (r >= 128) r = r - 256; break;
-                case 2: if (r >= 32768) r = r - 65536; break;
-                case 4: if (r >= (1 << 31)) r = r - (1 << 32); break;
+                case 1: r = (r & 0x80) ? (r - 0x100) : r; break;
+                case 2: r = (r & 0x8000) ? (r - 0x10000) : r; break;
+                case 4: r = (r & 0x80000000) ? (r - 0x100000000) : r; break;
                 default: debugger; return NaN;
             }
         }

@@ -809,6 +809,7 @@ function showChunky(_srcAdrs,_w,_h) {
 
 var SCRIPT_LOG_MSG = [];
 function SCRIPT_LOG(_msg) {
+  /*
   let str = "";
   if (SCRIPT_LOG_MSG.length > 0) {
     SCRIPT_LOG_MSG.push(_msg);
@@ -822,6 +823,7 @@ function SCRIPT_LOG(_msg) {
     ShowDebugLog(_msg);
     MACHINE.errorContext.script = _msg;
   }
+  */
 }
 
 function SCRIPT_LOG_STARTLIST(_msg) {

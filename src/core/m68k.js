@@ -3032,6 +3032,13 @@ async function execCPU() {
         alert("open your browser's debugger cause we reached M68K_DEBUGNEXTLINE");
         debugger;
       }
+      if (!line.call) {
+        debug("CPU is lost! Executing unknown code, try using the time machine to understand what happened");
+        MACHINE.forceExitAsm = false;
+        LAST_GETARG = [];
+        LAST_SETARG = [];
+        return;
+      }
       const out = line.call(line);
       if (MACHINE.forceExitAsm) {
         MACHINE.forceExitAsm = false;
@@ -3144,7 +3151,7 @@ function invoke68K(_label, _trace) {
           return; // Already tracing this function. The main loop will call CPU update on this function, we're good
         }
       }  
-      //main_Alert("error: can't invoke68K '" + _label + "' while already executing '" + DEBUGGER_insideInvoke + "'. You probably need to use execution lists.");
+      main_Alert("error: can't invoke68K '" + _label + "' while already executing '" + DEBUGGER_insideInvoke + "'. asm invoking js invoking asm is not supported");
       return;
     }
     M68K_IP = CODERPARSER_SINGLETON.getLabelCodeSectionOffset(_label);
@@ -3170,3 +3177,39 @@ function invoke68K(_label, _trace) {
 }
 
 
+function M68K_singleLine(ascii) {
+  ascii = ascii.toUpperCase();
+  const adrs = ASSEMBLER_CONFIG.CPU_CODE_SECTION_BYTES-18;
+  const compiled = asciiToBinary(ascii, adrs); 
+  if (!compiled) {
+    lastError = "M68K_singleLine failed for " + ascii + ": compilation returned null";
+    alert(lastError);
+    debugger;
+    return;
+  } 
+  let byteCode = new Uint8Array(16);
+  let w = 0;
+  for (let k = 0; k < 16; k++) {
+    byteCode[w++] = CPU_CODE_SECTION[adrs + k];
+  }
+  let r = decode_instruction_generated(byteCode, adrs);
+  let str = InstructionToString(r.instruction);
+  line = new LineParser("disassembly", str.fullString, str.fullString);
+  line.instr = str.instr;
+  line.isInstr = true;
+  line.instrSize = str.size;
+  line.parsingOK = true;
+  if (line.instr) {
+    CODERPARSER_SINGLETON.process_oneLineInstr(line);
+    CODERPARSER_SINGLETON.process_executionCallback_oneLine(line);
+    ASMBL_ADRSTOLINE_GEN.push({ip:M68K_IP, ln:PARSER_lines.length});
+    PARSER_lines.push(line);
+    let out = {tab:new Uint8Array(16), ofs:0};
+    asmbl_go(line, out);
+    if (out.ofs > 0) {
+      line.instrBytes = out.ofs;
+    }
+    if (line.call)
+      line.call(line);
+  }
+}
