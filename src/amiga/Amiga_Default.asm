@@ -4,9 +4,6 @@ M68KWB_TargetPlatformInit:
     ;>JS MACHINE.unpauseMemCheck();
     rts
 
-M68KWB_defaultMainLoop:
-    nop
-    rts
 
     IFD M68KWB
 fx_canExit:

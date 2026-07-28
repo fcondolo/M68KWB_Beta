@@ -2924,6 +2924,7 @@ function CPU_EvaluateVBL(_nextInstr) {
     }
   }
   DEBUGGER_restoreParanoid();
+  return doInterrupt;
 }
 
 

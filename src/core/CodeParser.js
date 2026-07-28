@@ -886,8 +886,8 @@ class CodeParser {
         let endmfound = false;
         for (let mIt = lnIt + 1; mIt < lnCount; mIt++) {
           let newLn = t.strings.lines[mIt];
-          if (newLn.path != macroFile && ASSEMBLER_CONFIG.foce_same_file_macro) {
-            ln.Failed("Could not find matching ENDM in:\n" +  macroFile + "\nSee 'ASSEMBLER_CONFIG.foce_same_file_macro'");
+          if (newLn.path != macroFile && ASSEMBLER_CONFIG.force_same_file_macro) {
+            ln.Failed("Could not find matching ENDM in:\n" +  macroFile + "\nSee 'ASSEMBLER_CONFIG.force_same_file_macro'");
             return;
           }
           t.strings.lines[mIt].isMacroDef = true;

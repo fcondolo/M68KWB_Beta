@@ -90,6 +90,8 @@ class M68K_Machine {
     }
 
     enterSuper(_callback, _return) {
+        if (!_callback)
+            return;
         let t = this;
         if (t.super) {
             return;

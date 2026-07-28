@@ -160,8 +160,11 @@ function main_mainLoop() {
         if (FX_INFO.asmUpdate)
           invoke68K(FX_INFO.asmUpdate);
 
-        if (!MYFX.updateInvokedAsm && FX_INFO.source) // do not call if no asm at all
-          invoke68K("M68KWB_defaultMainLoop"); // need to update something with the CPU at every frame, otherwise interrupts won' trigger (especially vbl)
+        if (!DEBUGGER_insideInvoke && !MYFX.updateInvokedAsm && FX_INFO.source) { // do not call if no asm at all
+          M68K_INTERRUPT_COUNTER += 4; // simulate some 4 cycles instruction
+          if (CPU_EvaluateVBL(null)) // need to update something with the CPU at every frame, otherwise interrupts won' trigger (especially vbl)
+            DEBUGGER_insideInvoke = "VBL";
+        }
         MYFX.updatedFramesCount++;
       } catch (err) {
         if (err.message == "WAITING_USERINPUT") {
@@ -454,8 +457,8 @@ function main_onload() {
     }
   }
 
-  if (Check_Chain())
-    return;
+
+
 
   // First try to start the FX in URL params
   const queryString = window.location.search;
@@ -464,9 +467,14 @@ function main_onload() {
   if (FXName) {
     FXName = FXName.toUpperCase();
     if (FXName == "RESET") {
+      localStorage.setItem(LOCALSTORAGE_CHAININDEX, null);
       localStorage.clear();
     }
   }
+
+  if (Check_Chain())
+    return;
+
 
   // Try to run previous session's FX stored in localStorage
   if (FXName != "RESET")
@@ -477,7 +485,11 @@ function main_onload() {
     } else {
       failedStartingFX();
     }
-  }  
+  } else {
+    window.location.replace(
+      window.location.origin + window.location.pathname + window.location.hash
+    );
+  }
 }
 
 // _zoom : 100..200
@@ -580,13 +592,23 @@ function onNewRunningSpeed(_forceVal) {
 
 function imgDataToScreen(imagedata) {
   ctx.imageSmoothingEnabled = false;
+  BACKBUF_CTX.font = "20px Arial";
+  switch (FX_INFO.platform) {
+    case "OCS" :
+    case "ST" :
+      BACKBUF_CTX.fillText(FX_INFO.fxName,10,450);
+    break;
+    case "STE" :
+      BACKBUF_CTX.fillText(FX_INFO.fxName,100,300);
+    break;
+  }
   if (CANVAS_SCALE == 100)
     ctx.drawImage(BACKBUF_CVS, 0, 0);
   else
     ctx.drawImage(BACKBUF_CVS, 0, 0, BACKBUF_CVS.width, BACKBUF_CVS.height, 0, 0, CANVAS_DISPLAY_WIDTH, CANVAS_DISPLAY_HEIGHT);
 
     smallRenderCtx.drawImage(BACKBUF_CVS, 0, 0, BACKBUF_CVS.width, BACKBUF_CVS.height, 0, 0, smallRenderCvs.width, smallRenderCvs.height);
-  }
+}
 
 
 function hideModalBox(_content, _closeCallback) {
@@ -877,6 +899,9 @@ function main_onFXJSLoaded() {
   // Create canvases
   cvs = document.getElementById("mycvs");
   ctx = get2DContext(cvs);
+  ctx.font = "50px Arial";
+  ctx.fillStyle = "white";
+  ctx.fillText(FXName, 10, 100);
 
   cvs.addEventListener('mouseover', showMouseCoord );
   cvs.addEventListener('mousemove', showMouseCoord );

@@ -315,6 +315,9 @@ function asmbl_argIsAdrsReg(_arg) {
 function asmbl_buildArray(_op, _out) {
     _out.tab[_out.ofs++] = (_op.op>>8)&0xff;
     _out.tab[_out.ofs++] = _op.op&0xff;
+    while (_op.byteData.length < ASSEMBLER_CONFIG.force_instr_dataLen) {
+        _op.byteData.unshift(0);
+    }
     for (let i = 0; i < _op.byteData.length; i++) {
         _out.tab[_out.ofs++] = _op.byteData[i]&0xff;
     }

@@ -66,7 +66,13 @@ const ASSEMBLER_CONFIG = {
     allow_ds_0 : false,
 
     // if true (recommended), for a given macro, the MACRO and ENDM keywords will need to be in the same file. This avoids declaring MACRO and forgetting the ENDM
-    foce_same_file_macro : true
+    force_same_file_macro : true,
+
+    // Useful for generated code and modified code. Forces instr data to be a certain size.
+    // for example, if force_instr_dataLen is 0, then
+    // or.w d6,0(a4) wil translate to $8D54, which is or.w d6,(a4).
+    // But if force_instr_dataLen is 2, or.w d6,0(a4) wil translate to $8D6C.0000, which is or.w d6,$0000(a4).
+    force_instr_dataLen : 0
 };
 
 
@@ -167,7 +173,7 @@ const ST_CONFIG = {
 // -----------------------------------------------------------------------
 const STE_CONFIG = {
     CHECK_VIDEO_BASE_ADRS   : true,         // make sure that video base address is even (low bit is ignored by the hardware, having this option to true makes sure the lowet bit is no used)
-    RAMSIZE                 : 2048 * 1024,
+    RAMSIZE                 : 1024 * 1024 * 3, // 3 megs
     STACKSIZE               : 4 * 1024,
     // ticks per second is used to trigger VBL interrupts
     M68K_TICKS_PER_SECOND   : 8000000
@@ -179,7 +185,7 @@ const STE_CONFIG = {
 const VSCODE_CONFIG = {
     // if true, will connect to the VSCode plugin's debuger
     // if false, will run in standalone mode without counting on vscode for debugging
-    AUTO_CONNECT    : true,
+    AUTO_CONNECT    : false,
     // if true, will keep the focus on the render window
     // if false, will scroll to show the current instruction whie debugging
     RENDER_FOCUS    : true,
